@@ -1,0 +1,13 @@
+QSpeedTest is a GUI tool written in C++ and Qt for evaluating the
+latency and speed of an Internet or LAN access by pinging and
+concurrently downloading test files from a customized list of target
+servers. It is currently hosted on SourceForge.net as free software,
+published under the GNU General Public License version 3 and is
+distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+For more information about QSpeedTest, visit its current homepage
+http://qspeedtest.sourceforge.net/
+You may also contact the author via e-mail at parsifal@binarynotion.net
