@@ -47,7 +47,8 @@ class DialogAbout : public QDialog
 
     private slots:
         void on_pushButtonAboutQt_clicked();
-        void on_labelURL_linkActivated(QString link);
+        void on_labelHomepage_linkActivated(QString link);
+        void on_labelForum_linkActivated(QString link);
         void on_pushButtonOK_clicked();
 };
 

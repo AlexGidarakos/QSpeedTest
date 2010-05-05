@@ -1,0 +1,6 @@
+revision 2 - 20100505:                                              |
+    * "Discuss" URL now points to QSpeedTest's official phpBB forum |
+    * "About" box contains link to forum                            |
+    * Target list updates are hosted on SourceForge                 |
+    * Version/revision number is displayed in GUI and reports       |
+    * Speedtest.net is used for the acquisition of IP and ISP info  |

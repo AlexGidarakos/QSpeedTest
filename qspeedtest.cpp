@@ -129,11 +129,10 @@ void QSpeedTest::printHostAndProgramInfo()
 void QSpeedTest::printLineInfo()
 {
     QNetworkAccessManager manager;
-    QEventLoop loop;
+    QEventLoop loop1, loop2;
     QNetworkReply *download;
     QByteArray contents;
     bool found = false;
-    int index;
     QStringList list;
     QProcess traceroute;
 #ifdef Q_WS_WIN
@@ -144,42 +143,44 @@ void QSpeedTest::printLineInfo()
     QString bbrasLine = " 2  ";
 #endif
 
+    IP.clear();
+    ISP.clear();
     traceroute.setProcessChannelMode(QProcess::MergedChannels);
-    connect(&traceroute, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    connect(&traceroute, SIGNAL(finished(int)), &loop2, SLOT(quit()));
     traceroute.start(tracerouteCommand, QIODevice::ReadOnly);
-    download = manager.get(QNetworkRequest(QUrl("http://www.ip-adress.com")));
-    connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
+    download = manager.get(QNetworkRequest(QUrl("http://www.speedtest.net/summary.php")));
+    connect(download, SIGNAL(finished()), &loop1, SLOT(quit()));
+    loop1.exec();
 
     while(!(contents = download->readLine()).isEmpty() && !found)
     {
-        index = contents.indexOf("is:");
-
-        if(index != -1)
+        if(contents.contains("<div class=\"ip\">"))
         {
             contents.chop(7);
-            IP = QString(contents.mid(index + 4)).trimmed();
+            IP = QString(contents.trimmed().mid(16));
             list = IP.split('.');
             IP = list[0] + "." + list[1] + ".xxx.xxx";
             continue;
         }
         else
         {
-            index = contents.indexOf("ISP");
-
-            if(index != -1)
+            if(contents.contains("<div class=\"isp\">"))
             {
-                contents.chop(8);
-                ISP = QString(contents.mid(index + 14)).trimmed();
+                contents.chop(7);
+                ISP = QString(contents.trimmed().mid(17));
                 found = true;
             }
         }
     }
 
-    if(!found)
+    if(IP.isEmpty())
     {
-        IP = trUtf8("ip-adress.com unreachable!");
-        ISP = trUtf8("ip-adress.com unreachable!");
+        IP = trUtf8("speedtest.net unreachable!");
+    }
+
+    if(ISP.isEmpty())
+    {
+        ISP = trUtf8("speedtest.net unreachable!");
     }
 
     delete download;
@@ -194,7 +195,7 @@ void QSpeedTest::printLineInfo()
 
     if(traceroute.state() != QProcess::NotRunning)
     {
-        loop.exec();
+        loop2.exec();
     }
 
     for(found = false; !found && !(contents = traceroute.readLine()).isEmpty();)

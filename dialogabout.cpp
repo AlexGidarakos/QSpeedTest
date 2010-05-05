@@ -32,7 +32,8 @@ DialogAbout::DialogAbout(QWidget *parent) : QDialog(parent), ui(new Ui::DialogAb
     setWindowTitle(trUtf8("About %1").arg(PROGRAMNAME));
     ui->labelVersion->setText(trUtf8("Version number: ") + PROGRAMVERSION);
     ui->labelAuthor->setText(trUtf8("Author: ") + PROGRAMAUTHOR);
-    ui->labelURL->setText("<a href=\"" + PROGRAMURL + "\">" + trUtf8("Visit Homepage") + "</a>");
+    ui->labelHomepage->setText("<a href=\"" + PROGRAMURL + "\">" + trUtf8("Visit homepage") + "</a>");
+    ui->labelForum->setText("<a href=\"" + PROGRAMDISCUSSURL + "\">" + trUtf8("Visit official forum") + "</a>");
 }
 
 
@@ -64,12 +65,21 @@ void DialogAbout::on_pushButtonOK_clicked()
 }
 
 
-void DialogAbout::on_labelURL_linkActivated(QString link)
+void DialogAbout::on_labelHomepage_linkActivated(QString link)
 {
     QUrl url(link);
 
     QDesktopServices::openUrl(url);
 }
+
+
+void DialogAbout::on_labelForum_linkActivated(QString link)
+{
+    QUrl url(link);
+
+    QDesktopServices::openUrl(url);
+}
+
 
 void DialogAbout::on_pushButtonAboutQt_clicked()
 {
