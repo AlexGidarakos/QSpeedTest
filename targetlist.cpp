@@ -80,7 +80,7 @@ bool TargetList::isUpdateAvailable()
 
     if((remoteVersion = download->readLine()) > version)
     {
-        emit message(trUtf8("Update available, remote target list version: v%1").arg(remoteVersion));
+        emit message(trUtf8("Update available, remote target list version: %1").arg(remoteVersion));
         delete download;
         return true;
     }
