@@ -14,7 +14,7 @@
 # Project created by QtCreator 2010-04-23T12:27:28
 # -------------------------------------------------
 QT += network
-TARGET = QSpeedTest
+TARGET = qspeedtest
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
@@ -32,5 +32,5 @@ FORMS += mainwindow.ui \
     dialogabout.ui
 OTHER_FILES += README \
     CHANGELOG \
-    resources/QSpeedTest.ini
+    resources/qspeedtest.ini
 RESOURCES += resources/resources.qrc
