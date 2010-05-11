@@ -19,24 +19,31 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef EXTERNS_H
-#define EXTERNS_H
+#ifndef FILEHOST_H
+#define FILEHOST_H
 
-#include <QString>
-#include <QMutex>
-extern const QString PROGRAMCOMPANY;
-extern const QString PROGRAMAUTHOR;
-extern const QString PROGRAMNAME;
-extern const QString PROGRAMVERSION;
-extern const QString PROGRAMURL;
-extern const QString PROGRAMDISCUSSURL;
-extern const QString TARGETLISTURL;
-extern const QString TARGETLISTVERSIONURL;
-extern const int PINGTIMEOUT;
-extern const int DOWNLOADTESTSECS;
-extern int PINGSPERTARGET;
-extern QMutex MUTEX;
-extern qint64 BYTESDOWNLOADED;
-extern bool STOPBENCHMARK;
+#include <QUrl>
 
-#endif // EXTERNS_H
+
+class FileHost : public QObject
+{
+    Q_OBJECT
+
+    public:
+        FileHost();
+        FileHost(QString, QUrl);
+        FileHost(const FileHost&);
+        FileHost& operator=(const FileHost&);
+        void downloadTest();
+        QString name;
+        QUrl url;
+        qint64 bytesDownloaded;
+
+    private slots:
+        void updateBytes(qint64);
+
+    signals:
+        void message(QString);
+};
+
+#endif // FILEHOST_H

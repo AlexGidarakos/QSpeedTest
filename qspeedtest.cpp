@@ -32,6 +32,19 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
+    fileHosts.append(FileHost("NTUA FTP", QUrl("ftp://ftp.ntua.gr/pub/linux/ubuntu-releases/10.04/ubuntu-10.04-desktop-i386.iso")));
+    connect(&fileHosts[0], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    fileHosts.append(FileHost("FORTHNET FTP", QUrl("ftp://ftp.forthnet.gr/pub/SPEEDTEST/CentOS-5.4-i386-LiveCD.iso")));
+    connect(&fileHosts[1], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    fileHosts.append(FileHost("NVIDIA Germany", QUrl("http://de.download.nvidia.com/Windows/197.45/197.45_desktop_win7_winvista_64bit_international_whql.exe")));
+    connect(&fileHosts[2], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    fileHosts.append(FileHost("NVIDIA USA", QUrl("http://us.download.nvidia.com/Windows/197.45/197.45_desktop_win7_winvista_32bit_english_whql.exe")));
+    connect(&fileHosts[3], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    fileHosts.append(FileHost("Microsoft", QUrl("http://download.microsoft.com/download/E/E/1/EE17FF74-6C45-4575-9CF4-7FC2597ACD18/directx_feb2010_redist.exe")));
+    connect(&fileHosts[4], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    fileHosts.append(FileHost("Apple", QUrl("http://appldnld.apple.com.edgesuite.net/content.info.apple.com/iTunes9/061-8203.20100427.1J2kd/iTunesSetup.exe")));
+    connect(&fileHosts[5], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
     connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
@@ -247,6 +260,7 @@ void QSpeedTest::startBenchmark()
     QString rttGroupAvg;
     double rttTestSum = 0.0;
     int testTargetsAlive = 0;
+    double speedInKbps = 0.0;
 
     for(int i = 0; i < targetList.numberOfGroups; i++)
     {
@@ -337,6 +351,13 @@ void QSpeedTest::startBenchmark()
         }
     }
 
+    emit message(trUtf8("Please wait approx. %1 seconds for the download speed test to complete...").arg(DOWNLOADTESTSECS));
+    QThreadPool::globalInstance()->setMaxThreadCount(fileHosts.size());
+    BYTESDOWNLOADED = 0;
+    QtConcurrent::blockingMap(fileHosts, &FileHost::downloadTest);
+    processEvents();
+    speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
+    emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 Kbps\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps));
     secondsElapsed = (time.elapsed() * 1.0) / 1000;
 
     if(!STOPBENCHMARK)
@@ -345,33 +366,36 @@ void QSpeedTest::startBenchmark()
         {
             emit message(trUtf8("Pings per target: %1\n"
                                 "Threads used: %2\n"
-                                "Pings completed in: %3 sec\n"
+                                "Test completed in: %3 sec\n"
                                 "Targets unreachable: %4 / %5\n"
                                 "Test total ping time: %6 msec\n"
-                                "Average ping time per target: %7 msec").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
+                                "Average ping time per target: %7 msec\n"
+                                "Speed test result: %8 Kbps").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive).arg(speedInKbps));
             vBulletinCode += trUtf8("[/spoiler]\n"
                                     "[table=head][center]Test metric[/center] | Value\n"
                                     "[b]Pings per target[/b] | [center]%1[/center] |\n"
                                     "[b]Threads used[/b] | [center]%2[/center] |\n"
-                                    "[b]Pings completed in[/b] | [center]%3 sec[/center] |\n"
+                                    "[b]Test completed in[/b] | [center]%3 sec[/center] |\n"
                                     "[b]Targets unreachable[/b] | [center]%4 / %5[/center] |\n"
                                     "[b]Test total ping time[/b] | [center]%6 msec[/center] |\n"
-                                    "[b]Average ping time per target[/b] | [center]%7 msec[/center] | [/table]\n"
-                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive);
+                                    "[b]Average ping time per target[/b] | [center]%7 msec[/center] |\n"
+                                    "[b]Speed test result[/b] | [center]%8 Kbps[/center] | [/table]\n"
+                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive).arg(speedInKbps);
             HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
             HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
             HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads);
-            HTML += trUtf8("            <tr><td><b>Pings completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
+            HTML += trUtf8("            <tr><td><b>Test completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
             HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %2</div></td></tr>\n").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets);
             HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum);
             HTML += trUtf8("            <tr><td><b>Average ping time per target</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum / testTargetsAlive);
+            HTML += trUtf8("            <tr><td><b>Speed test result</b></td><td><div align=\"center\">%1 Kbps</div></td></tr>\n").arg(speedInKbps);
         }
         else
         {
             emit message(trUtf8("Pings per target: %1\n"
                                 "Threads used: %2\n"
-                                "Pings completed in: %3 sec\n"
+                                "Test completed in: %3 sec\n"
                                 "Targets unreachable: %4 / %4\n"
                                 "Test total ping time: N/A\n"
                                 "Average ping time per target: N/A").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets));
@@ -379,19 +403,21 @@ void QSpeedTest::startBenchmark()
                                     "[table=head][center]Test metric[/center] | Value\n"
                                     "[b]Pings per target[/b] | [center]%1[/center] |\n"
                                     "[b]Threads used[/b] | [center]%2[/center] |\n"
-                                    "[b]Pings completed in[/b] | [center]%3 sec[/center] |\n"
+                                    "[b]Test completed in[/b] | [center]%3 sec[/center] |\n"
                                     "[b]Targets unreachable[/b] | [center]%4 / %4[/center] |\n"
                                     "[b]Test total ping time[/b] | [center]N/A[/center] |\n"
-                                    "[b]Average ping time per target[/b] | [center]N/A[/center] | [/table]\n"
-                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets);
+                                    "[b]Average ping time per target[/b] | [center]N/A[/center] |\n"
+                                    "[b]Speed test result[/b] | [center]%5 Kbps[/center] | [/table]\n"
+                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets).arg(speedInKbps);
             HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
             HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
             HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads);
-            HTML += trUtf8("            <tr><td><b>Pings completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
+            HTML += trUtf8("            <tr><td><b>Test completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
             HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %1</div></td></tr>\n").arg(targetList.numberOfTargets);
             HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Average ping time per target</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
+            HTML += trUtf8("            <tr><td><b>Speed test result</b></td><td><div align=\"center\">%1 Kbps</div></td></tr>\n").arg(speedInKbps);
         }
 
             HTML += trUtf8("        </table>\n");
