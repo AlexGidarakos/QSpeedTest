@@ -33,10 +33,8 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
     STOPBENCHMARK = false;
-    multithreadingFlag = 0;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
     connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
-    connect(&mainWindow, SIGNAL(multithreadingFlagChanged(int)), this, SLOT(setMultithreadingFlag(int)));
     connect(&mainWindow, SIGNAL(pushButtonStartClicked()), this, SLOT(startBenchmark()));
     connect(this, SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
     connect(this, SIGNAL(benchmarkFinished(bool)), &mainWindow, SLOT(updateButtons(bool)));
@@ -93,22 +91,19 @@ void QSpeedTest::printHostAndProgramInfo()
 #else
     hostOS = "Linux";
 #endif
-    cpuCores = QThread::idealThreadCount();
     testDateTime = QDateTime::currentDateTime().toString("dddd dd/MM/yyyy hh:mm:ss");
     emit message(trUtf8("Report created by: %1 %2\n"
                         "Target list version: v%3\n"
                         "Target list comment: %4\n"
                         "Target list contact URL: %5\n"
                         "Host OS: %6\n"
-                        "Host CPU cores: %7\n"
-                        "Test date and time: %8").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(targetList.version).arg(targetList.comment).arg(targetList.contactURL).arg(hostOS).arg(cpuCores).arg(testDateTime));
+                        "Test date and time: %7").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(targetList.version).arg(targetList.comment).arg(targetList.contactURL).arg(hostOS).arg(testDateTime));
     vBulletinCode = trUtf8( "[table=head] | Client info\n"
                             "Report created by | [center]%1 %2 - [url=%3]Homepage[/url] - [url=%4]Discuss[/url][/center] |\n"
                             "Target list version | [center]%5[/center] |\n"
                             "Target list comment | [center][url=%6]%7[/url][/center] |\n"
                             "Host OS | [center]%8[/center] |\n"
-                            "Host CPU cores | [center]%9[/center] |\n"
-                            "Test date and time | [center]%10[/center] |\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL).arg(targetList.version).arg(targetList.contactURL).arg(targetList.comment).arg(hostOS).arg(cpuCores).arg(testDateTime);
+                            "Test date and time | [center]%9[/center] |\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL).arg(targetList.version).arg(targetList.contactURL).arg(targetList.comment).arg(hostOS).arg(testDateTime);
     HTML  = trUtf8("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
     HTML += trUtf8("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"el\">\n");
     HTML += trUtf8("    <head>\n");
@@ -121,7 +116,6 @@ void QSpeedTest::printHostAndProgramInfo()
     HTML += trUtf8("            <tr><td>Report created by</td><td><div align=\"center\">%1 %2 - <a href=\"%3\" target=\"_blank\">Download</a> - <a href=\"%4\" target=\"_blank\">Discuss</a></div></td></tr>\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL);
     HTML += trUtf8("            <tr><td>Target list used</td><td><div align=\"center\"><a href=\"%1\">%2</a></div></td></tr>\n").arg(targetList.contactURL).arg(targetList.comment);
     HTML += trUtf8("            <tr><td>Host OS</td><td><div align=\"center\">%1</div></td></tr>\n").arg(hostOS);
-    HTML += trUtf8("            <tr><td>Host CPU cores</td><td><div align=\"center\">%1</div></td></tr>\n").arg(cpuCores);
     HTML += trUtf8("            <tr><td>Test date and time</td><td><div align=\"center\">%1</div></td></tr>\n").arg(testDateTime);
 }
 
@@ -240,14 +234,9 @@ void QSpeedTest::printLineInfo()
 }
 
 
-void QSpeedTest::setMultithreadingFlag(int value)
-{
-    multithreadingFlag = value;
-}
-
-
 void QSpeedTest::startBenchmark()
 {
+    int parallelThreads = mainWindow.parallelThreads();
     QString name;
     int nameSize;
     QString hr;
@@ -258,8 +247,6 @@ void QSpeedTest::startBenchmark()
     QString rttGroupAvg;
     double rttTestSum = 0.0;
     int testTargetsAlive = 0;
-    QString multithreadingString;
-    int threadsUsed;
 
     for(int i = 0; i < targetList.numberOfGroups; i++)
     {
@@ -269,6 +256,7 @@ void QSpeedTest::startBenchmark()
         }
     }
 
+    QThreadPool::globalInstance()->setMaxThreadCount(parallelThreads - 1);
     STOPBENCHMARK = false;
     printHostAndProgramInfo();
     printLineInfo();
@@ -296,7 +284,7 @@ void QSpeedTest::startBenchmark()
         HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
         HTML += trUtf8("            <tr><td>Target</td><td>Average ping time</td><td>Packet loss</td><td><div align=\"center\">Jitter</div></td><td>Rank</td></tr>\n");
 
-        if(multithreadingFlag)
+        if(mainWindow.parallelThreads() > 1)
         {
             QtConcurrent::blockingMap(targetList.groups[i].targets, &Target::ping);
         }
@@ -350,35 +338,30 @@ void QSpeedTest::startBenchmark()
     }
 
     secondsElapsed = (time.elapsed() * 1.0) / 1000;
-    multithreadingString = trUtf8(multithreadingFlag? "ON" : "OFF");
-    threadsUsed = multithreadingFlag? cpuCores + 1 : 1;
 
     if(!STOPBENCHMARK)
     {
         if(testTargetsAlive)
         {
             emit message(trUtf8("Pings per target: %1\n"
-                                "Multithreading: %2\n"
-                                "Threads used: %3\n"
-                                "Pings completed in: %4 sec\n"
-                                "Targets unreachable: %5 / %6\n"
-                                "Test total ping time: %7 msec\n"
-                                "Average ping time per target: %8 msec").arg(PINGSPERTARGET).arg(multithreadingString).arg(threadsUsed).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
+                                "Threads used: %2\n"
+                                "Pings completed in: %3 sec\n"
+                                "Targets unreachable: %4 / %5\n"
+                                "Test total ping time: %6 msec\n"
+                                "Average ping time per target: %7 msec").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
             vBulletinCode += trUtf8("[/spoiler]\n"
                                     "[table=head][center]Test metric[/center] | Value\n"
                                     "[b]Pings per target[/b] | [center]%1[/center] |\n"
-                                    "[b]Multithreading[/b] | [center]%2[/center] |\n"
-                                    "[b]Threads used[/b] | [center]%3[/center] |\n"
-                                    "[b]Pings completed in[/b] | [center]%4 sec[/center] |\n"
-                                    "[b]Targets unreachable[/b] | [center]%5 / %6[/center] |\n"
-                                    "[b]Test total ping time[/b] | [center]%7 msec[/center] |\n"
-                                    "[b]Average ping time per target[/b] | [center]%8 msec[/center] | [/table]\n"
-                                    "\n").arg(PINGSPERTARGET).arg(multithreadingString).arg(threadsUsed).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive);
+                                    "[b]Threads used[/b] | [center]%2[/center] |\n"
+                                    "[b]Pings completed in[/b] | [center]%3 sec[/center] |\n"
+                                    "[b]Targets unreachable[/b] | [center]%4 / %5[/center] |\n"
+                                    "[b]Test total ping time[/b] | [center]%6 msec[/center] |\n"
+                                    "[b]Average ping time per target[/b] | [center]%7 msec[/center] | [/table]\n"
+                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive);
             HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
             HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
-            HTML += trUtf8("            <tr><td><b>Multithreading</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(multithreadingString);
-            HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(threadsUsed);
+            HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads);
             HTML += trUtf8("            <tr><td><b>Pings completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
             HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %2</div></td></tr>\n").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets);
             HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum);
@@ -386,27 +369,25 @@ void QSpeedTest::startBenchmark()
         }
         else
         {
-            emit message(trUtf8("Pings per target: %1\nMultithreading: %2\n"
-                                "Threads used: %3\n"
-                                "Pings completed in: %4 sec\n"
-                                "Targets unreachable: %5 / %5\n"
+            emit message(trUtf8("Pings per target: %1\n"
+                                "Threads used: %2\n"
+                                "Pings completed in: %3 sec\n"
+                                "Targets unreachable: %4 / %4\n"
                                 "Test total ping time: N/A\n"
-                                "Average ping time per target: N/A").arg(PINGSPERTARGET).arg(multithreadingString).arg(threadsUsed).arg(secondsElapsed).arg(targetList.numberOfTargets));
+                                "Average ping time per target: N/A").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets));
             vBulletinCode += trUtf8("[/spoiler]\n"
                                     "[table=head][center]Test metric[/center] | Value\n"
                                     "[b]Pings per target[/b] | [center]%1[/center] |\n"
-                                    "[b]Multithreading[/b] | [center]%2[/center] |\n"
-                                    "[b]Threads used[/b] | [center]%3[/center] |\n"
-                                    "[b]Pings completed in[/b] | [center]%4 sec[/center] |\n"
-                                    "[b]Targets unreachable[/b] | [center]%5 / %5[/center] |\n"
+                                    "[b]Threads used[/b] | [center]%2[/center] |\n"
+                                    "[b]Pings completed in[/b] | [center]%3 sec[/center] |\n"
+                                    "[b]Targets unreachable[/b] | [center]%4 / %4[/center] |\n"
                                     "[b]Test total ping time[/b] | [center]N/A[/center] |\n"
                                     "[b]Average ping time per target[/b] | [center]N/A[/center] | [/table]\n"
-                                    "\n").arg(PINGSPERTARGET).arg(multithreadingString).arg(threadsUsed).arg(secondsElapsed).arg(targetList.numberOfTargets);
+                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets);
             HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
             HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
-            HTML += trUtf8("            <tr><td><b>Multithreading</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(multithreadingString);
-            HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(threadsUsed);
+            HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads);
             HTML += trUtf8("            <tr><td><b>Pings completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
             HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %1</div></td></tr>\n").arg(targetList.numberOfTargets);
             HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
