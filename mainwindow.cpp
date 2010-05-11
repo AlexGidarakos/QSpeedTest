@@ -34,6 +34,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 
+int MainWindow::parallelThreads()
+{
+    return ui->spinBoxParallelThreads->value();
+}
+
+
 void MainWindow::centerOnDesktop()
 {
     QDesktopWidget *desktop = QApplication::desktop();
@@ -108,7 +114,7 @@ void MainWindow::on_pushButtonStart_clicked()
     ui->pushButtonExit->setEnabled(false);
     ui->pushButtonCopyvBulletinCode->setEnabled(false);
     ui->pushButtonCopyHTML->setEnabled(false);
-    ui->checkBoxMultithreading->setEnabled(false);
+    ui->spinBoxParallelThreads->setEnabled(false);
     ui->spinBoxPingsPerTarget->setEnabled(false);
     ui->plainTextEditConsole->clear();
     emit pushButtonStartClicked();
@@ -120,7 +126,7 @@ void MainWindow::updateButtons(bool benchmarkAborted)
     ui->pushButtonStart->setEnabled(true);
     ui->pushButtonStop->setEnabled(false);
     ui->pushButtonExit->setEnabled(true);
-    ui->checkBoxMultithreading->setEnabled(true);
+    ui->spinBoxParallelThreads->setEnabled(true);
     ui->spinBoxPingsPerTarget->setEnabled(true);
 
     if(benchmarkAborted)
@@ -150,12 +156,6 @@ void MainWindow::on_pushButtonCopyHTML_clicked()
 void MainWindow::on_pushButtonStop_clicked()
 {
     STOPBENCHMARK = true;
-}
-
-
-void MainWindow::on_checkBoxMultithreading_stateChanged(int value)
-{
-    emit multithreadingFlagChanged(value);
 }
 
 

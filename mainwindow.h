@@ -39,6 +39,7 @@ class MainWindow : public QMainWindow
     public:
         MainWindow(QWidget *parent = 0);
         ~MainWindow();
+        int parallelThreads();
 
     protected:
         void changeEvent(QEvent *e);
@@ -48,13 +49,11 @@ class MainWindow : public QMainWindow
         void centerOnDesktop();
 
     signals:
-        void multithreadingFlagChanged(int);
         void pushButtonStartClicked();
         void pushButtonCopyvBulletinCodeClicked();
         void pushButtonCopyHTMLClicked();
 
     private slots:
-        void on_checkBoxMultithreading_stateChanged(int);
         void on_spinBoxPingsPerTarget_valueChanged(int);
         void on_pushButtonStop_clicked();
         void enablePushButtonStart();

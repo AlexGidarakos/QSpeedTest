@@ -1,3 +1,10 @@
+revision 6 - 20100511:                                              |
+    * Fixed About box "too small dimensions" bug                    |
+    * Instead of adjusting the number of worker threads based on    |
+      the number of CPU cores, it is now manually selectable by the |
+      user, with 8 being the maximum value                          |
+
+
 revision 2 - 20100505:                                              |
     * "Discuss" URL now points to QSpeedTest's official phpBB forum |
     * "About" box contains link to forum                            |

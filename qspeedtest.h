@@ -45,8 +45,6 @@ class QSpeedTest : public QApplication
         QString ISP;
         QString IP;
         QString BBRAS;
-        int multithreadingFlag;
-        int cpuCores;
         QTime time;
         double secondsElapsed;
         void printHostAndProgramInfo();
@@ -58,7 +56,6 @@ class QSpeedTest : public QApplication
         void benchmarkFinished(bool completed);
 
     private slots:
-        void setMultithreadingFlag(int);
         void startBenchmark();
         void updatevBulletinCode(QString);
         void updateHTML(QString);
