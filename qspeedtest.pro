@@ -21,13 +21,15 @@ SOURCES += main.cpp \
     dialogabout.cpp \
     qspeedtest.cpp \
     targetlist.cpp \
-    targetgroup.cpp
+    targetgroup.cpp \
+    filehost.cpp
 HEADERS += mainwindow.h \
     dialogabout.h \
     qspeedtest.h \
     externs.h \
     targetlist.h \
-    targetgroup.h
+    targetgroup.h \
+    filehost.h
 FORMS += mainwindow.ui \
     dialogabout.ui
 OTHER_FILES += README \

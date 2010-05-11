@@ -1,3 +1,7 @@
+revision 7 - 20100511:                                              |
+    * Added download speed test with 6 concurrent downloads         |
+
+
 revision 6 - 20100511:                                              |
     * Fixed About box "too small dimensions" bug                    |
     * Instead of adjusting the number of worker threads based on    |
