@@ -34,5 +34,6 @@ FORMS += mainwindow.ui \
     dialogabout.ui
 OTHER_FILES += README \
     CHANGELOG \
-    resources/qspeedtest.ini
+    resources/qspeedtest.ini \
+    TODO
 RESOURCES += resources/resources.qrc

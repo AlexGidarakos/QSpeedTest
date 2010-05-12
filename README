@@ -8,7 +8,16 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
-For more information about QSpeedTest, visit its current homepage:
+
+Note for Windows users:
+In order to run, this program requires some Qt DLLs to be present in
+the system, either in a folder included in the PATH variable or in the
+same folder as the program. For your convenience, a suitable compressed
+archive with these DLLs is available here:
+https://sourceforge.net/projects/qspeedtest/files/qspeedtest-win32/required-qt-dlls
+
+
+For more information about QSpeedTest, visit its homepage:
 http://qspeedtest.sourceforge.net/
 
 and the official phpBB forum:

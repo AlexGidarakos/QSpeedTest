@@ -75,6 +75,9 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 void QSpeedTest::printHostAndProgramInfo()
 {
     QString hostOS;
+    QProcess uname;
+    QEventLoop loop;
+
 #ifdef Q_WS_WIN
     switch(QSysInfo::WindowsVersion)
     {
@@ -102,7 +105,14 @@ void QSpeedTest::printHostAndProgramInfo()
             hostOS = "Windows";
     }
 #else
-    hostOS = "Linux";
+    uname.setProcessChannelMode(QProcess::MergedChannels);
+    connect(&uname, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    uname.start("uname -o", QIODevice::ReadOnly);
+    loop.exec();
+    hostOS = uname.readLine().trimmed();
+    uname.start("uname -rm", QIODevice::ReadOnly);
+    loop.exec();
+    hostOS += " " + uname.readLine().trimmed();
 #endif
     testDateTime = QDateTime::currentDateTime().toString("dddd dd/MM/yyyy hh:mm:ss");
     emit message(trUtf8("Report created by: %1 %2\n"
@@ -351,17 +361,17 @@ void QSpeedTest::startBenchmark()
         }
     }
 
-    emit message(trUtf8("Please wait approx. %1 seconds for the download speed test to complete...").arg(DOWNLOADTESTSECS));
-    QThreadPool::globalInstance()->setMaxThreadCount(fileHosts.size());
-    BYTESDOWNLOADED = 0;
-    QtConcurrent::blockingMap(fileHosts, &FileHost::downloadTest);
-    processEvents();
-    speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
-    emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 Kbps\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps));
-    secondsElapsed = (time.elapsed() * 1.0) / 1000;
-
     if(!STOPBENCHMARK)
     {
+        emit message(trUtf8("Please wait approx. %1 seconds for the download speed test to complete...").arg(DOWNLOADTESTSECS));
+        QThreadPool::globalInstance()->setMaxThreadCount(fileHosts.size());
+        BYTESDOWNLOADED = 0;
+        QtConcurrent::blockingMap(fileHosts, &FileHost::downloadTest);
+        processEvents();
+        speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
+        emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 Kbps\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps));
+        secondsElapsed = (time.elapsed() * 1.0) / 1000;
+
         if(testTargetsAlive)
         {
             emit message(trUtf8("Pings per target: %1\n"

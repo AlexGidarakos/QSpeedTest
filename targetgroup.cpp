@@ -244,7 +244,7 @@ void Target::ping()
     }
 
     emit message(name.leftJustified(27, ' ', true) + "    " + rttString.rightJustified(11, ' ', true) + "    " + packetLossString.rightJustified(9, ' ', true) + "    " + jitterString.rightJustified(12, ' ', true) + "    " + getRank().rightJustified(3, ' ', true));
-    changevBulletinCode(QString("[url=%1]%2[/url] | [right]%3[/right] | [right]%4[/right] | [right]%5[/right] | [center]%6[/center] |\n").arg(address).arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
+    changevBulletinCode(QString("%1 | [right]%2[/right] | [right]%3[/right] | [right]%4[/right] | [center]%5[/center] |\n").arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
     changeHTML(QString("            <tr><td><a href=\"%1\">%2</a></td><td><div align=\"right\">%3</div></td><td><div align=\"right\">%4</div></td><td><div align=\"right\">%5</div></td><td><div align=\"center\">%6</div></td></tr>\n").arg(address).arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
 }
 

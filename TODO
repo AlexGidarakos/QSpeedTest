@@ -1,0 +1,5 @@
+100. Per group averages (and sums, where applicable)
+200. Make DOWNLOADTESTSECS selectable from the GUI
+300. Relocate download speed test targets in qspeedtest.ini and the aproppriate class inside the TargetList class
+500. Thread safety and (maybe) Singletton pattern for the global variables?
+600. Target list editor module
