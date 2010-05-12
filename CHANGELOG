@@ -1,3 +1,7 @@
+revision 9 - 20100512:                                              |
+    * Source code is now compilable on 64bit Linux hosts            |
+
+
 revision 8 - 20100512:                                              |
     * Print more detailed OS info for Linux/Unix hosts              |
     * Updated embedded target list                                  |

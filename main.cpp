@@ -25,7 +25,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 const QString PROGRAMCOMPANY = "Binary Notion";
 const QString PROGRAMAUTHOR = "parsifal";
 const QString PROGRAMNAME = "QSpeedTest";
-const QString PROGRAMVERSION = "r8";
+const QString PROGRAMVERSION = "r9";
 const QString PROGRAMURL = "http://qspeedtest.sourceforge.net/";
 const QString PROGRAMDISCUSSURL = "https://sourceforge.net/apps/phpbb/qspeedtest/";
 const QString TARGETLISTURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.ini";
