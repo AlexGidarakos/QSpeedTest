@@ -32,7 +32,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 TargetList::TargetList(QObject *parent) : QObject(parent)
 {
-    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, PROGRAMCOMPANY, PROGRAMNAME);
+    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, PROGRAMCOMPANY, PROGRAMNAME.toLower());
     version = QString(NULL);
     numberOfGroups = 0;
     comment = QString(NULL);
@@ -254,7 +254,7 @@ bool TargetList::restoreEmbedded()
     QString filename(settings->fileName());
     QFileInfo info(filename);
     QFile file(filename);
-    QFile embedded(":/QSpeedTest.ini");
+    QFile embedded(":/qspeedtest.ini");
 
     if(!QDir().exists(info.absolutePath()))
     {

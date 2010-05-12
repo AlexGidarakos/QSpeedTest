@@ -1,3 +1,13 @@
+revision 8 - 20100512:                                              |
+    * Print more detailed OS info for Linux/Unix hosts              |
+    * Updated embedded target list                                  |
+    * Changed .ini filename to lowercase. IMPORTANT: as a result,   |
+      target list updates are now broken for all older revisions    |
+    * Removed vBulletin URL tags surrounding host names to stop     |
+      Thunderbird scam warnings when receiving notification emails  |
+      from the vBulletin forum where a report was posted            |
+
+
 revision 7 - 20100511:                                              |
     * Added download speed test with 6 concurrent downloads         |
 
