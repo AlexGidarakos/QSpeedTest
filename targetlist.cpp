@@ -166,7 +166,7 @@ bool TargetList::load()
         return false;
     }
 
-    version = settings->value("TargetListInfo/Version", NULL).toString();
+    version = settings->value("TargetListInfo/Version", QString(NULL)).toString();
 
     if(version == QString(NULL))
     {
@@ -174,9 +174,9 @@ bool TargetList::load()
         return false;
     }
 
-    comment = settings->value("TargetListInfo/Comment", NULL).toString();
-    contactURL = settings->value("TargetListInfo/ContactURL", NULL).toString();
-    tempNumberOfGroups = settings->value("TargetListInfo/NumberOfGroups", NULL).toInt();
+    comment = settings->value("TargetListInfo/Comment", QString(NULL)).toString();
+    contactURL = settings->value("TargetListInfo/ContactURL", QString(NULL)).toString();
+    tempNumberOfGroups = settings->value("TargetListInfo/NumberOfGroups", QString(NULL)).toInt();
 
     if(tempNumberOfGroups < 1)
     {
@@ -195,7 +195,7 @@ bool TargetList::load()
             return false;
         }
 
-        newGroup.name = settings->value(QString("Group%1/Name").arg(i), NULL).toString();
+        newGroup.name = settings->value(QString("Group%1/Name").arg(i), QString(NULL)).toString();
 
         if(newGroup.name == QString(NULL))
         {
@@ -203,7 +203,7 @@ bool TargetList::load()
             return false;
         }
 
-        tempGroupSize = settings->value(QString("Group%1/NumberOfTargets").arg(i), NULL).toInt();
+        tempGroupSize = settings->value(QString("Group%1/NumberOfTargets").arg(i), QString(NULL)).toInt();
 
         if(tempGroupSize < 1)
         {
@@ -213,7 +213,7 @@ bool TargetList::load()
 
         for(int j = 1; j <= tempGroupSize; j++)
         {
-            newTarget.setName(settings->value(QString("Group%1/%2/Name").arg(i).arg(j), NULL).toString());
+            newTarget.setName(settings->value(QString("Group%1/%2/Name").arg(i).arg(j), QString(NULL)).toString());
 
             if(newTarget.getName() == QString(NULL))
             {
@@ -221,7 +221,7 @@ bool TargetList::load()
                 return false;
             }
 
-            newTarget.setAddress(settings->value(QString("Group%1/%2/Address").arg(i).arg(j), NULL).toString());
+            newTarget.setAddress(settings->value(QString("Group%1/%2/Address").arg(i).arg(j), QString(NULL)).toString());
 
             if(newTarget.getAddress() == QString(NULL))
             {
