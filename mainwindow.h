@@ -40,6 +40,7 @@ class MainWindow : public QMainWindow
         MainWindow(QWidget *parent = 0);
         ~MainWindow();
         int parallelThreads();
+        bool speedTestEnabled();
 
     protected:
         void changeEvent(QEvent *e);
@@ -57,7 +58,8 @@ class MainWindow : public QMainWindow
         void on_spinBoxPingsPerTarget_valueChanged(int);
         void on_pushButtonStop_clicked();
         void enablePushButtonStart();
-        void updateConsole(QString);
+        void updateLogMessages(QString);
+        void updateTestResults(QString);
         void updateButtons(bool benchmarkCompleted);
         void on_pushButtonStart_clicked();
         void on_pushButtonAbout_clicked();

@@ -9,18 +9,42 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
 
-Note for Windows users:
-In order to run, this program requires some Qt DLLs to be present in
+CONTENTS
+1. Requirements for Windows users
+2. Build instructions
+3. Support and contact info
+
+
+1. Requirements for Windows users
+In order to run, this program requires some of the Qt DLLs present in
 the system, either in a folder included in the PATH variable or in the
 same folder as the program. For your convenience, a suitable compressed
 archive with these DLLs is available here:
-https://sourceforge.net/projects/qspeedtest/files/qspeedtest-win32/required-qt-dlls
+https://sourceforge.net/projects/qspeedtest/files/qspeedtest-win32-required-dlls
 
 
+2. Build instructions
+Provided that you have installed the necessary Qt development libraries
+and build tools, all you have to do in order to build binaries from the
+source code is to navigate to a directory containing the source and
+enter the two following commands:
+    qmake
+    make
+If you feel more comfortable working with an IDE (Integrated
+Development Environment), I recommend installing the complete Qt SDK by
+Nokia, which contains all the necessary libraries and build tools, as
+well as the excellent Qt Creator IDE. You can install the SDK either
+via your distribution's repositories (if you are using a Linux distro)
+or from binaries available in Nokia's Qt homepage:
+    http://qt.nokia.com
+In Qt Creator, you only need to load QSpeedTest's main project file
+(qspeedtest.pro) and use the command under "Build" menu
+
+
+3. Support and contact info
 For more information about QSpeedTest, visit its homepage:
-http://qspeedtest.sourceforge.net/
-
+    http://qspeedtest.sourceforge.net
 and the official phpBB forum:
-https://sourceforge.net/apps/phpbb/qspeedtest/
-
-You may also contact the author via e-mail at parsifal@binarynotion.net
+    https://sourceforge.net/apps/phpbb/qspeedtest
+You may also contact the author via e-mail at:
+    parsifal@binarynotion.net

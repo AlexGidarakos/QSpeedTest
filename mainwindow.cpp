@@ -23,6 +23,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "ui_mainwindow.h"
 #include "externs.h"
 #include <QDesktopWidget>
+#include <QDateTime>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -37,6 +38,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 int MainWindow::parallelThreads()
 {
     return ui->spinBoxParallelThreads->value();
+}
+
+
+bool MainWindow::speedTestEnabled()
+{
+    return ui->checkBoxSpeedTest->isChecked();
 }
 
 
@@ -86,9 +93,15 @@ void MainWindow::enablePushButtonStart()
 }
 
 
-void MainWindow::updateConsole(QString message)
+void MainWindow::updateLogMessages(QString message)
 {
-    ui->plainTextEditConsole->appendPlainText(message);
+    ui->plainTextEditLogMessages->appendPlainText(QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + message);
+}
+
+
+void MainWindow::updateTestResults(QString message)
+{
+    ui->plainTextEditTestResults->appendPlainText(message);
 }
 
 
@@ -114,24 +127,26 @@ void MainWindow::on_pushButtonStart_clicked()
     ui->pushButtonExit->setEnabled(false);
     ui->pushButtonCopyvBulletinCode->setEnabled(false);
     ui->pushButtonCopyHTML->setEnabled(false);
+    ui->checkBoxSpeedTest->setEnabled(false);
     ui->spinBoxParallelThreads->setEnabled(false);
     ui->spinBoxPingsPerTarget->setEnabled(false);
-    ui->plainTextEditConsole->clear();
+    ui->plainTextEditTestResults->clear();
     emit pushButtonStartClicked();
 }
 
 
-void MainWindow::updateButtons(bool benchmarkAborted)
+void MainWindow::updateButtons(bool testAborted)
 {
     ui->pushButtonStart->setEnabled(true);
     ui->pushButtonStop->setEnabled(false);
     ui->pushButtonExit->setEnabled(true);
+    ui->checkBoxSpeedTest->setEnabled(true);
     ui->spinBoxParallelThreads->setEnabled(true);
     ui->spinBoxPingsPerTarget->setEnabled(true);
 
-    if(benchmarkAborted)
+    if(testAborted)
     {
-        ui->plainTextEditConsole->appendPlainText("\n\nBenchmark aborted!");
+        ui->plainTextEditLogMessages->appendPlainText("\n\nTest aborted!");
     }
     else
     {

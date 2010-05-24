@@ -54,6 +54,7 @@ class QSpeedTest : public QApplication
 
     signals:
         void initOK();
+        void logMessage(QString);
         void message(QString);
         void benchmarkFinished(bool completed);
 
