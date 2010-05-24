@@ -1,3 +1,11 @@
+revision 10 - 20100524:                                             |
+    * Fixed a nasty bug causing massive memory leak and network     |
+      usage after the completion of a download speed test           |
+    * Build instructions included in the README                     |
+    * Split old console in two: "Log messages" and "Test results"   |
+    * Checkbox to enable/disable download speed test                |
+
+
 revision 9 - 20100512:                                              |
     * Source code is now compilable on 64bit Linux hosts            |
 

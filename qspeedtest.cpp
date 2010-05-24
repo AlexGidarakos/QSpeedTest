@@ -33,23 +33,23 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
     fileHosts.append(FileHost("NTUA FTP", QUrl("ftp://ftp.ntua.gr/pub/linux/ubuntu-releases/10.04/ubuntu-10.04-desktop-i386.iso")));
-    connect(&fileHosts[0], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
     fileHosts.append(FileHost("FORTHNET FTP", QUrl("ftp://ftp.forthnet.gr/pub/SPEEDTEST/CentOS-5.4-i386-LiveCD.iso")));
-    connect(&fileHosts[1], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
     fileHosts.append(FileHost("NVIDIA Germany", QUrl("http://de.download.nvidia.com/Windows/197.45/197.45_desktop_win7_winvista_64bit_international_whql.exe")));
-    connect(&fileHosts[2], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
     fileHosts.append(FileHost("NVIDIA USA", QUrl("http://us.download.nvidia.com/Windows/197.45/197.45_desktop_win7_winvista_32bit_english_whql.exe")));
-    connect(&fileHosts[3], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
     fileHosts.append(FileHost("Microsoft", QUrl("http://download.microsoft.com/download/E/E/1/EE17FF74-6C45-4575-9CF4-7FC2597ACD18/directx_feb2010_redist.exe")));
-    connect(&fileHosts[4], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
     fileHosts.append(FileHost("Apple", QUrl("http://appldnld.apple.com.edgesuite.net/content.info.apple.com/iTunes9/061-8203.20100427.1J2kd/iTunesSetup.exe")));
-    connect(&fileHosts[5], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+
+    for(int i = 0; i < 6; i++)
+    {
+        connect(&fileHosts[i], SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+    }
 
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
-    connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
     connect(&mainWindow, SIGNAL(pushButtonStartClicked()), this, SLOT(startBenchmark()));
-    connect(this, SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+    connect(this, SIGNAL(logMessage(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
+    connect(this, SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
     connect(this, SIGNAL(benchmarkFinished(bool)), &mainWindow, SLOT(updateButtons(bool)));
     connect(&mainWindow, SIGNAL(pushButtonCopyvBulletinCodeClicked()), this, SLOT(copyvBulletinCode()));
     connect(&mainWindow, SIGNAL(pushButtonCopyHTMLClicked()), this, SLOT(copyHTML()));
@@ -61,7 +61,7 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
         {
             for(int j = 0; j < targetList.groups.at(i).size; j++)
             {
-                connect(&targetList.groups[i].targets[j], SIGNAL(message(QString)), &mainWindow, SLOT(updateConsole(QString)));
+                connect(&targetList.groups[i].targets[j], SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
                 connect(&targetList.groups[i].targets[j], SIGNAL(changevBulletinCode(QString)), this, SLOT(updatevBulletinCode(QString)));
                 connect(&targetList.groups[i].targets[j], SIGNAL(changeHTML(QString)), this, SLOT(updateHTML(QString)));
             }
@@ -260,6 +260,7 @@ void QSpeedTest::printLineInfo()
 void QSpeedTest::startBenchmark()
 {
     int parallelThreads = mainWindow.parallelThreads();
+    bool speedTestFlag = mainWindow.speedTestEnabled();
     QString name;
     int nameSize;
     QString hr;
@@ -271,6 +272,9 @@ void QSpeedTest::startBenchmark()
     double rttTestSum = 0.0;
     int testTargetsAlive = 0;
     double speedInKbps = 0.0;
+
+    time.start();
+    emit logMessage(trUtf8("Test started"));
 
     for(int i = 0; i < targetList.numberOfGroups; i++)
     {
@@ -284,7 +288,6 @@ void QSpeedTest::startBenchmark()
     STOPBENCHMARK = false;
     printHostAndProgramInfo();
     printLineInfo();
-    time.start();
 
     for(int i = 0; i < targetList.numberOfGroups; i++)
     {
@@ -363,13 +366,17 @@ void QSpeedTest::startBenchmark()
 
     if(!STOPBENCHMARK)
     {
-        emit message(trUtf8("Please wait approx. %1 seconds for the download speed test to complete...").arg(DOWNLOADTESTSECS));
-        QThreadPool::globalInstance()->setMaxThreadCount(fileHosts.size());
-        BYTESDOWNLOADED = 0;
-        QtConcurrent::blockingMap(fileHosts, &FileHost::downloadTest);
-        processEvents();
-        speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
-        emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 Kbps\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps));
+        if(speedTestFlag)
+        {
+            emit logMessage(trUtf8("Please wait %1 seconds for the download speed test to complete").arg(DOWNLOADTESTSECS));
+            QThreadPool::globalInstance()->setMaxThreadCount(fileHosts.size());
+            BYTESDOWNLOADED = 0;
+            QtConcurrent::blockingMap(fileHosts, &FileHost::downloadTest);
+            processEvents();
+            speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
+            emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 Kbps\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps));
+        }
+
         secondsElapsed = (time.elapsed() * 1.0) / 1000;
 
         if(testTargetsAlive)
@@ -379,8 +386,7 @@ void QSpeedTest::startBenchmark()
                                 "Test completed in: %3 sec\n"
                                 "Targets unreachable: %4 / %5\n"
                                 "Test total ping time: %6 msec\n"
-                                "Average ping time per target: %7 msec\n"
-                                "Speed test result: %8 Kbps").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive).arg(speedInKbps));
+                                "Average ping time per target: %7 msec").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
             vBulletinCode += trUtf8("[/spoiler]\n"
                                     "[table=head][center]Test metric[/center] | Value\n"
                                     "[b]Pings per target[/b] | [center]%1[/center] |\n"
@@ -389,8 +395,7 @@ void QSpeedTest::startBenchmark()
                                     "[b]Targets unreachable[/b] | [center]%4 / %5[/center] |\n"
                                     "[b]Test total ping time[/b] | [center]%6 msec[/center] |\n"
                                     "[b]Average ping time per target[/b] | [center]%7 msec[/center] |\n"
-                                    "[b]Speed test result[/b] | [center]%8 Kbps[/center] | [/table]\n"
-                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive).arg(speedInKbps);
+                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive);
             HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
             HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
@@ -399,7 +404,6 @@ void QSpeedTest::startBenchmark()
             HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %2</div></td></tr>\n").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets);
             HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum);
             HTML += trUtf8("            <tr><td><b>Average ping time per target</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum / testTargetsAlive);
-            HTML += trUtf8("            <tr><td><b>Speed test result</b></td><td><div align=\"center\">%1 Kbps</div></td></tr>\n").arg(speedInKbps);
         }
         else
         {
@@ -417,8 +421,7 @@ void QSpeedTest::startBenchmark()
                                     "[b]Targets unreachable[/b] | [center]%4 / %4[/center] |\n"
                                     "[b]Test total ping time[/b] | [center]N/A[/center] |\n"
                                     "[b]Average ping time per target[/b] | [center]N/A[/center] |\n"
-                                    "[b]Speed test result[/b] | [center]%5 Kbps[/center] | [/table]\n"
-                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets).arg(speedInKbps);
+                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets);
             HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
             HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
@@ -427,21 +430,28 @@ void QSpeedTest::startBenchmark()
             HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %1</div></td></tr>\n").arg(targetList.numberOfTargets);
             HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
             HTML += trUtf8("            <tr><td><b>Average ping time per target</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
+        }
+
+        if(speedTestFlag)
+        {
+            emit message(trUtf8("Speed test result: %1 Kbps").arg(speedInKbps));
+            vBulletinCode += trUtf8("[b]Speed test result[/b] | [center]%1 Kbps[/center] |\n").arg(speedInKbps);
             HTML += trUtf8("            <tr><td><b>Speed test result</b></td><td><div align=\"center\">%1 Kbps</div></td></tr>\n").arg(speedInKbps);
         }
 
-            HTML += trUtf8("        </table>\n");
-            HTML += trUtf8("        <br/>\n");
-            HTML += trUtf8("        <p>\n");
-            HTML += trUtf8("            <a href=\"http://validator.w3.org/check?uri=referer\">\n");
-            HTML += trUtf8("                <img src=\"http://www.w3.org/Icons/valid-xhtml10\" alt=\"Valid XHTML 1.0 Transitional\" height=\"31\" width=\"88\" />\n");
-            HTML += trUtf8("            </a>\n");
-            HTML += trUtf8("        </p>\n");
-            HTML += trUtf8("    </body>\n");
-            HTML += trUtf8("</html>\n");
+        vBulletinCode += trUtf8("[/table]\n");
+        HTML += trUtf8("        </table>\n");
+        HTML += trUtf8("        <br/>\n");
+        HTML += trUtf8("        <p>\n");
+        HTML += trUtf8("            <a href=\"http://validator.w3.org\">\n");
+        HTML += trUtf8("                <img src=\"http://www.w3.org/Icons/valid-xhtml10\" alt=\"Valid XHTML 1.0 Transitional\" height=\"31\" width=\"88\" />\n");
+        HTML += trUtf8("            </a>\n");
+        HTML += trUtf8("        </p>\n");
+        HTML += trUtf8("    </body>\n");
+        HTML += trUtf8("</html>\n");
         HTML.replace('&', "&amp;");
         HTML.replace("&amp;nbsp", "&nbsp");
-        emit message(trUtf8("Test completed."));
+        emit logMessage(trUtf8("Test complete"));
     }
 
     emit benchmarkFinished(STOPBENCHMARK);
