@@ -1,3 +1,9 @@
+revision 12 - 20100525:                                             |
+    * Considerably more accurate OS version reporting under Windows |
+    * A QSplitter widget between log console and results console    |
+      that allows for vertical resizing of said consoles            |
+
+
 revision 11 - 20100525:                                             |
     * Notification when a new program version is available          |
     * Temporary workaround for upstream QTBUG-8914: replaced FTP    |

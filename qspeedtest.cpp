@@ -26,14 +26,21 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QUrl>
 #include <QMessageBox>
 #include <QDesktopServices>
+#include <QProcessEnvironment>
 #include <QDateTime>
 #include <QClipboard>
-#include <QProcess>
 #include <QtConcurrentMap>
 
 
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
+    winSystemInfo.setProcessChannelMode(QProcess::MergedChannels);
+
+    if(QSysInfo::WindowsVersion == QSysInfo::WV_VISTA || QSysInfo::WindowsVersion == QSysInfo::WV_WINDOWS7)
+    {
+        winSystemInfo.start("systeminfo", QIODevice::ReadOnly);
+    }
+
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
     connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
@@ -110,10 +117,19 @@ void QSpeedTest::checkForProgramUpdates()
 void QSpeedTest::printHostAndProgramInfo()
 {
     QString hostOS;
-    QProcess uname;
+    QProcess proc;
     QEventLoop loop;
 
+    testDateTime = QDateTime::currentDateTime().toString("dddd dd/MM/yyyy hh:mm:ss");
+    emit message(trUtf8("Report created by: %1 %2\n"
+                        "Target list version: v%3\n"
+                        "Target list comment: %4\n"
+                        "Target list contact URL: %5").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(targetList.version).arg(targetList.comment).arg(targetList.contactURL));
+    proc.setProcessChannelMode(QProcess::MergedChannels);
+    connect(&proc, SIGNAL(finished(int)), &loop, SLOT(quit()));
 #ifdef Q_WS_WIN
+    bool x64 = QProcessEnvironment::systemEnvironment().contains("ProgramFiles(x86)");
+
     switch(QSysInfo::WindowsVersion)
     {
         case QSysInfo::WV_2000:
@@ -121,41 +137,73 @@ void QSpeedTest::printHostAndProgramInfo()
             break;
 
         case QSysInfo::WV_XP:
-            hostOS = "Windows XP 32bit";
+            hostOS = "Windows XP x86";
             break;
 
         case QSysInfo::WV_2003:
-            hostOS = "Windows XP 64bit or Server 2003";
+            proc.start("cmd /c ver", QIODevice::ReadOnly);
+            loop.exec();
+
+            if(proc.readAll().contains("2003"))
+            {
+                hostOS = QString("Windows Server 2003 ") + QString((x64)? "x64" : "x86");
+            }
+            else
+            {
+                hostOS = "Windows XP x64";
+            }
+
             break;
 
         case QSysInfo::WV_VISTA:
-            hostOS = "Windows Vista";
+            if(winSystemInfo.state() != QProcess::NotRunning)
+            {
+                connect(&winSystemInfo, SIGNAL(finished(int)), &loop, SLOT(quit()));
+                loop.exec();
+            }
+
+            if(winSystemInfo.readAll().contains("Windows Server 2008"))
+            {
+                hostOS = QString("Windows Server 2008 ") + QString((x64)? "x64" : "x86");
+            }
+            else
+            {
+                hostOS = QString("Windows Vista ") + QString((x64)? "x64" : "x86");
+            }
+
             break;
 
         case QSysInfo::WV_WINDOWS7:
-            hostOS = "Windows 7";
+            if(winSystemInfo.state() != QProcess::NotRunning)
+            {
+                connect(&winSystemInfo, SIGNAL(finished(int)), &loop, SLOT(quit()));
+                loop.exec();
+            }
+
+            if(winSystemInfo.readAll().contains("Windows Server 2008"))
+            {
+                hostOS = QString("Windows Server 2008 R2 ") + QString((x64)? "x64" : "x86");
+            }
+            else
+            {
+                hostOS = QString("Windows 7 ") + QString((x64)? "x64" : "x86");
+            }
+
             break;
 
         default:
             hostOS = "Windows";
     }
 #else
-    uname.setProcessChannelMode(QProcess::MergedChannels);
-    connect(&uname, SIGNAL(finished(int)), &loop, SLOT(quit()));
-    uname.start("uname -o", QIODevice::ReadOnly);
+    proc.start("uname -o", QIODevice::ReadOnly);
     loop.exec();
-    hostOS = uname.readLine().trimmed();
-    uname.start("uname -rm", QIODevice::ReadOnly);
+    hostOS = proc.readLine().trimmed();
+    proc.start("uname -rm", QIODevice::ReadOnly);
     loop.exec();
-    hostOS += " " + uname.readLine().trimmed();
+    hostOS += " " + proc.readLine().trimmed();
 #endif
-    testDateTime = QDateTime::currentDateTime().toString("dddd dd/MM/yyyy hh:mm:ss");
-    emit message(trUtf8("Report created by: %1 %2\n"
-                        "Target list version: v%3\n"
-                        "Target list comment: %4\n"
-                        "Target list contact URL: %5\n"
-                        "Host OS: %6\n"
-                        "Test date and time: %7").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(targetList.version).arg(targetList.comment).arg(targetList.contactURL).arg(hostOS).arg(testDateTime));
+    emit message(trUtf8("Host OS: %1\n"
+                        "Test date and time: %2").arg(hostOS).arg(testDateTime));
     vBulletinCode = trUtf8( "[table=head] | Client info\n"
                             "Report created by | [center]%1 %2 - [url=%3]Homepage[/url] - [url=%4]Discuss[/url][/center] |\n"
                             "Target list version | [center]%5[/center] |\n"
