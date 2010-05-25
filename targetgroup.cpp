@@ -270,6 +270,31 @@ double TargetGroup::rttGroupSum()
 }
 
 
+double TargetGroup::packetLossGroupAvg()
+{
+    double avg = 0.0;
+    Target target;
+
+    foreach(target, targets)
+    {
+        avg += target.getPacketLoss();
+    }
+
+    return (avg / this->countTargetsAlive());
+}
+
+
+QString TargetGroup::rankGroupAvg(double rttAvg)
+{
+    if(rttAvg < 30.0) return QString("A");
+    else if(rttAvg < 75.0) return QString("B");
+    else if(rttAvg < 125.0) return QString("C");
+    else if(rttAvg < 200.0) return QString("D");
+    else if(rttAvg < 250.0) return QString("E");
+    else return QString("F");
+}
+
+
 int TargetGroup::countTargetsAlive()
 {
     int count = 0;

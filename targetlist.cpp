@@ -66,7 +66,6 @@ bool TargetList::isUpdateAvailable()
     QString remoteVersion;
 
     emit message(trUtf8("Checking online for an updated version of the target list"));
-
     download = manager.get(QNetworkRequest(QUrl(TARGETLISTVERSIONURL)));
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
@@ -152,6 +151,7 @@ bool TargetList::load()
     int tempGroupSize;
     TargetGroup newGroup;
     Target newTarget;
+    FileHost newFileHost;
 
     emit message(trUtf8("Loading targets from %1").arg(targetListPath));
 
@@ -226,13 +226,13 @@ bool TargetList::load()
 
             if(newTarget.getAddress() == QString(NULL))
             {
-                emit message(trUtf8("Error: Key \"%2\\Address\" missing from section [Group%1] or is not a proper IP or URL address").arg(i).arg(j));
+                emit message(trUtf8("Error: Key \"%2\\Address\" missing from section [Group%1] or is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
             if(!QUrl(newTarget.getAddress()).isValid())
             {
-                emit message(trUtf8("Error: Key \"%2\\Address\" in section [Group%1] is not a proper IP or URL address").arg(i).arg(j));
+                emit message(trUtf8("Error: Key \"%2\\Address\" in section [Group%1] is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
@@ -245,10 +245,52 @@ bool TargetList::load()
         numberOfTargets += newGroup.size;
     }
 
-    emit message(trUtf8("%1 target in %2 groups were successfully loaded").arg(numberOfTargets).arg(numberOfGroups));
+    if(!settings->childGroups().contains("DownloadSpeedTest"))
+    {
+        emit message(trUtf8("Error: Section [DownloadSpeedTest] missing"));
+        return false;
+    }
+
+    tempGroupSize = settings->value(QString("DownloadSpeedTest/NumberOfTargets"), QString(NULL)).toInt();
+
+    if(tempGroupSize < 1)
+    {
+        emit message(trUtf8("Error: Key \"NumberOfTargets\" missing from section [DownloadSpeedTest] or has incompatible value"));
+        return false;
+    }
+
+    for(int i = 1; i <= tempGroupSize; i++)
+    {
+        newFileHost.name = settings->value(QString("DownloadSpeedTest/%1/Name").arg(i), QString(NULL)).toString();
+
+        if(newFileHost.name == QString(NULL))
+        {
+            emit message(trUtf8("Error: Key \"%1\\Name\" missing from section [DownloadSpeedTest] or has incompatible value").arg(i));
+            return false;
+        }
+
+        newFileHost.url = QUrl(settings->value(QString("DownloadSpeedTest/%1/URL").arg(i), QString(NULL)).toString());
+
+        if(newFileHost.url == QUrl(NULL))
+        {
+            emit message(trUtf8("Error: Key \"%1\\URL\" missing from section [DownloadSpeedTest] or is not a proper file URL").arg(i));
+            return false;
+        }
+
+        if(!newFileHost.url.isValid())
+        {
+            emit message(trUtf8("Error: Key \"%1\\URL\" in section [DownloadSpeedTest] is not a proper file URL").arg(i));
+            return false;
+        }
+
+        fileHosts.append(newFileHost);
+    }
+
     emit message(trUtf8("Target list version: %1").arg(version));
     emit message(trUtf8("Target list comment: %1").arg(comment));
     emit message(trUtf8("Target list contact URL: %1").arg(contactURL));
+    emit message(trUtf8("%1 ping targets in %2 groups were successfully loaded").arg(numberOfTargets).arg(numberOfGroups));
+    emit message(trUtf8("%1 download speed test targets were successfully loaded").arg(fileHosts.size()));
     return true;
 }
 
@@ -291,7 +333,7 @@ bool TargetList::init()
     {
         if(isUpdateAvailable())
         {
-            int reply = QMessageBox::question(NULL, trUtf8("Update available"), trUtf8("An updated version of the target list is available online.\n\nWould you like to update now?"), QMessageBox::Yes, QMessageBox::No);
+            int reply = QMessageBox::question(NULL, trUtf8("Target list update available"), trUtf8("An updated version of the target list is available online.\n\nWould you like to update now?"), QMessageBox::Yes, QMessageBox::No);
 
             if(reply == QMessageBox::Yes)
             {

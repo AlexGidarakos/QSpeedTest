@@ -26,6 +26,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSettings>
 #include <QList>
 #include "targetgroup.h"
+#include "filehost.h"
 
 
 class TargetList : public QObject
@@ -47,6 +48,7 @@ class TargetList : public QObject
         int numberOfGroups;
         int numberOfTargets;
         QList<TargetGroup> groups;
+        QList<FileHost> fileHosts;
 
     private:
         QSettings *settings;

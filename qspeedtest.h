@@ -27,7 +27,6 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 #include "mainwindow.h"
 #include "targetlist.h"
-#include "filehost.h"
 
 
 class QSpeedTest : public QApplication
@@ -40,7 +39,6 @@ class QSpeedTest : public QApplication
     private:
         MainWindow mainWindow;
         TargetList targetList;
-        QList<FileHost> fileHosts;
         QString vBulletinCode;
         QString HTML;
         QString testDateTime;
@@ -49,6 +47,7 @@ class QSpeedTest : public QApplication
         QString BBRAS;
         QTime time;
         double secondsElapsed;
+        void checkForProgramUpdates();
         void printHostAndProgramInfo();
         void printLineInfo();
 
