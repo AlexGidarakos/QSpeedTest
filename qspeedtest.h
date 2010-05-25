@@ -24,6 +24,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QApplication>
 #include <QTime>
+#include <QProcess>
 #include "externs.h"
 #include "mainwindow.h"
 #include "targetlist.h"
@@ -42,6 +43,7 @@ class QSpeedTest : public QApplication
         QString vBulletinCode;
         QString HTML;
         QString testDateTime;
+        QProcess winSystemInfo;
         QString ISP;
         QString IP;
         QString BBRAS;

@@ -29,6 +29,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->splitter->setSizes(QList<int>() << 50 << 200);
     setWindowTitle(PROGRAMNAME + " " + PROGRAMVERSION);
     ui->spinBoxPingsPerTarget->setValue(PINGSPERTARGET);
     centerOnDesktop();
