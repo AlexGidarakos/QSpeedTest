@@ -20,30 +20,20 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "qspeedtest.h"
-#include <QDateTime>
-#include <QClipboard>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QUrl>
+#include <QMessageBox>
+#include <QDesktopServices>
+#include <QDateTime>
+#include <QClipboard>
 #include <QProcess>
 #include <QtConcurrentMap>
 
 
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
-    fileHosts.append(FileHost("NTUA FTP", QUrl("ftp://ftp.ntua.gr/pub/linux/ubuntu-releases/10.04/ubuntu-10.04-desktop-i386.iso")));
-    fileHosts.append(FileHost("FORTHNET FTP", QUrl("ftp://ftp.forthnet.gr/pub/SPEEDTEST/CentOS-5.4-i386-LiveCD.iso")));
-    fileHosts.append(FileHost("NVIDIA Germany", QUrl("http://de.download.nvidia.com/Windows/197.45/197.45_desktop_win7_winvista_64bit_international_whql.exe")));
-    fileHosts.append(FileHost("NVIDIA USA", QUrl("http://us.download.nvidia.com/Windows/197.45/197.45_desktop_win7_winvista_32bit_english_whql.exe")));
-    fileHosts.append(FileHost("Microsoft", QUrl("http://download.microsoft.com/download/E/E/1/EE17FF74-6C45-4575-9CF4-7FC2597ACD18/directx_feb2010_redist.exe")));
-    fileHosts.append(FileHost("Apple", QUrl("http://appldnld.apple.com.edgesuite.net/content.info.apple.com/iTunes9/061-8203.20100427.1J2kd/iTunesSetup.exe")));
-
-    for(int i = 0; i < 6; i++)
-    {
-        connect(&fileHosts[i], SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
-    }
-
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
     connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
@@ -54,6 +44,7 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
     connect(&mainWindow, SIGNAL(pushButtonCopyvBulletinCodeClicked()), this, SLOT(copyvBulletinCode()));
     connect(&mainWindow, SIGNAL(pushButtonCopyHTMLClicked()), this, SLOT(copyHTML()));
     mainWindow.show();
+    checkForProgramUpdates();
 
     if(targetList.init())
     {
@@ -67,8 +58,52 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
             }
         }
 
+        for(int i = 0; i < targetList.fileHosts.size(); i++)
+        {
+            connect(&targetList.fileHosts[i], SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+        }
+
         emit initOK();
     }
+}
+
+
+void QSpeedTest::checkForProgramUpdates()
+{
+    QNetworkAccessManager manager;
+    QNetworkReply *download;
+    QEventLoop loop;
+    int remoteVersion;
+
+    emit logMessage(trUtf8("Checking online for an updated version of %1").arg(PROGRAMNAME));
+    download = manager.get(QNetworkRequest(QUrl(PROGRAMUPDATECHECKURL)));
+    connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if(download->error())
+    {
+        emit logMessage(trUtf8("Update site unreachable"));
+        delete download;
+        return;
+    }
+
+    if((remoteVersion = download->readLine().mid(1).toInt()) > PROGRAMVERSION.mid(1).toInt())
+    {
+        emit logMessage(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
+        int reply = QMessageBox::question(NULL, trUtf8("Update available"), trUtf8("An updated version of %1 is available online.\n\nWould you like to open the download page in your browser?").arg(PROGRAMNAME), QMessageBox::Yes, QMessageBox::No);
+
+        if(reply == QMessageBox::Yes)
+        {
+            emit logMessage(trUtf8("Opening download page %1").arg(PROGRAMURL));
+            QDesktopServices::openUrl(QUrl(PROGRAMURL));
+        }
+    }
+    else
+    {
+        emit logMessage(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
+    }
+
+    delete download;
 }
 
 
@@ -241,10 +276,7 @@ void QSpeedTest::printLineInfo()
         BBRAS = trUtf8("N/A");
     }
 
-    emit message(trUtf8("ISP: %1\n"
-                        "Internet IP: %2\n"
-                        "BBRAS: %3\n"
-                        "\n").arg(ISP).arg(IP).arg(BBRAS));
+    emit message(trUtf8("ISP: %1\nInternet IP: %2\nBBRAS: %3\n").arg(ISP).arg(IP).arg(BBRAS));
     vBulletinCode += trUtf8("ISP | [center]%1[/center] |\n"
                             "Internet IP | [center]%2[/center] |\n"
                             "BBRAS | [center]%3[/center] |\n"
@@ -269,6 +301,8 @@ void QSpeedTest::startBenchmark()
     double rttGroupSumAsDouble;
     int groupTargetsAlive;
     QString rttGroupAvg;
+    QString packetLossGroupAvg;
+    QString rankGroupAvg;
     double rttTestSum = 0.0;
     int testTargetsAlive = 0;
     double speedInKbps = 0.0;
@@ -291,6 +325,12 @@ void QSpeedTest::startBenchmark()
 
     for(int i = 0; i < targetList.numberOfGroups; i++)
     {
+        if(STOPBENCHMARK)
+        {
+            emit benchmarkFinished(true);
+            return;
+        }
+
         name = targetList.groups.at(i).name;
         emit message(name.leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
         nameSize = name.size();
@@ -321,8 +361,7 @@ void QSpeedTest::startBenchmark()
             {
                 if(STOPBENCHMARK)
                 {
-                    emit message("\n\nBenchmark stopped before completion.");
-                    emit benchmarkFinished(false);
+                    emit benchmarkFinished(true);
                     return;
                 }
 
@@ -339,26 +378,28 @@ void QSpeedTest::startBenchmark()
             rttGroupSumAsDouble = targetList.groups[i].rttGroupSum();
             rttGroupSum = QString::number(rttGroupSumAsDouble, 'f', 2) + " msec";
             rttGroupAvg = QString::number((rttGroupSumAsDouble / groupTargetsAlive), 'f', 2) + " msec";
+            packetLossGroupAvg = QString::number(targetList.groups[i].packetLossGroupAvg(), 'f', 2) + "%";
+            rankGroupAvg = targetList.groups[i].rankGroupAvg(rttGroupSumAsDouble / groupTargetsAlive);
         }
         else
         {
             rttGroupSum = "N/A";
             rttGroupAvg = "N/A";
+            packetLossGroupAvg = "100%";
+            rankGroupAvg = "N/A";
         }
 
         processEvents();
 
         if(!STOPBENCHMARK)
         {
-            emit message(trUtf8("\nGroup total ping time: %1\n"
-                                "Group average ping time: %2\n"
-                                "\n").arg(rttGroupSum).arg(rttGroupAvg));
-            vBulletinCode += trUtf8("[b]Group total ping time[/b] | [right][b]%1[/b][/right] |\n"
-                                    "[b]Group average ping time[/b] | [right][b]%2[/b][/right] |\n"
+            emit message(trUtf8("Group sum: %1\nGroup average: %2\n").arg(rttGroupSum).arg(rttGroupAvg));
+            vBulletinCode += trUtf8("[b]Group sum[/b] | [right][b]%1[/b][/right] |\n"
+                                    "[b]Group average[/b] | [right][b]%2[/b][/right] | [right][b]%3[/b][/right] | | [center][b]%4[/b][/center]\n"
                                     "[/table]\n"
-                                    "[/spoiler]\n").arg(rttGroupSum).arg(rttGroupAvg);
-            HTML += trUtf8("            <tr><td><b>Group total ping time</b></td><td><div align=\"right\"><b>%1 msec</b></div></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n").arg(rttGroupSum);
-            HTML += trUtf8("            <tr><td><b>Group average ping time</b></td><td><div align=\"right\"><b>%1 msec</b></div></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n").arg(rttGroupAvg);
+                                    "[/spoiler]\n").arg(rttGroupSum).arg(rttGroupAvg).arg(packetLossGroupAvg).arg(rankGroupAvg);
+            HTML += trUtf8("            <tr><td><b>Group sum</b></td><td><div align=\"right\"><b>%1</b></div></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n").arg(rttGroupSum);
+            HTML += trUtf8("            <tr><td><b>Group average</b></td><td><div align=\"right\"><b>%1</b></div></td><td><div align=\"right\"><b>%2</b></div></td><td>&nbsp;</td><td><div align=\"center\"><b>%3</b></div></td></tr>\n").arg(rttGroupAvg).arg(packetLossGroupAvg).arg(rankGroupAvg);
             HTML += trUtf8("        </table>\n");
             HTML += trUtf8("        <br/>\n");
         }
@@ -368,13 +409,14 @@ void QSpeedTest::startBenchmark()
     {
         if(speedTestFlag)
         {
-            emit logMessage(trUtf8("Please wait %1 seconds for the download speed test to complete").arg(DOWNLOADTESTSECS));
-            QThreadPool::globalInstance()->setMaxThreadCount(fileHosts.size());
+            mainWindow.pushButtonStopEnable(false);
+            emit message(trUtf8("Downloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
+            QThreadPool::globalInstance()->setMaxThreadCount(targetList.fileHosts.size());
             BYTESDOWNLOADED = 0;
-            QtConcurrent::blockingMap(fileHosts, &FileHost::downloadTest);
+            QtConcurrent::blockingMap(targetList.fileHosts, &FileHost::downloadTest);
             processEvents();
             speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
-            emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 Kbps\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps));
+            emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 MB/sec\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps / (8 * 1024)));
         }
 
         secondsElapsed = (time.elapsed() * 1.0) / 1000;

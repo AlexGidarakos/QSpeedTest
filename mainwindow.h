@@ -41,6 +41,7 @@ class MainWindow : public QMainWindow
         ~MainWindow();
         int parallelThreads();
         bool speedTestEnabled();
+        void pushButtonStopEnable(bool);
 
     protected:
         void changeEvent(QEvent *e);

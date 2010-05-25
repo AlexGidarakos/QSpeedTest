@@ -47,6 +47,12 @@ bool MainWindow::speedTestEnabled()
 }
 
 
+void MainWindow::pushButtonStopEnable(bool value)
+{
+    ui->pushButtonStop->setEnabled(value);
+}
+
+
 void MainWindow::centerOnDesktop()
 {
     QDesktopWidget *desktop = QApplication::desktop();
@@ -146,7 +152,8 @@ void MainWindow::updateButtons(bool testAborted)
 
     if(testAborted)
     {
-        ui->plainTextEditLogMessages->appendPlainText("\n\nTest aborted!");
+        this->updateLogMessages(trUtf8("Test aborted"));
+        this->updateTestResults(trUtf8("Test aborted"));
     }
     else
     {

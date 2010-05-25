@@ -70,6 +70,8 @@ class TargetGroup
     public:
         TargetGroup();
         double rttGroupSum();
+        double packetLossGroupAvg();
+        QString rankGroupAvg(double);
         int countTargetsAlive();
         QString name;
         int size;

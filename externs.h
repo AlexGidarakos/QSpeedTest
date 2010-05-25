@@ -30,6 +30,7 @@ extern const QString PROGRAMNAME;
 extern const QString PROGRAMVERSION;
 extern const QString PROGRAMURL;
 extern const QString PROGRAMDISCUSSURL;
+extern const QString PROGRAMUPDATECHECKURL;
 extern const QString TARGETLISTURL;
 extern const QString TARGETLISTVERSIONURL;
 extern const int PINGTIMEOUT;
