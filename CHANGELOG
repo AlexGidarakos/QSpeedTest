@@ -1,3 +1,7 @@
+revision 13 - 20100525:                                             |
+    * Fixed a small compiling error under non-Windows OS            |
+
+
 revision 12 - 20100525:                                             |
     * Considerably more accurate OS version reporting under Windows |
     * A QSplitter widget between log console and results console    |

@@ -35,12 +35,12 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
     winSystemInfo.setProcessChannelMode(QProcess::MergedChannels);
-
+#ifdef Q_WS_WIN
     if(QSysInfo::WindowsVersion == QSysInfo::WV_VISTA || QSysInfo::WindowsVersion == QSysInfo::WV_WINDOWS7)
     {
         winSystemInfo.start("systeminfo", QIODevice::ReadOnly);
     }
-
+#endif
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
     connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
