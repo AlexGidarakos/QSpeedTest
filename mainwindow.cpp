@@ -33,6 +33,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setWindowTitle(PROGRAMNAME + " " + PROGRAMVERSION);
     ui->spinBoxPingsPerTarget->setValue(PINGSPERTARGET);
     centerOnDesktop();
+#ifndef Q_WS_WIN
+#ifdef Q_WS_MAC
+    ui->plainTextEditLogMessages->setFont(QFont("Courier New", 12));
+    ui->plainTextEditTestResults->setFont(QFont("Courier New", 12));
+#else
+    ui->plainTextEditLogMessages->setFont(QFont("Courier New", 9));
+    ui->plainTextEditTestResults->setFont(QFont("Courier New", 9));
+#endif
+#endif
 }
 
 

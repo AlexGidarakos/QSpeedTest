@@ -1,5 +1,6 @@
-100. Reopen QTBUG-8914 for QNetworkAccessManager and FTP downloads
-200. Implement menu system, with options saved inside qspeedtest.ini
-300. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
-400. Make download speed test's duration selectable
-500. Thread safety and (maybe) Singletton pattern for the global variables?
+100. Again attempt to combine Start and Stop into one button
+200. Make Stop button usable during download speed test
+300. Implement menu system, with options saved inside qspeedtest.ini
+400. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
+500. Make download speed test's duration selectable
+600. Thread safety and (maybe) Singletton pattern for the global variables?

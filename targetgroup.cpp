@@ -180,16 +180,23 @@ void Target::ping()
     QStringList list;
     QProcess pingProcess;
     QEventLoop loop;
-#ifdef Q_WS_WIN
-    QString pingCmd = QString("ping -n 1 -w %1 %2").arg(PINGTIMEOUT).arg(address);
-    int skipLines = 3;
-#else
-    QString pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT / 1000).arg(address);
-    int skipLines = 6;
-#endif
+    QString pingCmd;
+    int skipLines;
     QString packetLossString;
     QString jitterString;
     double jitterDouble;
+
+#ifdef Q_WS_WIN
+    pingCmd = QString("ping -n 1 -w %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
+    skipLines = 3;
+#else
+    skipLines = 6;
+#ifdef Q_WS_MAC
+    pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
+#else
+    pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT).arg(address);
+#endif
+#endif
 
     pingProcess.setProcessChannelMode(QProcess::MergedChannels);
     connect(&pingProcess, SIGNAL(finished(int)), &loop, SLOT(quit()));
@@ -208,12 +215,14 @@ void Target::ping()
         {
             contents = pingProcess.readLine().trimmed();
         }
+
 #ifdef Q_WS_WIN
         if(!contents.contains(QString("=").toAscii()))
         {
             contents = pingProcess.readLine().trimmed();
         }
 #endif
+
         if(contents.contains(QString("=").toAscii()))
         {
             rttString = contents;

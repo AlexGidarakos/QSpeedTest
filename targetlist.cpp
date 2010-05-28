@@ -66,7 +66,7 @@ bool TargetList::isUpdateAvailable()
     QString remoteVersion;
 
     emit message(trUtf8("Checking online for an updated version of the target list"));
-    download = manager.get(QNetworkRequest(QUrl(TARGETLISTVERSIONURL)));
+    download = manager.get(QNetworkRequest(QUrl(TARGETLISTUPDATECHECKURL)));
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
