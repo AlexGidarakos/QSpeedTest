@@ -35,12 +35,14 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
     winSystemInfo.setProcessChannelMode(QProcess::MergedChannels);
+
 #ifdef Q_WS_WIN
     if(QSysInfo::WindowsVersion == QSysInfo::WV_VISTA || QSysInfo::WindowsVersion == QSysInfo::WV_WINDOWS7)
     {
         winSystemInfo.start("systeminfo", QIODevice::ReadOnly);
     }
 #endif
+
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
     connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
@@ -195,6 +197,15 @@ void QSpeedTest::printHostAndProgramInfo()
             hostOS = "Windows";
     }
 #else
+#ifdef Q_WS_MAC
+    hostOS = "Mac OS X";
+    proc.start("sw_vers -productVersion", QIODevice::ReadOnly);
+    loop.exec();
+    hostOS += " " + proc.readLine().trimmed();
+    proc.start("uname -m", QIODevice::ReadOnly);
+    loop.exec();
+    hostOS += " " + proc.readLine().trimmed();
+#else
     proc.start("uname -o", QIODevice::ReadOnly);
     loop.exec();
     hostOS = proc.readLine().trimmed();
@@ -202,6 +213,8 @@ void QSpeedTest::printHostAndProgramInfo()
     loop.exec();
     hostOS += " " + proc.readLine().trimmed();
 #endif
+#endif
+
     emit message(trUtf8("Host OS: %1\n"
                         "Test date and time: %2").arg(hostOS).arg(testDateTime));
     vBulletinCode = trUtf8( "[table=head] | Client info\n"
@@ -235,12 +248,15 @@ void QSpeedTest::printLineInfo()
     bool found = false;
     QStringList list;
     QProcess traceroute;
+    QString tracerouteCommand;
+    QString bbrasLine;
+
 #ifdef Q_WS_WIN
-    QString tracerouteCommand = "pathping -h 2 -q 1 8.8.8.8";
-    QString bbrasLine = "  2  ";
+    tracerouteCommand = "pathping -h 2 -q 1 8.8.8.8";
+    bbrasLine = "  2  ";
 #else
-    QString tracerouteCommand = "traceroute -m 2 -q 1 8.8.8.8";
-    QString bbrasLine = " 2  ";
+    tracerouteCommand = "traceroute -m 2 -q 1 8.8.8.8";
+    bbrasLine = " 2  ";
 #endif
 
     IP.clear();
@@ -306,7 +322,7 @@ void QSpeedTest::printLineInfo()
 
             if(contents.contains(QString("*").toAscii()))
             {
-                BBRAS = trUtf8("N/A (no reply to traceroute)");
+                BBRAS = trUtf8("N/A (non-responsive BBRAS)");
             }
             else
             {
@@ -565,6 +581,7 @@ void QSpeedTest::copyvBulletinCode()
     QClipboard *clipboard = QApplication::clipboard();
 
     clipboard->setText(vBulletinCode);
+    QMessageBox::information(NULL, trUtf8("Copied to clipboard"), trUtf8("<center>A report with the test results was succesfully copied to the system clipboard in vBulletin code format.<center>"));
 }
 
 
@@ -573,4 +590,5 @@ void QSpeedTest::copyHTML()
     QClipboard *clipboard = QApplication::clipboard();
 
     clipboard->setText(HTML);
+    QMessageBox::information(NULL, trUtf8("Copied to clipboard"), trUtf8("<center>A report with the test results was succesfully copied to the system clipboard in HTML code format.</center>"));
 }

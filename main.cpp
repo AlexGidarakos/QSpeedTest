@@ -25,13 +25,13 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 const QString PROGRAMCOMPANY = "Binary Notion";
 const QString PROGRAMAUTHOR = "parsifal";
 const QString PROGRAMNAME = "QSpeedTest";
-const QString PROGRAMVERSION = "r13";
+const QString PROGRAMVERSION = "r14";
 const QString PROGRAMURL = "https://sourceforge.net/projects/qspeedtest/files/";
 const QString PROGRAMDISCUSSURL = "https://sourceforge.net/apps/phpbb/qspeedtest";
 const QString PROGRAMUPDATECHECKURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.version";
 const QString TARGETLISTURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.ini";
-const QString TARGETLISTVERSIONURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.ini.version";
-const int PINGTIMEOUT = 2000;
+const QString TARGETLISTUPDATECHECKURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.ini.version";
+const int PINGTIMEOUT = 2;
 const int DOWNLOADTESTSECS = 20;
 int PINGSPERTARGET = 4;
 QMutex MUTEX;

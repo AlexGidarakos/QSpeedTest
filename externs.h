@@ -32,7 +32,7 @@ extern const QString PROGRAMURL;
 extern const QString PROGRAMDISCUSSURL;
 extern const QString PROGRAMUPDATECHECKURL;
 extern const QString TARGETLISTURL;
-extern const QString TARGETLISTVERSIONURL;
+extern const QString TARGETLISTUPDATECHECKURL;
 extern const int PINGTIMEOUT;
 extern const int DOWNLOADTESTSECS;
 extern int PINGSPERTARGET;
