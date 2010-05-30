@@ -65,26 +65,26 @@ bool TargetList::isUpdateAvailable()
     QEventLoop loop;
     QString remoteVersion;
 
-    emit message(trUtf8("Checking online for an updated version of the target list"));
+    emit logMessage(trUtf8("Checking online for an updated version of the target list"));
     download = manager.get(QNetworkRequest(QUrl(TARGETLISTUPDATECHECKURL)));
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
     if(download->error())
     {
-        emit message(trUtf8("Update site unreachable"));
+        emit logMessage(trUtf8("Update site unreachable"));
         delete download;
         return false;
     }
 
     if((remoteVersion = download->readLine()) > version)
     {
-        emit message(trUtf8("Update available, remote target list version: %1").arg(remoteVersion));
+        emit logMessage(trUtf8("Update available, remote target list version: %1").arg(remoteVersion));
         delete download;
         return true;
     }
 
-    emit message(trUtf8("Your local target list is already up to date"));
+    emit logMessage(trUtf8("Your local target list is already up to date"));
     delete download;
     return false;
 }
@@ -100,7 +100,7 @@ bool TargetList::downloadList()
     QFileInfo info(fileName);
     QTextStream out;
 
-    emit message(trUtf8("Downloading new target list"));
+    emit logMessage(trUtf8("Downloading new target list"));
 
     download = manager.get(QNetworkRequest(QUrl(TARGETLISTURL)));
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -108,12 +108,12 @@ bool TargetList::downloadList()
 
     if(download->error())
     {
-        emit message(trUtf8("Error: Download failed"));
+        emit logMessage(trUtf8("Error: Download failed"));
         delete download;
         return false;
     }
 
-    emit message(trUtf8("Download complete. Writing to file"));
+    emit logMessage(trUtf8("Download complete. Writing to file"));
 
     if(!QDir().exists(info.absolutePath()))
     {
@@ -132,13 +132,13 @@ bool TargetList::downloadList()
         out.setDevice(&file);
         out << download->readAll();
         file.close();
-        emit message(trUtf8("Wrote %1 bytes").arg(file.size()));
+        emit logMessage(trUtf8("Wrote %1 bytes").arg(file.size()));
         delete download;
         return true;
     }
 
-    emit message(trUtf8("Error: Could not open file %1 for write operation").arg(settings->fileName()));
-    emit message(trUtf8("Please check your folder access permissions."));
+    emit logMessage(trUtf8("Error: Could not open file %1 for write operation").arg(settings->fileName()));
+    emit logMessage(trUtf8("Please check your folder access permissions."));
     delete download;
     return false;
 }
@@ -153,17 +153,17 @@ bool TargetList::load()
     Target newTarget;
     FileHost newFileHost;
 
-    emit message(trUtf8("Loading targets from %1").arg(targetListPath));
+    emit logMessage(trUtf8("Loading targets from %1").arg(targetListPath));
 
     if(!QFile::exists(targetListPath))
     {
-        emit message(trUtf8("Error: File not found"));
+        emit logMessage(trUtf8("Error: File not found"));
         return false;
     }
 
     if(!settings->childGroups().contains("TargetListInfo"))
     {
-        emit message(trUtf8("Error: Section [TargetListInfo] missing"));
+        emit logMessage(trUtf8("Error: Section [TargetListInfo] missing"));
         return false;
     }
 
@@ -171,7 +171,7 @@ bool TargetList::load()
 
     if(version == QString(NULL))
     {
-        emit message(trUtf8("Error: Key \"Version\" missing from section [TargetListInfo]"));
+        emit logMessage(trUtf8("Error: Key \"Version\" missing from section [TargetListInfo]"));
         return false;
     }
 
@@ -181,7 +181,7 @@ bool TargetList::load()
 
     if(tempNumberOfGroups < 1)
     {
-        emit message(trUtf8("Error: Key \"NumberOfGroups\" missing from section [TargetListInfo] or has incompatible value"));
+        emit logMessage(trUtf8("Error: Key \"NumberOfGroups\" missing from section [TargetListInfo] or has incompatible value"));
         return false;
     }
 
@@ -192,7 +192,7 @@ bool TargetList::load()
 
         if(!settings->childGroups().contains(QString("Group%1").arg(i)))
         {
-            emit message(trUtf8("Error: Section [Group%1] missing").arg(i));
+            emit logMessage(trUtf8("Error: Section [Group%1] missing").arg(i));
             return false;
         }
 
@@ -200,7 +200,7 @@ bool TargetList::load()
 
         if(newGroup.name == QString(NULL))
         {
-            emit message(trUtf8("Error: Key \"Name\" missing from section [Group%1] or has incompatible value").arg(i));
+            emit logMessage(trUtf8("Error: Key \"Name\" missing from section [Group%1] or has incompatible value").arg(i));
             return false;
         }
 
@@ -208,7 +208,7 @@ bool TargetList::load()
 
         if(tempGroupSize < 1)
         {
-            emit message(trUtf8("Error: Key \"NumberOfTargets\" missing from section [Group%1] or has incompatible value").arg(i));
+            emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [Group%1] or has incompatible value").arg(i));
             return false;
         }
 
@@ -218,7 +218,7 @@ bool TargetList::load()
 
             if(newTarget.getName() == QString(NULL))
             {
-                emit message(trUtf8("Error: Key \"%2\\Name\" missing from section [Group%1] or has incompatible value").arg(i).arg(j));
+                emit logMessage(trUtf8("Error: Key \"%2\\Name\" missing from section [Group%1] or has incompatible value").arg(i).arg(j));
                 return false;
             }
 
@@ -226,13 +226,13 @@ bool TargetList::load()
 
             if(newTarget.getAddress() == QString(NULL))
             {
-                emit message(trUtf8("Error: Key \"%2\\Address\" missing from section [Group%1] or is not a proper IP address or URL").arg(i).arg(j));
+                emit logMessage(trUtf8("Error: Key \"%2\\Address\" missing from section [Group%1] or is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
             if(!QUrl(newTarget.getAddress()).isValid())
             {
-                emit message(trUtf8("Error: Key \"%2\\Address\" in section [Group%1] is not a proper IP address or URL").arg(i).arg(j));
+                emit logMessage(trUtf8("Error: Key \"%2\\Address\" in section [Group%1] is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
@@ -245,52 +245,52 @@ bool TargetList::load()
         numberOfTargets += newGroup.size;
     }
 
-    if(!settings->childGroups().contains("DownloadSpeedTest"))
+    if(!settings->childGroups().contains("DownloadTest"))
     {
-        emit message(trUtf8("Error: Section [DownloadSpeedTest] missing"));
+        emit logMessage(trUtf8("Error: Section [DownloadTest] missing"));
         return false;
     }
 
-    tempGroupSize = settings->value(QString("DownloadSpeedTest/NumberOfTargets"), QString(NULL)).toInt();
+    tempGroupSize = settings->value(QString("DownloadTest/NumberOfTargets"), QString(NULL)).toInt();
 
     if(tempGroupSize < 1)
     {
-        emit message(trUtf8("Error: Key \"NumberOfTargets\" missing from section [DownloadSpeedTest] or has incompatible value"));
+        emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [DownloadTest] or has incompatible value"));
         return false;
     }
 
     for(int i = 1; i <= tempGroupSize; i++)
     {
-        newFileHost.name = settings->value(QString("DownloadSpeedTest/%1/Name").arg(i), QString(NULL)).toString();
+        newFileHost.name = settings->value(QString("DownloadTest/%1/Name").arg(i), QString(NULL)).toString();
 
         if(newFileHost.name == QString(NULL))
         {
-            emit message(trUtf8("Error: Key \"%1\\Name\" missing from section [DownloadSpeedTest] or has incompatible value").arg(i));
+            emit logMessage(trUtf8("Error: Key \"%1\\Name\" missing from section [DownloadTest] or has incompatible value").arg(i));
             return false;
         }
 
-        newFileHost.url = QUrl(settings->value(QString("DownloadSpeedTest/%1/URL").arg(i), QString(NULL)).toString());
+        newFileHost.url = QUrl(settings->value(QString("DownloadTest/%1/URL").arg(i), QString(NULL)).toString());
 
         if(newFileHost.url == QUrl(NULL))
         {
-            emit message(trUtf8("Error: Key \"%1\\URL\" missing from section [DownloadSpeedTest] or is not a proper file URL").arg(i));
+            emit logMessage(trUtf8("Error: Key \"%1\\URL\" missing from section [DownloadTest] or is not a proper file URL").arg(i));
             return false;
         }
 
         if(!newFileHost.url.isValid())
         {
-            emit message(trUtf8("Error: Key \"%1\\URL\" in section [DownloadSpeedTest] is not a proper file URL").arg(i));
+            emit logMessage(trUtf8("Error: Key \"%1\\URL\" in section [DownloadTest] is not a proper file URL").arg(i));
             return false;
         }
 
         fileHosts.append(newFileHost);
     }
 
-    emit message(trUtf8("Target list version: %1").arg(version));
-    emit message(trUtf8("Target list comment: %1").arg(comment));
-    emit message(trUtf8("Target list contact URL: %1").arg(contactURL));
-    emit message(trUtf8("%1 ping targets in %2 groups were successfully loaded").arg(numberOfTargets).arg(numberOfGroups));
-    emit message(trUtf8("%1 download speed test targets were successfully loaded").arg(fileHosts.size()));
+    emit logMessage(trUtf8("Target list version: %1").arg(version));
+    emit logMessage(trUtf8("Target list comment: %1").arg(comment));
+    emit logMessage(trUtf8("Target list contact URL: %1").arg(contactURL));
+    emit logMessage(trUtf8("%1 ping targets in %2 groups were successfully loaded").arg(numberOfTargets).arg(numberOfGroups));
+    emit logMessage(trUtf8("%1 download test targets were successfully loaded").arg(fileHosts.size()));
     return true;
 }
 
@@ -314,15 +314,15 @@ bool TargetList::restoreEmbedded()
         }
     }
 
-    emit message(trUtf8("Extracting a default target list from embedded resources"));
+    emit logMessage(trUtf8("Extracting a default target list from embedded resources"));
 
     if(embedded.copy(filename))
     {
-        emit message(trUtf8("Successfully copied to %1").arg(QDir::toNativeSeparators(filename)));
+        emit logMessage(trUtf8("Successfully copied to %1").arg(QDir::toNativeSeparators(filename)));
         return true;
     }
 
-    emit message(trUtf8("Error: Could not create file %1").arg(QDir::toNativeSeparators(filename)));
+    emit logMessage(trUtf8("Error: Could not create file %1").arg(QDir::toNativeSeparators(filename)));
     return false;
 }
 
@@ -354,7 +354,7 @@ bool TargetList::init()
             }
             else
             {
-                emit message(trUtf8("Update aborted"));
+                emit logMessage(trUtf8("Update aborted"));
             }
         }
 

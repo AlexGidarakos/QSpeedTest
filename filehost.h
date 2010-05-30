@@ -43,7 +43,7 @@ class FileHost : public QObject
         void updateBytes(qint64);
 
     signals:
-        void message(QString);
+        void newTestResult(QString);
 };
 
 #endif // FILEHOST_H

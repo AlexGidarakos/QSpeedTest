@@ -40,14 +40,12 @@ class QSpeedTest : public QApplication
     private:
         MainWindow mainWindow;
         TargetList targetList;
-        QString vBulletinCode;
-        QString HTML;
         QString testDateTime;
         QProcess winSystemInfo;
         QString ISP;
         QString IP;
         QString BBRAS;
-        QTime time;
+        QTime timer;
         double secondsElapsed;
         void checkForProgramUpdates();
         void printHostAndProgramInfo();
@@ -56,15 +54,13 @@ class QSpeedTest : public QApplication
     signals:
         void initOK();
         void logMessage(QString);
-        void message(QString);
+        void newTestResult(QString);
+        void newVbCode(QString);
+        void newHtmlCode(QString);
         void benchmarkFinished(bool completed);
 
     private slots:
         void startBenchmark();
-        void updatevBulletinCode(QString);
-        void updateHTML(QString);
-        void copyvBulletinCode();
-        void copyHTML();
 };
 
 #endif // QSPEEDTEST_H

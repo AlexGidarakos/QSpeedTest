@@ -67,14 +67,14 @@ void FileHost::downloadTest()
     QNetworkReply *file;
 
     QTimer::singleShot(DOWNLOADTESTSECS * 1000, &loop, SLOT(quit()));
-    emit message(trUtf8("%1").arg(url.toString()));
+    emit newTestResult(trUtf8("%1").arg(url.toString()));
     file = manager.get(QNetworkRequest(url));
     connect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     loop.exec();
     MUTEX.lock();
     BYTESDOWNLOADED += bytesDownloaded;
     MUTEX.unlock();
-    emit message(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
+    emit newTestResult(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
     file->abort();
     file->deleteLater();
 }

@@ -1,7 +1,17 @@
+revision 15 - 20100530:                                             |
+    * Now correctly working under FreeBSD. Special thanks to        |
+      Thuglife from adslgr.com for the relevant patch               |
+    * 3 test mode combinations available, selectable via combobox   |
+    * Ping timeout reduced to 1 sec                                 |
+    * Download test duration reduced to 15 sec                      |
+    * Copy to clipboard confirmation via label instead of msgbox    |
+    * Some minor changes to vBulletin and HTML output format        |
+
+
 revision 14 - 20100529:                                             |
     * Now correctly working under Mac OS X. Special thanks to:      |
       1. Vag from madseeds.com for giving remote access to a Mac Pro|
-      2. greatst from insomnia.gr for additional testing!           |
+      2. greatst from insomnia.gr for additional testing            |
     * Added tooltips which explain some of the options or buttons   |
     * Updated embedded target list                                  |
 

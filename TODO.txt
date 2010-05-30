@@ -3,4 +3,4 @@
 300. Implement menu system, with options saved inside qspeedtest.ini
 400. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
 500. Make download speed test's duration selectable
-600. Thread safety and (maybe) Singletton pattern for the global variables?
+600. Thread safe Singleton pattern for the global variables?

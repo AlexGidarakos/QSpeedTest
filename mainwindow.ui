@@ -25,13 +25,13 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="0" column="2">
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="leftMargin">
        <number>20</number>
       </property>
       <item>
-       <widget class="QLabel" name="labelSpeedTest">
+       <widget class="QLabel" name="labelTestMode">
         <property name="toolTip">
          <string>If enabled, when the ping test completes, an additional test
 will start that downloads multiple files in parallel in order
@@ -40,7 +40,7 @@ to measure the download speed of your Internet access.
 Speed is measured in Kbps (Kilobits per second).</string>
         </property>
         <property name="text">
-         <string>Perform speed test</string>
+         <string>Test mode</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -48,31 +48,27 @@ Speed is measured in Kbps (Kilobits per second).</string>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBoxSpeedTest">
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>If enabled, when the ping test completes, an additional test
-will start that downloads multiple files in parallel in order
-to measure the download speed of your Internet access.
-
-Speed is measured in Kbps (Kilobits per second).</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
+       <widget class="QComboBox" name="comboBoxTestMode">
+        <item>
+         <property name="text">
+          <string>Ping and download</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Ping only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Download only</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="0" column="2">
+    <item row="0" column="3">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="leftMargin">
        <number>20</number>
@@ -140,7 +136,7 @@ completion.</string>
       </item>
      </layout>
     </item>
-    <item row="0" column="3">
+    <item row="0" column="4">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="spacing">
        <number>6</number>
@@ -190,7 +186,7 @@ target list.</string>
       </item>
      </layout>
     </item>
-    <item row="1" column="0" colspan="4">
+    <item row="1" column="0" colspan="5">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -275,7 +271,7 @@ target list.</string>
     <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QPushButton" name="pushButtonCopyvBulletinCode">
+       <widget class="QPushButton" name="pushButtonCopyVbCode">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -290,7 +286,7 @@ based forum.</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonCopyHTML">
+       <widget class="QPushButton" name="pushButtonCopyHtmlCode">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -306,20 +302,7 @@ however and wherever you see fit.</string>
       </item>
      </layout>
     </item>
-    <item row="3" column="1">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>354</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="3" column="2" colspan="2">
+    <item row="3" column="3" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="pushButtonStart">
@@ -362,6 +345,16 @@ however and wherever you see fit.</string>
        </widget>
       </item>
      </layout>
+    </item>
+    <item row="3" column="1" colspan="2">
+     <widget class="QLabel" name="labelCopyToClipboard">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

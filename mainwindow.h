@@ -40,7 +40,8 @@ class MainWindow : public QMainWindow
         MainWindow(QWidget *parent = 0);
         ~MainWindow();
         int parallelThreads();
-        bool speedTestEnabled();
+        bool pingTestEnabled();
+        bool downloadTestEnabled();
         void pushButtonStopEnable(bool);
 
     protected:
@@ -48,25 +49,28 @@ class MainWindow : public QMainWindow
 
     private:
         Ui::MainWindow *ui;
+        QString vbCode;
+        QString htmlCode;
         void centerOnDesktop();
 
     signals:
         void pushButtonStartClicked();
-        void pushButtonCopyvBulletinCodeClicked();
-        void pushButtonCopyHTMLClicked();
 
     private slots:
+        void on_comboBoxTestMode_currentIndexChanged(int index);
         void on_spinBoxPingsPerTarget_valueChanged(int);
         void on_pushButtonStop_clicked();
         void enablePushButtonStart();
         void updateLogMessages(QString);
         void updateTestResults(QString);
+        void updateVbCode(QString);
+        void updateHtmlCode(QString);
         void updateButtons(bool benchmarkCompleted);
         void on_pushButtonStart_clicked();
         void on_pushButtonAbout_clicked();
         void on_pushButtonExit_clicked();
-        void on_pushButtonCopyvBulletinCode_clicked();
-        void on_pushButtonCopyHTML_clicked();
+        void on_pushButtonCopyVbCode_clicked();
+        void on_pushButtonCopyHtmlCode_clicked();
 };
 
 #endif // MAINWINDOW_H
