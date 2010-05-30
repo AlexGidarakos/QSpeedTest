@@ -28,7 +28,6 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDesktopServices>
 #include <QProcessEnvironment>
 #include <QDateTime>
-#include <QClipboard>
 #include <QtConcurrentMap>
 
 
@@ -45,13 +44,13 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStart()));
-    connect(&targetList, SIGNAL(message(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
     connect(&mainWindow, SIGNAL(pushButtonStartClicked()), this, SLOT(startBenchmark()));
+    connect(&targetList, SIGNAL(logMessage(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
     connect(this, SIGNAL(logMessage(QString)), &mainWindow, SLOT(updateLogMessages(QString)));
-    connect(this, SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+    connect(this, SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+    connect(this, SIGNAL(newVbCode(QString)), &mainWindow, SLOT(updateVbCode(QString)));
+    connect(this, SIGNAL(newHtmlCode(QString)), &mainWindow, SLOT(updateHtmlCode(QString)));
     connect(this, SIGNAL(benchmarkFinished(bool)), &mainWindow, SLOT(updateButtons(bool)));
-    connect(&mainWindow, SIGNAL(pushButtonCopyvBulletinCodeClicked()), this, SLOT(copyvBulletinCode()));
-    connect(&mainWindow, SIGNAL(pushButtonCopyHTMLClicked()), this, SLOT(copyHTML()));
     mainWindow.show();
     checkForProgramUpdates();
 
@@ -61,15 +60,15 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
         {
             for(int j = 0; j < targetList.groups.at(i).size; j++)
             {
-                connect(&targetList.groups[i].targets[j], SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
-                connect(&targetList.groups[i].targets[j], SIGNAL(changevBulletinCode(QString)), this, SLOT(updatevBulletinCode(QString)));
-                connect(&targetList.groups[i].targets[j], SIGNAL(changeHTML(QString)), this, SLOT(updateHTML(QString)));
+                connect(&targetList.groups[i].targets[j], SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+                connect(&targetList.groups[i].targets[j], SIGNAL(newVbCode(QString)), &mainWindow, SLOT(updateVbCode(QString)));
+                connect(&targetList.groups[i].targets[j], SIGNAL(newHtmlCode(QString)), &mainWindow, SLOT(updateHtmlCode(QString)));
             }
         }
 
         for(int i = 0; i < targetList.fileHosts.size(); i++)
         {
-            connect(&targetList.fileHosts[i], SIGNAL(message(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+            connect(&targetList.fileHosts[i], SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
         }
 
         emit initOK();
@@ -123,7 +122,7 @@ void QSpeedTest::printHostAndProgramInfo()
     QEventLoop loop;
 
     testDateTime = QDateTime::currentDateTime().toString("dddd dd/MM/yyyy hh:mm:ss");
-    emit message(trUtf8("Report created by: %1 %2\n"
+    emit newTestResult(trUtf8("Report created by: %1 %2\n"
                         "Target list version: v%3\n"
                         "Target list comment: %4\n"
                         "Target list contact URL: %5").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(targetList.version).arg(targetList.comment).arg(targetList.contactURL));
@@ -197,45 +196,49 @@ void QSpeedTest::printHostAndProgramInfo()
             hostOS = "Windows";
     }
 #else
+#ifdef Q_OS_UNIX
 #ifdef Q_WS_MAC
-    hostOS = "Mac OS X";
     proc.start("sw_vers -productVersion", QIODevice::ReadOnly);
     loop.exec();
-    hostOS += " " + proc.readLine().trimmed();
+    hostOS = "Mac OS X " + proc.readLine().trimmed();
     proc.start("uname -m", QIODevice::ReadOnly);
+#else
+    proc.start("uname -s", QIODevice::ReadOnly);
     loop.exec();
-    hostOS += " " + proc.readLine().trimmed();
+    hostOS = proc.readLine().trimmed();
+    proc.start("uname -rm", QIODevice::ReadOnly);
+#endif
 #else
     proc.start("uname -o", QIODevice::ReadOnly);
     loop.exec();
     hostOS = proc.readLine().trimmed();
     proc.start("uname -rm", QIODevice::ReadOnly);
+#endif
     loop.exec();
     hostOS += " " + proc.readLine().trimmed();
 #endif
-#endif
 
-    emit message(trUtf8("Host OS: %1\n"
+    emit newTestResult(trUtf8("Host OS: %1\n"
                         "Test date and time: %2").arg(hostOS).arg(testDateTime));
-    vBulletinCode = trUtf8( "[table=head] | Client info\n"
-                            "Report created by | [center]%1 %2 - [url=%3]Homepage[/url] - [url=%4]Discuss[/url][/center] |\n"
-                            "Target list version | [center]%5[/center] |\n"
-                            "Target list comment | [center][url=%6]%7[/url][/center] |\n"
-                            "Host OS | [center]%8[/center] |\n"
-                            "Test date and time | [center]%9[/center] |\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL).arg(targetList.version).arg(targetList.contactURL).arg(targetList.comment).arg(hostOS).arg(testDateTime);
-    HTML  = trUtf8("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
-    HTML += trUtf8("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"el\">\n");
-    HTML += trUtf8("    <head>\n");
-    HTML += trUtf8("        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
-    HTML += trUtf8("        <title>%1 report</title>\n").arg(PROGRAMNAME);
-    HTML += trUtf8("    </head>\n");
-    HTML += trUtf8("    <body>\n");
-    HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
-    HTML += trUtf8("            <tr><td>&nbsp;</td><td><div align=\"center\">Client info</div></td></tr>\n");
-    HTML += trUtf8("            <tr><td>Report created by</td><td><div align=\"center\">%1 %2 - <a href=\"%3\" target=\"_blank\">Download</a> - <a href=\"%4\" target=\"_blank\">Discuss</a></div></td></tr>\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL);
-    HTML += trUtf8("            <tr><td>Target list used</td><td><div align=\"center\"><a href=\"%1\">%2</a></div></td></tr>\n").arg(targetList.contactURL).arg(targetList.comment);
-    HTML += trUtf8("            <tr><td>Host OS</td><td><div align=\"center\">%1</div></td></tr>\n").arg(hostOS);
-    HTML += trUtf8("            <tr><td>Test date and time</td><td><div align=\"center\">%1</div></td></tr>\n").arg(testDateTime);
+    emit newVbCode(trUtf8("[table=head] | Client info\n"
+                          "Report created by | [center]%1 %2 - [url=%3]Download[/url] - [url=%4]Discuss[/url][/center] |\n"
+                          "Target list version | [center]%5[/center] |\n"
+                          "Target list comment | [center][url=%6]%7[/url][/center] |\n"
+                          "Host OS | [center]%8[/center] |\n"
+                          "Test date and time | [center]%9[/center] |\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL).arg(targetList.version).arg(targetList.contactURL).arg(targetList.comment).arg(hostOS).arg(testDateTime));
+    emit newHtmlCode(trUtf8("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n"
+                            "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"el\">\n"
+                            "    <head>\n"
+                            "        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+                            "        <title>%1 report</title>\n"
+                            "    </head>\n"
+                            "    <body>\n"
+                            "        <table border=\"1\" cellpadding=\"4\">\n"
+                            "            <tr><td>&nbsp;</td><td><div align=\"center\">Client info</div></td></tr>\n"));
+    emit newHtmlCode(trUtf8("            <tr><td>Report created by</td><td><div align=\"center\">%1 %2 - <a href=\"%3\" target=\"_blank\">Download</a> - <a href=\"%4\" target=\"_blank\">Discuss</a></div></td></tr>\n").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMURL).arg(PROGRAMDISCUSSURL));
+    emit newHtmlCode(trUtf8("            <tr><td>Target list used</td><td><div align=\"center\"><a href=\"%1\">%2</a></div></td></tr>\n").arg(targetList.contactURL).arg(targetList.comment));
+    emit newHtmlCode(trUtf8("            <tr><td>Host OS</td><td><div align=\"center\">%1</div></td></tr>\n"
+                            "            <tr><td>Test date and time</td><td><div align=\"center\">%2</div></td></tr>\n").arg(hostOS).arg(testDateTime));
 }
 
 
@@ -327,9 +330,9 @@ void QSpeedTest::printLineInfo()
             else
             {
 #ifdef Q_WS_WIN
-                BBRAS = contents.mid(3);
+                BBRAS = contents.mid(3).trimmed();
 #else
-                BBRAS = contents.mid(4, contents.indexOf(')') - 1);
+                BBRAS = contents.mid(4, contents.indexOf(')') - 1).trimmed();
 #endif
             }
         }
@@ -340,23 +343,24 @@ void QSpeedTest::printLineInfo()
         BBRAS = trUtf8("N/A");
     }
 
-    emit message(trUtf8("ISP: %1\nInternet IP: %2\nBBRAS: %3\n").arg(ISP).arg(IP).arg(BBRAS));
-    vBulletinCode += trUtf8("ISP | [center]%1[/center] |\n"
-                            "Internet IP | [center]%2[/center] |\n"
-                            "BBRAS | [center]%3[/center] |\n"
-                            "[/table]\n"
-                            "[spoiler]\n").arg(ISP).arg(IP).arg(BBRAS);
-    HTML += trUtf8("            <tr><td>ISP</td><td><div align=\"center\">%1</div></td></tr>\n").arg(ISP);
-    HTML += trUtf8("            <tr><td>Internet IP</td><td><div align=\"center\">%1</div></td></tr>\n").arg(IP);
-    HTML += trUtf8("            <tr><td>BBRAS</td><td><div align=\"center\">%1</div></td></tr>\n").arg(BBRAS);
-    HTML += trUtf8("        </table>\n");
+    emit newTestResult(trUtf8("ISP: %1\nInternet IP: %2\nBBRAS: %3\n").arg(ISP).arg(IP).arg(BBRAS));
+    emit newVbCode(trUtf8("ISP | [center]%1[/center] |\n"
+                          "Internet IP | [center]%2[/center] |\n"
+                          "BBRAS | [center]%3[/center] |\n"
+                          "[/table]\n").arg(ISP).arg(IP).arg(BBRAS));
+    emit newHtmlCode(trUtf8("            <tr><td>ISP</td><td><div align=\"center\">%1</div></td></tr>\n"
+                            "            <tr><td>Internet IP</td><td><div align=\"center\">%2</div></td></tr>\n"
+                            "            <tr><td>BBRAS</td><td><div align=\"center\">%3</div></td></tr>\n"
+                            "        </table>\n").arg(ISP).arg(IP).arg(BBRAS));
 }
 
 
 void QSpeedTest::startBenchmark()
 {
     int parallelThreads = mainWindow.parallelThreads();
-    bool speedTestFlag = mainWindow.speedTestEnabled();
+    bool pingTestEnabled = mainWindow.pingTestEnabled();
+    bool downloadTestEnabled = mainWindow.downloadTestEnabled();
+    QString testMode;
     QString name;
     int nameSize;
     QString hr;
@@ -370,24 +374,17 @@ void QSpeedTest::startBenchmark()
     double rttTestSum = 0.0;
     int testTargetsAlive = 0;
     double speedInKbps = 0.0;
+    double speedInMBps = 0.0;
 
-    time.start();
+    timer.start();
     emit logMessage(trUtf8("Test started"));
-
-    for(int i = 0; i < targetList.numberOfGroups; i++)
-    {
-        for(int j = 0; j < targetList.groups.at(i).size; j++)
-        {
-            targetList.groups[i].targets[j].reset();
-        }
-    }
-
     QThreadPool::globalInstance()->setMaxThreadCount(parallelThreads - 1);
     STOPBENCHMARK = false;
     printHostAndProgramInfo();
     printLineInfo();
+    emit newVbCode((pingTestEnabled)? ("[spoiler]\n") : NULL);
 
-    for(int i = 0; i < targetList.numberOfGroups; i++)
+    for(int i = 0; i < targetList.numberOfGroups && pingTestEnabled; i++)
     {
         if(STOPBENCHMARK)
         {
@@ -396,7 +393,7 @@ void QSpeedTest::startBenchmark()
         }
 
         name = targetList.groups.at(i).name;
-        emit message(name.leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
+        emit newTestResult(name.leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
         nameSize = name.size();
         hr.clear();
 
@@ -405,15 +402,15 @@ void QSpeedTest::startBenchmark()
             hr += "-";
         }
 
-        emit message(hr);
-        vBulletinCode += trUtf8("[b]%1[/b]\n"
-                                "[spoiler]\n"
-                                "[table=head][center]Target[/center] | [center]Average ping time[/center] | Packet loss | Jitter | Rank\n").arg(name);
-        HTML += trUtf8("        <br/>\n");
-        HTML += trUtf8("        <b>%1</b>\n").arg(name);
-        HTML += trUtf8("        <br/>\n");
-        HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
-        HTML += trUtf8("            <tr><td>Target</td><td>Average ping time</td><td>Packet loss</td><td><div align=\"center\">Jitter</div></td><td>Rank</td></tr>\n");
+        emit newTestResult(hr);
+        emit newVbCode(trUtf8("[b]%1[/b]\n"
+                              "[spoiler]\n"
+                              "[table=head][center]Target[/center] | [center]Average ping time[/center] | Packet loss | Jitter | Rank\n").arg(name));
+        emit newHtmlCode(trUtf8("        <br/>\n"
+                                "        <b>%1</b>\n"
+                                "        <br/>\n"
+                                "        <table border=\"1\" cellpadding=\"4\">\n").arg(name));
+        emit newHtmlCode(trUtf8("            <tr><td>Target</td><td>Average ping time</td><td>Packet loss</td><td><div align=\"center\">Jitter</div></td><td>Rank</td></tr>\n"));
 
         if(mainWindow.parallelThreads() > 1)
         {
@@ -457,138 +454,123 @@ void QSpeedTest::startBenchmark()
 
         if(!STOPBENCHMARK)
         {
-            emit message(trUtf8("Group sum: %1\nGroup average: %2\n").arg(rttGroupSum).arg(rttGroupAvg));
-            vBulletinCode += trUtf8("[b]Group sum[/b] | [right][b]%1[/b][/right] |\n"
-                                    "[b]Group average[/b] | [right][b]%2[/b][/right] | [right][b]%3[/b][/right] | | [center][b]%4[/b][/center]\n"
-                                    "[/table]\n"
-                                    "[/spoiler]\n").arg(rttGroupSum).arg(rttGroupAvg).arg(packetLossGroupAvg).arg(rankGroupAvg);
-            HTML += trUtf8("            <tr><td><b>Group sum</b></td><td><div align=\"right\"><b>%1</b></div></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n").arg(rttGroupSum);
-            HTML += trUtf8("            <tr><td><b>Group average</b></td><td><div align=\"right\"><b>%1</b></div></td><td><div align=\"right\"><b>%2</b></div></td><td>&nbsp;</td><td><div align=\"center\"><b>%3</b></div></td></tr>\n").arg(rttGroupAvg).arg(packetLossGroupAvg).arg(rankGroupAvg);
-            HTML += trUtf8("        </table>\n");
-            HTML += trUtf8("        <br/>\n");
+            emit newTestResult(trUtf8("Group sum: %1\nGroup average: %2\n").arg(rttGroupSum).arg(rttGroupAvg));
+            emit newVbCode(trUtf8("[b]Group sum[/b] | [right][b]%1[/b][/right] |\n"
+                                  "[b]Group average[/b] | [right][b]%2[/b][/right] | [right][b]%3[/b][/right] | | [center][b]%4[/b][/center]\n"
+                                  "[/table]\n"
+                                  "[/spoiler]\n").arg(rttGroupSum).arg(rttGroupAvg).arg(packetLossGroupAvg).arg(rankGroupAvg));
+            emit newHtmlCode(trUtf8("            <tr><td><b>Group sum</b></td><td><div align=\"right\"><b>%1</b></div></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n"
+                                    "            <tr><td><b>Group average</b></td><td><div align=\"right\"><b>%2</b></div></td><td><div align=\"right\"><b>%3</b></div></td><td>&nbsp;</td><td><div align=\"center\"><b>%4</b></div></td></tr>\n"
+                                    "        </table>\n"
+                                    "        <br/>\n").arg(rttGroupSum).arg(rttGroupAvg).arg(packetLossGroupAvg).arg(rankGroupAvg));
         }
     }
 
     if(!STOPBENCHMARK)
     {
-        if(speedTestFlag)
+        if(downloadTestEnabled)
         {
             mainWindow.pushButtonStopEnable(false);
-            emit message(trUtf8("Downloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
+            emit newTestResult(trUtf8("Downloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
             QThreadPool::globalInstance()->setMaxThreadCount(targetList.fileHosts.size());
             BYTESDOWNLOADED = 0;
             QtConcurrent::blockingMap(targetList.fileHosts, &FileHost::downloadTest);
             processEvents();
             speedInKbps = (BYTESDOWNLOADED * 8) / (DOWNLOADTESTSECS * 1024 * 1.0);
-            emit message(trUtf8("Total data downloaded in %1 secs: %2 bytes\nAverage speed: %3 MB/sec\n").arg(DOWNLOADTESTSECS).arg(BYTESDOWNLOADED).arg(speedInKbps / (8 * 1024)));
-        }
+            speedInMBps = speedInKbps / (8 * 1024);
 
-        secondsElapsed = (time.elapsed() * 1.0) / 1000;
-
-        if(testTargetsAlive)
-        {
-            emit message(trUtf8("Pings per target: %1\n"
-                                "Threads used: %2\n"
-                                "Test completed in: %3 sec\n"
-                                "Targets unreachable: %4 / %5\n"
-                                "Test total ping time: %6 msec\n"
-                                "Average ping time per target: %7 msec").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
-            vBulletinCode += trUtf8("[/spoiler]\n"
-                                    "[table=head][center]Test metric[/center] | Value\n"
-                                    "[b]Pings per target[/b] | [center]%1[/center] |\n"
-                                    "[b]Threads used[/b] | [center]%2[/center] |\n"
-                                    "[b]Test completed in[/b] | [center]%3 sec[/center] |\n"
-                                    "[b]Targets unreachable[/b] | [center]%4 / %5[/center] |\n"
-                                    "[b]Test total ping time[/b] | [center]%6 msec[/center] |\n"
-                                    "[b]Average ping time per target[/b] | [center]%7 msec[/center] |\n"
-                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive);
-            HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
-            HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
-            HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
-            HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads);
-            HTML += trUtf8("            <tr><td><b>Test completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
-            HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %2</div></td></tr>\n").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets);
-            HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum);
-            HTML += trUtf8("            <tr><td><b>Average ping time per target</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum / testTargetsAlive);
+            if(pingTestEnabled)
+            {
+                testMode = trUtf8("Ping and download");
+            }
+            else
+            {
+                testMode = trUtf8("Download only");
+            }
         }
         else
         {
-            emit message(trUtf8("Pings per target: %1\n"
-                                "Threads used: %2\n"
-                                "Test completed in: %3 sec\n"
-                                "Targets unreachable: %4 / %4\n"
-                                "Test total ping time: N/A\n"
-                                "Average ping time per target: N/A").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets));
-            vBulletinCode += trUtf8("[/spoiler]\n"
-                                    "[table=head][center]Test metric[/center] | Value\n"
-                                    "[b]Pings per target[/b] | [center]%1[/center] |\n"
-                                    "[b]Threads used[/b] | [center]%2[/center] |\n"
-                                    "[b]Test completed in[/b] | [center]%3 sec[/center] |\n"
-                                    "[b]Targets unreachable[/b] | [center]%4 / %4[/center] |\n"
-                                    "[b]Test total ping time[/b] | [center]N/A[/center] |\n"
-                                    "[b]Average ping time per target[/b] | [center]N/A[/center] |\n"
-                                    "\n").arg(PINGSPERTARGET).arg(parallelThreads).arg(secondsElapsed).arg(targetList.numberOfTargets);
-            HTML += trUtf8("        <table border=\"1\" cellpadding=\"4\">\n");
-            HTML += trUtf8("            <tr><td><div align=\"center\">Test metric</div></td><td><div align=\"center\">Value</div></td></tr>\n");
-            HTML += trUtf8("            <tr><td><b>Pings per target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET);
-            HTML += trUtf8("            <tr><td><b>Threads used</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads);
-            HTML += trUtf8("            <tr><td><b>Test completed in</b></td><td><div align=\"center\">%1 sec</div></td></tr>\n").arg(secondsElapsed);
-            HTML += trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %1</div></td></tr>\n").arg(targetList.numberOfTargets);
-            HTML += trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
-            HTML += trUtf8("            <tr><td><b>Average ping time per target</b></td><td><div align=\"center\">N/A</div></td></tr>\n");
+            testMode = trUtf8("Ping only");
         }
 
-        if(speedTestFlag)
+        secondsElapsed = (timer.elapsed() * 1.0) / 1000;
+        emit newTestResult(trUtf8("\nTest completed in: %1 sec").arg(secondsElapsed));
+        emit newVbCode((pingTestEnabled)? "[/spoiler]\n" : NULL);
+        emit newVbCode(trUtf8("[table=head][center]Variable[/center] | Value\n"
+                              "[b]Test mode[/b] | [center]%1[/center] |\n"
+                              "[b]Test completed in[/b] | [center]%2 sec[/center] |\n").arg(testMode).arg(secondsElapsed));
+        emit newHtmlCode(trUtf8("        <table border=\"1\" cellpadding=\"4\">\n"
+                                "            <tr><td><div align=\"center\">Variable</div></td><td><div align=\"center\">Value</div></td></tr>\n"
+                                "            <tr><td><b>Test mode</b></td><td><div align=\"center\">%1</div></td></tr>\n"
+                                "            <tr><td><b>Test completed in</b></td><td><div align=\"center\">%2 sec</div></td></tr>\n").arg(testMode).arg(secondsElapsed));
+
+        if(pingTestEnabled)
         {
-            emit message(trUtf8("Speed test result: %1 Kbps").arg(speedInKbps));
-            vBulletinCode += trUtf8("[b]Speed test result[/b] | [center]%1 Kbps[/center] |\n").arg(speedInKbps);
-            HTML += trUtf8("            <tr><td><b>Speed test result</b></td><td><div align=\"center\">%1 Kbps</div></td></tr>\n").arg(speedInKbps);
+            emit newTestResult(trUtf8("Pings/target: %1\nParallel ping threads: %2").arg(PINGSPERTARGET).arg(parallelThreads));
+            emit newVbCode(trUtf8("[b]Pings/target[/b] | [center]%1[/center] |\n"
+                                  "[b]Parallel ping threads[/b] | [center]%2[/center] |\n").arg(PINGSPERTARGET).arg(parallelThreads));
+            emit newHtmlCode(trUtf8("            <tr><td><b>Pings/target</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(PINGSPERTARGET));
+            emit newHtmlCode(trUtf8("            <tr><td><b>Parallel ping threads</b></td><td><div align=\"center\">%1</div></td></tr>\n").arg(parallelThreads));
+
+            if(testTargetsAlive)
+            {
+                emit newTestResult(trUtf8("Targets unreachable: %1 / %2\n"
+                                    "Test total ping time: %3 msec\n"
+                                    "Average ping time/target: %4 msec").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
+                emit newVbCode(trUtf8("[b]Targets unreachable[/b] | [center]%1 / %2[/center] |\n"
+                                      "[b]Test total ping time[/b] | [center]%3 msec[/center] |\n"
+                                      "[b]Average ping time/target[/b] | [center]%4 msec[/center] |\n").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets).arg(rttTestSum).arg(rttTestSum / testTargetsAlive));
+                emit newHtmlCode(trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %2</div></td></tr>\n").arg(targetList.numberOfTargets - testTargetsAlive).arg(targetList.numberOfTargets));
+                emit newHtmlCode(trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum));
+                emit newHtmlCode(trUtf8("            <tr><td><b>Average ping time/target</b></td><td><div align=\"center\">%1 msec</div></td></tr>\n").arg(rttTestSum / testTargetsAlive));
+            }
+            else
+            {
+                emit newTestResult(trUtf8("Targets unreachable: %1 / %1\n"
+                                    "Test total ping time: N/A\n"
+                                    "Average ping time/target: N/A").arg(targetList.numberOfTargets));
+                emit newVbCode(trUtf8("[b]Targets unreachable[/b] | [center]%1 / %1[/center] |\n"
+                                      "[b]Test total ping time[/b] | [center]N/A[/center] |\n"
+                                      "[b]Average ping time/target[/b] | [center]N/A[/center] |\n").arg(targetList.numberOfTargets));
+                emit newHtmlCode(trUtf8("            <tr><td><b>Targets unreachable</b></td><td><div align=\"center\">%1 / %1</div></td></tr>\n").arg(targetList.numberOfTargets));
+                emit newHtmlCode(trUtf8("            <tr><td><b>Test total ping time</b></td><td><div align=\"center\">N/A</div></td></tr>\n"
+                                        "            <tr><td><b>Average ping time/target</b></td><td><div align=\"center\">N/A</div></td></tr>\n"));
+            }
         }
 
-        vBulletinCode += trUtf8("[/table]\n");
-        HTML += trUtf8("        </table>\n");
-        HTML += trUtf8("        <br/>\n");
-        HTML += trUtf8("        <p>\n");
-        HTML += trUtf8("            <a href=\"http://validator.w3.org\">\n");
-        HTML += trUtf8("                <img src=\"http://www.w3.org/Icons/valid-xhtml10\" alt=\"Valid XHTML 1.0 Transitional\" height=\"31\" width=\"88\" />\n");
-        HTML += trUtf8("            </a>\n");
-        HTML += trUtf8("        </p>\n");
-        HTML += trUtf8("    </body>\n");
-        HTML += trUtf8("</html>\n");
-        HTML.replace('&', "&amp;");
-        HTML.replace("&amp;nbsp", "&nbsp");
+        if(downloadTestEnabled)
+        {
+            emit newTestResult(trUtf8("Download speed (Kbps): %1 Kbps\n"
+                                "Download speed (MBps): %2 MB/sec").arg(speedInKbps).arg(speedInMBps));
+            emit newVbCode(trUtf8("[b]Download speed (Kbps)[/b] | [center]%1 Kbps[/center] |\n"
+                                  "[b]Download speed (MBps)[/b] | [center]%2 MB/sec[/center] |\n").arg(speedInKbps).arg(speedInMBps));
+            emit newHtmlCode(trUtf8("            <tr><td><b>Download speed (Kbps)</b></td><td><div align=\"center\">%1 Kbps</div></td></tr>\n"
+                                    "            <tr><td><b>Download speed (MBps)</b></td><td><div align=\"center\">%2 MB/sec</div></td></tr>\n").arg(speedInKbps).arg(speedInMBps));
+        }
+
+        emit newVbCode("[/table]\n\n");
+        emit newHtmlCode("        </table>\n"
+                         "        <br/>\n"
+                         "        <p>\n"
+                         "            <a href=\"http://validator.w3.org\">\n"
+                         "                <img src=\"http://www.w3.org/Icons/valid-xhtml10\" alt=\"Valid XHTML 1.0 Transitional\" height=\"31\" width=\"88\" />\n"
+                         "            </a>\n"
+                         "        </p>\n"
+                         "    </body>\n"
+                         "</html>\n");
         emit logMessage(trUtf8("Test complete"));
     }
 
+    if(pingTestEnabled)
+    {
+        for(int i = 0; i < targetList.numberOfGroups; i++)
+        {
+            for(int j = 0; j < targetList.groups.at(i).size; j++)
+            {
+                targetList.groups[i].targets[j].reset();
+            }
+        }
+    }
+
     emit benchmarkFinished(STOPBENCHMARK);
-}
-
-
-void QSpeedTest::updatevBulletinCode(QString code)
-{
-    vBulletinCode += code;
-}
-
-
-void QSpeedTest::updateHTML(QString code)
-{
-    HTML += code;
-}
-
-
-void QSpeedTest::copyvBulletinCode()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-
-    clipboard->setText(vBulletinCode);
-    QMessageBox::information(NULL, trUtf8("Copied to clipboard"), trUtf8("<center>A report with the test results was succesfully copied to the system clipboard in vBulletin code format.<center>"));
-}
-
-
-void QSpeedTest::copyHTML()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-
-    clipboard->setText(HTML);
-    QMessageBox::information(NULL, trUtf8("Copied to clipboard"), trUtf8("<center>A report with the test results was succesfully copied to the system clipboard in HTML code format.</center>"));
 }

@@ -59,9 +59,9 @@ class Target : public QObject
         QString rank;
 
     signals:
-        void message(QString);
-        void changevBulletinCode(QString);
-        void changeHTML(QString);
+        void newTestResult(QString);
+        void newVbCode(QString);
+        void newHtmlCode(QString);
 };
 
 

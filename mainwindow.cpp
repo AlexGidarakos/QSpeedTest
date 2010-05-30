@@ -24,6 +24,8 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 #include <QDesktopWidget>
 #include <QDateTime>
+#include <QClipboard>
+#include <QTimer>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -51,9 +53,15 @@ int MainWindow::parallelThreads()
 }
 
 
-bool MainWindow::speedTestEnabled()
+bool MainWindow::pingTestEnabled()
 {
-    return ui->checkBoxSpeedTest->isChecked();
+    return (ui->comboBoxTestMode->currentIndex() != 2);
+}
+
+
+bool MainWindow::downloadTestEnabled()
+{
+    return (ui->comboBoxTestMode->currentIndex() != 1);
 }
 
 
@@ -65,12 +73,11 @@ void MainWindow::pushButtonStopEnable(bool value)
 
 void MainWindow::centerOnDesktop()
 {
-    QDesktopWidget *desktop = QApplication::desktop();
     int screenWidth, width, screenHeight, height, x, y;
     QSize windowSize;
 
-    screenWidth = desktop->width();
-    screenHeight = desktop->height();
+    screenWidth = QApplication::desktop()->width();
+    screenHeight = QApplication::desktop()->height();
     windowSize = size();
     width = windowSize.width();
     height = windowSize.height();
@@ -121,6 +128,18 @@ void MainWindow::updateTestResults(QString message)
 }
 
 
+void MainWindow::updateVbCode(QString code)
+{
+    vbCode += code;
+}
+
+
+void MainWindow::updateHtmlCode(QString code)
+{
+    htmlCode += code;
+}
+
+
 void MainWindow::on_pushButtonExit_clicked()
 {
     close();
@@ -138,12 +157,14 @@ void MainWindow::on_pushButtonAbout_clicked()
 
 void MainWindow::on_pushButtonStart_clicked()
 {
+    vbCode.clear();
+    htmlCode.clear();
     ui->pushButtonStart->setEnabled(false);
     ui->pushButtonStop->setEnabled(true);
     ui->pushButtonExit->setEnabled(false);
-    ui->pushButtonCopyvBulletinCode->setEnabled(false);
-    ui->pushButtonCopyHTML->setEnabled(false);
-    ui->checkBoxSpeedTest->setEnabled(false);
+    ui->pushButtonCopyVbCode->setEnabled(false);
+    ui->pushButtonCopyHtmlCode->setEnabled(false);
+    ui->comboBoxTestMode->setEnabled(false);
     ui->spinBoxParallelThreads->setEnabled(false);
     ui->spinBoxPingsPerTarget->setEnabled(false);
     ui->plainTextEditTestResults->clear();
@@ -156,7 +177,7 @@ void MainWindow::updateButtons(bool testAborted)
     ui->pushButtonStart->setEnabled(true);
     ui->pushButtonStop->setEnabled(false);
     ui->pushButtonExit->setEnabled(true);
-    ui->checkBoxSpeedTest->setEnabled(true);
+    ui->comboBoxTestMode->setEnabled(true);
     ui->spinBoxParallelThreads->setEnabled(true);
     ui->spinBoxPingsPerTarget->setEnabled(true);
 
@@ -167,27 +188,50 @@ void MainWindow::updateButtons(bool testAborted)
     }
     else
     {
-        ui->pushButtonCopyvBulletinCode->setEnabled(true);
-        ui->pushButtonCopyHTML->setEnabled(true);
+        htmlCode.replace('&', "&amp;");
+        htmlCode.replace("&amp;nbsp", "&nbsp");
+        ui->pushButtonCopyVbCode->setEnabled(true);
+        ui->pushButtonCopyHtmlCode->setEnabled(true);
     }
 }
 
 
-void MainWindow::on_pushButtonCopyvBulletinCode_clicked()
+void MainWindow::on_pushButtonCopyVbCode_clicked()
 {
-    emit pushButtonCopyvBulletinCodeClicked();
+    QApplication::clipboard()->setText(vbCode);
+    ui->labelCopyToClipboard->setText(trUtf8("<p style=\"align: center; color: green;\">vBulletin code copied to clipboard!</p>"));
+    QTimer::singleShot(4 * 1000, ui->labelCopyToClipboard, SLOT(clear()));
 }
 
 
-void MainWindow::on_pushButtonCopyHTML_clicked()
+void MainWindow::on_pushButtonCopyHtmlCode_clicked()
 {
-    emit pushButtonCopyHTMLClicked();
+    QApplication::clipboard()->setText(htmlCode);
+    ui->labelCopyToClipboard->setText(trUtf8("<p style=\"align: center; color: green;\">HTML code copied to clipboard!</p>"));
+    QTimer::singleShot(4 * 1000, ui->labelCopyToClipboard, SLOT(clear()));
 }
 
 
 void MainWindow::on_pushButtonStop_clicked()
 {
+    MUTEX.lock();
     STOPBENCHMARK = true;
+    MUTEX.unlock();
+}
+
+
+void MainWindow::on_comboBoxTestMode_currentIndexChanged(int index)
+{
+    if(index == 2)
+    {
+        ui->spinBoxPingsPerTarget->setEnabled(false);
+        ui->spinBoxParallelThreads->setEnabled(false);
+    }
+    else
+    {
+        ui->spinBoxPingsPerTarget->setEnabled(true);
+        ui->spinBoxParallelThreads->setEnabled(true);
+    }
 }
 
 

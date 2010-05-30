@@ -54,7 +54,7 @@ class TargetList : public QObject
         QSettings *settings;
 
     signals:
-        void message(QString);
+        void logMessage(QString);
 
     public slots:
 

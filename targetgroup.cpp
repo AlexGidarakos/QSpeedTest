@@ -191,7 +191,7 @@ void Target::ping()
     skipLines = 3;
 #else
     skipLines = 6;
-#ifdef Q_WS_MAC
+#ifdef Q_OS_UNIX
     pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
 #else
     pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT).arg(address);
@@ -252,9 +252,9 @@ void Target::ping()
         jitterString = ((jitterDouble >= 0.00)? "+" : "") + QString::number(getJitter(), 'f', 2) + " msec";
     }
 
-    emit message(name.leftJustified(27, ' ', true) + "    " + rttString.rightJustified(11, ' ', true) + "    " + packetLossString.rightJustified(9, ' ', true) + "    " + jitterString.rightJustified(12, ' ', true) + "    " + getRank().rightJustified(3, ' ', true));
-    changevBulletinCode(QString("%1 | [right]%2[/right] | [right]%3[/right] | [right]%4[/right] | [center]%5[/center] |\n").arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
-    changeHTML(QString("            <tr><td><a href=\"%1\">%2</a></td><td><div align=\"right\">%3</div></td><td><div align=\"right\">%4</div></td><td><div align=\"right\">%5</div></td><td><div align=\"center\">%6</div></td></tr>\n").arg(address).arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
+    emit newTestResult(name.leftJustified(27, ' ', true) + "    " + rttString.rightJustified(11, ' ', true) + "    " + packetLossString.rightJustified(9, ' ', true) + "    " + jitterString.rightJustified(12, ' ', true) + "    " + getRank().rightJustified(3, ' ', true));
+    emit newVbCode(QString("%1 | [right]%2[/right] | [right]%3[/right] | [right]%4[/right] | [center]%5[/center] |\n").arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
+    emit newHtmlCode(QString("            <tr><td><a href=\"%1\">%2</a></td><td><div align=\"right\">%3</div></td><td><div align=\"right\">%4</div></td><td><div align=\"right\">%5</div></td><td><div align=\"center\">%6</div></td></tr>\n").arg(address).arg(name).arg(rttString).arg(packetLossString).arg(jitterString).arg(getRank()));
 }
 
 

@@ -32,8 +32,9 @@ HEADERS += mainwindow.h \
     filehost.h
 FORMS += mainwindow.ui \
     dialogabout.ui
-OTHER_FILES += README \
-    CHANGELOG \
-    resources/qspeedtest.ini \
-    TODO
+OTHER_FILES += resources/qspeedtest.ini \
+    CHANGELOG.txt \
+    COPYING.txt \
+    README.txt \
+    TODO.txt
 RESOURCES += resources/resources.qrc
