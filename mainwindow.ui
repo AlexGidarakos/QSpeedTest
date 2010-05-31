@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
+    <width>902</width>
     <height>450</height>
    </rect>
   </property>
@@ -33,11 +33,8 @@
       <item>
        <widget class="QLabel" name="labelTestMode">
         <property name="toolTip">
-         <string>If enabled, when the ping test completes, an additional test
-will start that downloads multiple files in parallel in order
-to measure the download speed of your Internet access.
-
-Speed is measured in Kbps (Kilobits per second).</string>
+         <string>Select the desired combination of tests
+that QSpeedTest will run.</string>
         </property>
         <property name="text">
          <string>Test mode</string>
@@ -49,6 +46,10 @@ Speed is measured in Kbps (Kilobits per second).</string>
       </item>
       <item>
        <widget class="QComboBox" name="comboBoxTestMode">
+        <property name="toolTip">
+         <string>Select the desired combination of tests
+that QSpeedTest will run.</string>
+        </property>
         <item>
          <property name="text">
           <string>Ping and download</string>
@@ -363,8 +364,8 @@ however and wherever you see fit.</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>700</width>
-     <height>21</height>
+     <width>902</width>
+     <height>23</height>
     </rect>
    </property>
   </widget>

@@ -191,10 +191,10 @@ void Target::ping()
     skipLines = 3;
 #else
     skipLines = 6;
-#ifdef Q_OS_UNIX
-    pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
-#else
+#ifdef Q_OS_LINUX
     pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT).arg(address);
+#else
+    pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
 #endif
 #endif
 

@@ -1,3 +1,8 @@
+revision 16 - 20100531:                                             |
+    * Fixed bug introduced by FreeBSD patch, causing extremely long |
+      ping timeouts under Linux                                     |
+
+
 revision 15 - 20100530:                                             |
     * Now correctly working under FreeBSD. Special thanks to        |
       Thuglife from adslgr.com for the relevant patch               |
