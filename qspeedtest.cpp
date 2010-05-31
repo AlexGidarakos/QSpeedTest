@@ -196,26 +196,23 @@ void QSpeedTest::printHostAndProgramInfo()
             hostOS = "Windows";
     }
 #else
-#ifdef Q_OS_UNIX
 #ifdef Q_WS_MAC
     proc.start("sw_vers -productVersion", QIODevice::ReadOnly);
     loop.exec();
     hostOS = "Mac OS X " + proc.readLine().trimmed();
     proc.start("uname -m", QIODevice::ReadOnly);
 #else
-    proc.start("uname -s", QIODevice::ReadOnly);
-    loop.exec();
-    hostOS = proc.readLine().trimmed();
-    proc.start("uname -rm", QIODevice::ReadOnly);
-#endif
-#else
+#ifdef Q_OS_LINUX
     proc.start("uname -o", QIODevice::ReadOnly);
+#else
+    proc.start("uname -s", QIODevice::ReadOnly);
+#endif
     loop.exec();
     hostOS = proc.readLine().trimmed();
     proc.start("uname -rm", QIODevice::ReadOnly);
-#endif
     loop.exec();
     hostOS += " " + proc.readLine().trimmed();
+#endif
 #endif
 
     emit newTestResult(trUtf8("Host OS: %1\n"
