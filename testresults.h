@@ -19,44 +19,41 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef TARGETGROUP_H
-#define TARGETGROUP_H
+#ifndef TESTRESULTS_H
+#define TESTRESULTS_H
 
 #include <QString>
-#include <QList>
-#include "target.h"
 
 
-class TargetGroup
+class TestResults
 {
     public:
-        TargetGroup();
+        TestResults();
         void reset();
-        void addTarget(const Target&);
-        double getRttSum();
         QString getRttSumAsString();
-        double getRttAvg();
         QString getRttAvgAsString();
-        double getPacketLossAvg();
-        QString getPacketLossAvgAsString();
-        QString getRank();
-        int getTargetsAlive();
-        QString getName();
-        void setName(QString);
-        int getSize();
-        void setSize(int);
-        QList<Target> targets;
-
-    private:
+        QString programName;
+        QString programVersion;
+        QString programUrl;
+        QString programDiscussUrl;
+        QString targetListVersion;
+        QString targetListComment;
+        QString targetListContactUrl;
+        QString testDate;
+        QString testTime;
+        QString hostOS;
+        QString isp;
+        QString ip;
+        QString bbras;
         double rttSum;
-        QString rttSumAsString;
-        QString rttAvgAsString;
-        double packetLossAvg;
-        QString packetLossAvgAsString;
-        QString rank;
+        int targetsTotal;
         int targetsAlive;
-        QString name;
-        int size;
+        double speedInKbps;
+        double speedInMBps;
+        QString testMode;
+        double testDuration;
+        int pingsPerTarget;
+        int parallelPingThreads;
 };
 
-#endif // TARGETGROUP_H
+#endif // TESTRESULTS_H

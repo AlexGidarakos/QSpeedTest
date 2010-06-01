@@ -32,11 +32,11 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 TargetList::TargetList(QObject *parent) : QObject(parent)
 {
-    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, PROGRAMCOMPANY, PROGRAMNAME.toLower());
-    version = QString(NULL);
+    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, PROGRAMNAME, PROGRAMNAME.toLower());
+    version.clear();
     numberOfGroups = 0;
-    comment = QString(NULL);
-    contactURL = QString(NULL);
+    comment.clear();
+    contactUrl.clear();
     numberOfTargets = 0;
 }
 
@@ -49,10 +49,10 @@ TargetList::~TargetList()
 
 void TargetList::purge()
 {
-    version = QString(NULL);
+    version.clear();
     numberOfGroups = 0;
-    comment = QString(NULL);
-    contactURL = QString(NULL);
+    comment.clear();
+    contactUrl.clear();
     numberOfTargets = 0;
     groups.clear();
 }
@@ -167,17 +167,17 @@ bool TargetList::load()
         return false;
     }
 
-    version = settings->value("TargetListInfo/Version", QString(NULL)).toString();
+    version = settings->value("TargetListInfo/Version", QString("")).toString();
 
-    if(version == QString(NULL))
+    if(version.isEmpty())
     {
         emit logMessage(trUtf8("Error: Key \"Version\" missing from section [TargetListInfo]"));
         return false;
     }
 
-    comment = settings->value("TargetListInfo/Comment", QString(NULL)).toString();
-    contactURL = settings->value("TargetListInfo/ContactURL", QString(NULL)).toString();
-    tempNumberOfGroups = settings->value("TargetListInfo/NumberOfGroups", QString(NULL)).toInt();
+    comment = settings->value("TargetListInfo/Comment", QString("")).toString();
+    contactUrl = settings->value("TargetListInfo/ContactURL", QString("")).toString();
+    tempNumberOfGroups = settings->value("TargetListInfo/NumberOfGroups", QString("")).toInt();
 
     if(tempNumberOfGroups < 1)
     {
@@ -187,7 +187,7 @@ bool TargetList::load()
 
     for(int i = 1; i <= tempNumberOfGroups; i++)
     {
-        newGroup.size = 0;
+        newGroup.setSize(0);
         newGroup.targets.clear();
 
         if(!settings->childGroups().contains(QString("Group%1").arg(i)))
@@ -196,15 +196,15 @@ bool TargetList::load()
             return false;
         }
 
-        newGroup.name = settings->value(QString("Group%1/Name").arg(i), QString(NULL)).toString();
+        newGroup.setName(settings->value(QString("Group%1/Name").arg(i), QString("")).toString());
 
-        if(newGroup.name == QString(NULL))
+        if(newGroup.getName().isEmpty())
         {
             emit logMessage(trUtf8("Error: Key \"Name\" missing from section [Group%1] or has incompatible value").arg(i));
             return false;
         }
 
-        tempGroupSize = settings->value(QString("Group%1/NumberOfTargets").arg(i), QString(NULL)).toInt();
+        tempGroupSize = settings->value(QString("Group%1/NumberOfTargets").arg(i), QString("")).toInt();
 
         if(tempGroupSize < 1)
         {
@@ -214,17 +214,17 @@ bool TargetList::load()
 
         for(int j = 1; j <= tempGroupSize; j++)
         {
-            newTarget.setName(settings->value(QString("Group%1/%2/Name").arg(i).arg(j), QString(NULL)).toString());
+            newTarget.setName(settings->value(QString("Group%1/%2/Name").arg(i).arg(j), QString("")).toString());
 
-            if(newTarget.getName() == QString(NULL))
+            if(newTarget.getName().isEmpty())
             {
                 emit logMessage(trUtf8("Error: Key \"%2\\Name\" missing from section [Group%1] or has incompatible value").arg(i).arg(j));
                 return false;
             }
 
-            newTarget.setAddress(settings->value(QString("Group%1/%2/Address").arg(i).arg(j), QString(NULL)).toString());
+            newTarget.setAddress(settings->value(QString("Group%1/%2/Address").arg(i).arg(j), QString("")).toString());
 
-            if(newTarget.getAddress() == QString(NULL))
+            if(newTarget.getAddress().isEmpty())
             {
                 emit logMessage(trUtf8("Error: Key \"%2\\Address\" missing from section [Group%1] or is not a proper IP address or URL").arg(i).arg(j));
                 return false;
@@ -236,13 +236,12 @@ bool TargetList::load()
                 return false;
             }
 
-            newGroup.targets.append(newTarget);
-            newGroup.size++;
+            newGroup.addTarget(newTarget);
         }
 
         groups.append(newGroup);
         numberOfGroups++;
-        numberOfTargets += newGroup.size;
+        numberOfTargets += newGroup.getSize();
     }
 
     if(!settings->childGroups().contains("DownloadTest"))
@@ -251,7 +250,7 @@ bool TargetList::load()
         return false;
     }
 
-    tempGroupSize = settings->value(QString("DownloadTest/NumberOfTargets"), QString(NULL)).toInt();
+    tempGroupSize = settings->value(QString("DownloadTest/NumberOfTargets"), QString("")).toInt();
 
     if(tempGroupSize < 1)
     {
@@ -261,23 +260,23 @@ bool TargetList::load()
 
     for(int i = 1; i <= tempGroupSize; i++)
     {
-        newFileHost.name = settings->value(QString("DownloadTest/%1/Name").arg(i), QString(NULL)).toString();
+        newFileHost.setName(settings->value(QString("DownloadTest/%1/Name").arg(i), QString("")).toString());
 
-        if(newFileHost.name == QString(NULL))
+        if(newFileHost.getName().isEmpty())
         {
             emit logMessage(trUtf8("Error: Key \"%1\\Name\" missing from section [DownloadTest] or has incompatible value").arg(i));
             return false;
         }
 
-        newFileHost.url = QUrl(settings->value(QString("DownloadTest/%1/URL").arg(i), QString(NULL)).toString());
+        newFileHost.setUrl(QUrl(settings->value(QString("DownloadTest/%1/URL").arg(i), QString("")).toString()));
 
-        if(newFileHost.url == QUrl(NULL))
+        if(newFileHost.getUrl().isEmpty())
         {
             emit logMessage(trUtf8("Error: Key \"%1\\URL\" missing from section [DownloadTest] or is not a proper file URL").arg(i));
             return false;
         }
 
-        if(!newFileHost.url.isValid())
+        if(!newFileHost.getUrl().isValid())
         {
             emit logMessage(trUtf8("Error: Key \"%1\\URL\" in section [DownloadTest] is not a proper file URL").arg(i));
             return false;
@@ -288,7 +287,7 @@ bool TargetList::load()
 
     emit logMessage(trUtf8("Target list version: %1").arg(version));
     emit logMessage(trUtf8("Target list comment: %1").arg(comment));
-    emit logMessage(trUtf8("Target list contact URL: %1").arg(contactURL));
+    emit logMessage(trUtf8("Target list contact URL: %1").arg(contactUrl));
     emit logMessage(trUtf8("%1 ping targets in %2 groups were successfully loaded").arg(numberOfTargets).arg(numberOfGroups));
     emit logMessage(trUtf8("%1 download test targets were successfully loaded").arg(fileHosts.size()));
     return true;
