@@ -42,31 +42,29 @@ class MainWindow : public QMainWindow
         int parallelThreads();
         bool pingTestEnabled();
         bool downloadTestEnabled();
-        void pushButtonStopEnable(bool);
+        void showClipboardConfirmation(QString);
 
     protected:
         void changeEvent(QEvent *e);
 
     private:
         Ui::MainWindow *ui;
-        QString vbCode;
-        QString htmlCode;
         void centerOnDesktop();
 
     signals:
         void pushButtonStartClicked();
+        void pushButtonStopClicked();
+        void pushButtonCopyVbCodeClicked();
+        void pushButtonCopyHtmlCodeClicked();
 
     private slots:
         void on_comboBoxTestMode_currentIndexChanged(int index);
         void on_spinBoxPingsPerTarget_valueChanged(int);
-        void on_pushButtonStop_clicked();
-        void enablePushButtonStart();
+        void enablePushButtonStartStop();
         void updateLogMessages(QString);
         void updateTestResults(QString);
-        void updateVbCode(QString);
-        void updateHtmlCode(QString);
         void updateButtons(bool benchmarkCompleted);
-        void on_pushButtonStart_clicked();
+        void on_pushButtonStartStop_clicked();
         void on_pushButtonAbout_clicked();
         void on_pushButtonExit_clicked();
         void on_pushButtonCopyVbCode_clicked();

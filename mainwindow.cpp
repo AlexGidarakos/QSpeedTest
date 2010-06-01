@@ -24,7 +24,6 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 #include <QDesktopWidget>
 #include <QDateTime>
-#include <QClipboard>
 #include <QTimer>
 
 
@@ -42,8 +41,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 #else
     ui->plainTextEditLogMessages->setFont(QFont("Courier New", 9));
     ui->plainTextEditTestResults->setFont(QFont("Courier New", 9));
-#endif
-#endif
+#endif // Q_WS_MAC
+#endif // Q_WS_WIN
 }
 
 
@@ -65,9 +64,10 @@ bool MainWindow::downloadTestEnabled()
 }
 
 
-void MainWindow::pushButtonStopEnable(bool value)
+void MainWindow::showClipboardConfirmation(QString value)
 {
-    ui->pushButtonStop->setEnabled(value);
+    ui->labelCopyToClipboard->setText(value);
+    QTimer::singleShot(4 * 1000, ui->labelCopyToClipboard, SLOT(clear()));
 }
 
 
@@ -110,9 +110,9 @@ void MainWindow::changeEvent(QEvent *e)
 }
 
 
-void MainWindow::enablePushButtonStart()
+void MainWindow::enablePushButtonStartStop()
 {
-    ui->pushButtonStart->setEnabled(true);
+    ui->pushButtonStartStop->setEnabled(true);
 }
 
 
@@ -125,18 +125,6 @@ void MainWindow::updateLogMessages(QString message)
 void MainWindow::updateTestResults(QString message)
 {
     ui->plainTextEditTestResults->appendPlainText(message);
-}
-
-
-void MainWindow::updateVbCode(QString code)
-{
-    vbCode += code;
-}
-
-
-void MainWindow::updateHtmlCode(QString code)
-{
-    htmlCode += code;
 }
 
 
@@ -155,27 +143,35 @@ void MainWindow::on_pushButtonAbout_clicked()
 }
 
 
-void MainWindow::on_pushButtonStart_clicked()
+void MainWindow::on_pushButtonStartStop_clicked()
 {
-    vbCode.clear();
-    htmlCode.clear();
-    ui->pushButtonStart->setEnabled(false);
-    ui->pushButtonStop->setEnabled(true);
-    ui->pushButtonExit->setEnabled(false);
-    ui->pushButtonCopyVbCode->setEnabled(false);
-    ui->pushButtonCopyHtmlCode->setEnabled(false);
-    ui->comboBoxTestMode->setEnabled(false);
-    ui->spinBoxParallelThreads->setEnabled(false);
-    ui->spinBoxPingsPerTarget->setEnabled(false);
-    ui->plainTextEditTestResults->clear();
-    emit pushButtonStartClicked();
+    if(!ui->pushButtonStartStop->text().compare(trUtf8("Start")))
+    {
+        ui->pushButtonStartStop->setText(trUtf8("Stop"));
+        ui->pushButtonExit->setEnabled(false);
+        ui->pushButtonCopyVbCode->setEnabled(false);
+        ui->pushButtonCopyHtmlCode->setEnabled(false);
+        ui->comboBoxTestMode->setEnabled(false);
+        ui->spinBoxParallelThreads->setEnabled(false);
+        ui->spinBoxPingsPerTarget->setEnabled(false);
+        ui->plainTextEditTestResults->clear();
+        STOPBENCHMARK = false;
+        emit pushButtonStartClicked();
+    }
+    else
+    {
+        MUTEX.lock();
+        STOPBENCHMARK = true;
+        MUTEX.unlock();
+        emit pushButtonStopClicked();
+    }
 }
 
 
 void MainWindow::updateButtons(bool testAborted)
 {
-    ui->pushButtonStart->setEnabled(true);
-    ui->pushButtonStop->setEnabled(false);
+    ui->pushButtonStartStop->setText(trUtf8("Start"));
+    ui->pushButtonStartStop->setEnabled(true);
     ui->pushButtonExit->setEnabled(true);
     ui->comboBoxTestMode->setEnabled(true);
     ui->spinBoxParallelThreads->setEnabled(true);
@@ -188,8 +184,6 @@ void MainWindow::updateButtons(bool testAborted)
     }
     else
     {
-        htmlCode.replace('&', "&amp;");
-        htmlCode.replace("&amp;nbsp", "&nbsp");
         ui->pushButtonCopyVbCode->setEnabled(true);
         ui->pushButtonCopyHtmlCode->setEnabled(true);
     }
@@ -198,25 +192,13 @@ void MainWindow::updateButtons(bool testAborted)
 
 void MainWindow::on_pushButtonCopyVbCode_clicked()
 {
-    QApplication::clipboard()->setText(vbCode);
-    ui->labelCopyToClipboard->setText(trUtf8("<p style=\"align: center; color: green;\">vBulletin code copied to clipboard!</p>"));
-    QTimer::singleShot(4 * 1000, ui->labelCopyToClipboard, SLOT(clear()));
+    emit pushButtonCopyVbCodeClicked();
 }
 
 
 void MainWindow::on_pushButtonCopyHtmlCode_clicked()
 {
-    QApplication::clipboard()->setText(htmlCode);
-    ui->labelCopyToClipboard->setText(trUtf8("<p style=\"align: center; color: green;\">HTML code copied to clipboard!</p>"));
-    QTimer::singleShot(4 * 1000, ui->labelCopyToClipboard, SLOT(clear()));
-}
-
-
-void MainWindow::on_pushButtonStop_clicked()
-{
-    MUTEX.lock();
-    STOPBENCHMARK = true;
-    MUTEX.unlock();
+    emit pushButtonCopyHtmlCodeClicked();
 }
 
 

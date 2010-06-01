@@ -19,44 +19,53 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef TARGETGROUP_H
-#define TARGETGROUP_H
+#ifndef TARGET_H
+#define TARGET_H
 
+#include <QObject>
 #include <QString>
 #include <QList>
-#include "target.h"
 
 
-class TargetGroup
+class Target : public QObject
 {
+    Q_OBJECT
+
     public:
-        TargetGroup();
+        Target();
+        Target(const Target&);
+        Target& operator=(const Target&);
         void reset();
-        void addTarget(const Target&);
-        double getRttSum();
-        QString getRttSumAsString();
-        double getRttAvg();
-        QString getRttAvgAsString();
-        double getPacketLossAvg();
-        QString getPacketLossAvgAsString();
-        QString getRank();
-        int getTargetsAlive();
         QString getName();
         void setName(QString);
-        int getSize();
-        void setSize(int);
-        QList<Target> targets;
+        QString getAddress();
+        void setAddress(QString);
+        void addRtt(double);
+        double getRttAvg();
+        QString getRttAvgAsString();
+        double getPacketLoss();
+        QString getPacketLossAsString();
+        double getJitter();
+        QString getJitterAsString();
+        QString getRank();
+        bool isAlive();
+        void ping();
 
     private:
-        double rttSum;
-        QString rttSumAsString;
-        QString rttAvgAsString;
-        double packetLossAvg;
-        QString packetLossAvgAsString;
-        QString rank;
-        int targetsAlive;
         QString name;
-        int size;
+        QString address;
+        QList<double> rtt;
+        double rttSum;
+        QString rttAvgAsString;
+        int replies;
+        double packetLoss;
+        QString packetLossAsString;
+        double jitterSum;
+        QString jitterAsString;
+        QString rank;
+
+    signals:
+        void newTestResult(QString);
 };
 
-#endif // TARGETGROUP_H
+#endif // TARGET_H

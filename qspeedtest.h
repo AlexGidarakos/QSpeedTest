@@ -25,9 +25,11 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QApplication>
 #include <QTime>
 #include <QProcess>
+#include <QNetworkAccessManager>
 #include "externs.h"
 #include "mainwindow.h"
 #include "targetlist.h"
+#include "testresults.h"
 
 
 class QSpeedTest : public QApplication
@@ -38,15 +40,27 @@ class QSpeedTest : public QApplication
         QSpeedTest(int, char**);
 
     private:
+        QProcess winSystemInfo;
         MainWindow mainWindow;
         TargetList targetList;
         QString testDateTime;
-        QProcess winSystemInfo;
-        QString ISP;
-        QString IP;
-        QString BBRAS;
+        QProcess proc;
+        QEventLoop loop1, loop2;
+        QString winArch;
+        bool foundFlag;
+        QString tracerouteCommand;
+        QString bbrasLine;
+        QProcess traceroute;
+        QNetworkReply *download;
+        QNetworkAccessManager manager;
+        QByteArray contents;
+        QStringList list;
         QTime timer;
-        double secondsElapsed;
+        bool pingTestEnabledFlag;
+        bool downloadTestEnabledFlag;
+        TestResults results;
+        QString vbCode;
+        QString htmlCode;
         void checkForProgramUpdates();
         void printHostAndProgramInfo();
         void printLineInfo();
@@ -55,12 +69,12 @@ class QSpeedTest : public QApplication
         void initOK();
         void logMessage(QString);
         void newTestResult(QString);
-        void newVbCode(QString);
-        void newHtmlCode(QString);
         void benchmarkFinished(bool completed);
 
     private slots:
         void startBenchmark();
+        void copyVbCode();
+        void copyHtmlCode();
 };
 
 #endif // QSPEEDTEST_H

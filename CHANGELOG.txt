@@ -1,3 +1,15 @@
+revision 18 - 20100601:                                             |
+    * Combined Start/Stop functionality in a single button          |
+    * Reduced default window dimensions                             |
+    * Stop button can now abort a download speed test               |
+    * Extensive code reorganization + introduced a new class for    |
+      dedicated storage of the test results                         |
+
+
+revision 17 - 20100531:                                             |
+    * Removed COPYING (duplicate of COPYING.txt)                    |
+
+
 revision 16 - 20100531:                                             |
     * Fixed bug introduced by FreeBSD patch, causing extremely long |
       ping timeouts under Linux                                     |

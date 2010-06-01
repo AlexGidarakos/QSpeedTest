@@ -44,7 +44,7 @@ class TargetList : public QObject
         bool init();
         QString version;
         QString comment;
-        QString contactURL;
+        QString contactUrl;
         int numberOfGroups;
         int numberOfTargets;
         QList<TargetGroup> groups;

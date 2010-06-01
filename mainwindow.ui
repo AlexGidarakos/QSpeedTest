@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>902</width>
-    <height>450</height>
+    <width>675</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
     <item row="0" column="2">
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="leftMargin">
-       <number>20</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QLabel" name="labelTestMode">
@@ -72,7 +72,7 @@ that QSpeedTest will run.</string>
     <item row="0" column="3">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="leftMargin">
-       <number>20</number>
+       <number>15</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
@@ -143,7 +143,7 @@ completion.</string>
        <number>6</number>
       </property>
       <property name="leftMargin">
-       <number>20</number>
+       <number>15</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
@@ -305,10 +305,19 @@ however and wherever you see fit.</string>
     </item>
     <item row="3" column="3" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
-       <widget class="QPushButton" name="pushButtonStart">
+       <widget class="QPushButton" name="pushButtonStartStop">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>80</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="text">
          <string>Start</string>
@@ -316,19 +325,15 @@ however and wherever you see fit.</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonStop">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="pushButtonAbout">
         <property name="enabled">
          <bool>true</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>80</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="text">
          <string>About</string>
@@ -339,6 +344,12 @@ however and wherever you see fit.</string>
        <widget class="QPushButton" name="pushButtonExit">
         <property name="enabled">
          <bool>true</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>80</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="text">
          <string>Exit</string>
@@ -364,8 +375,8 @@ however and wherever you see fit.</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>902</width>
-     <height>23</height>
+     <width>675</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

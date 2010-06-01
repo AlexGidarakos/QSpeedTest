@@ -1,6 +1,3 @@
-100. Again attempt to combine Start and Stop into one button
-200. Make Stop button usable during download speed test
-300. Implement menu system, with options saved inside qspeedtest.ini
-400. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
-500. Make download speed test's duration selectable
-600. Thread safe Singleton pattern for the global variables?
+100. Implement menu system, with options saved inside qspeedtest.ini
+200. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
+300. Thread safe Singleton pattern for the global variables?
