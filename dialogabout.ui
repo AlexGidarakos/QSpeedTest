@@ -29,7 +29,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="labelDescription">
      <property name="text">
-      <string>A Qt4 GUI tool that measures RTT times and packet loss for various targets</string>
+      <string>A Qt4/C++ GUI tool for testing the latency and speed of a broadband Internet connection.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

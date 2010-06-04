@@ -18,18 +18,13 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "filehost.h"
 #include "externs.h"
 #include <QNetworkAccessManager>
 #include <QEventLoop>
 #include <QNetworkReply>
 #include <QTimer>
-
-
-FileHost::FileHost()
-{
-}
+#include <QApplication>
 
 
 FileHost::FileHost(QString name, QUrl url)
@@ -39,7 +34,7 @@ FileHost::FileHost(QString name, QUrl url)
 }
 
 
-FileHost::FileHost(const FileHost &fileHost)
+FileHost::FileHost(const FileHost &fileHost, QObject *parent) : QObject(parent)
 {
     name = fileHost.name;
     url = fileHost.url;
@@ -71,47 +66,13 @@ void FileHost::downloadTest()
     file = manager.get(QNetworkRequest(url));
     connect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     loop->exec();
+    file->abort();
+    qApp->processEvents();
     MUTEX.lock();
     BYTESDOWNLOADED += bytesDownloaded;
     MUTEX.unlock();
+
     emit newTestResult(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
-    file->abort();
     delete file;
     delete loop;
-}
-
-
-QString FileHost::getName()
-{
-    return name;
-}
-
-
-void FileHost::setName(QString value)
-{
-    name = value;
-}
-
-
-QUrl FileHost::getUrl()
-{
-    return url;
-}
-
-
-void FileHost::setUrl(QUrl value)
-{
-    url = value;
-}
-
-
-void FileHost::updateBytes(qint64 bytes)
-{
-    bytesDownloaded = bytes;
-}
-
-
-void FileHost::abortDownload()
-{
-    loop->quit();
 }

@@ -25,7 +25,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
+    <item row="0" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="leftMargin">
        <number>0</number>
@@ -69,7 +69,7 @@ that QSpeedTest will run.</string>
       </item>
      </layout>
     </item>
-    <item row="0" column="3">
+    <item row="0" column="2">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="leftMargin">
        <number>15</number>
@@ -137,7 +137,7 @@ completion.</string>
       </item>
      </layout>
     </item>
-    <item row="0" column="4">
+    <item row="0" column="3">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="spacing">
        <number>6</number>
@@ -187,7 +187,7 @@ target list.</string>
       </item>
      </layout>
     </item>
-    <item row="1" column="0" colspan="5">
+    <item row="1" column="0" colspan="4">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -265,14 +265,28 @@ target list.</string>
     <item row="2" column="0">
      <widget class="QLabel" name="labelCopyFormat">
       <property name="text">
-       <string>Copy report to clipboard as:</string>
+       <string>View report as:</string>
       </property>
      </widget>
     </item>
     <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QPushButton" name="pushButtonCopyVbCode">
+       <widget class="QPushButton" name="pushButtonHtmlCode">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Copies to the system clipboard a report with the test results in
+HTML format. Passes W3C Markup Validator as XHTML transitional 1.0.</string>
+        </property>
+        <property name="text">
+         <string>HTML</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonVbCode">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -282,28 +296,13 @@ in vBulletin code format, ready to be posted on any vBulletin-
 based forum.</string>
         </property>
         <property name="text">
-         <string>vBulletin code</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonCopyHtmlCode">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Copies to the system clipboard a report with the test results
-in HTML format, which you can save as an .html file and use
-however and wherever you see fit.</string>
-        </property>
-        <property name="text">
-         <string>HTML</string>
+         <string>vBulletin</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="3" column="3" colspan="2">
+    <item row="3" column="2" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
        <number>0</number>
@@ -357,16 +356,6 @@ however and wherever you see fit.</string>
        </widget>
       </item>
      </layout>
-    </item>
-    <item row="3" column="1" colspan="2">
-     <widget class="QLabel" name="labelCopyToClipboard">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>

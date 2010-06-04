@@ -18,28 +18,19 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef EXTERNS_H
-#define EXTERNS_H
-#include <QString>
-#include <QMutex>
+#include "plaintarget.h"
 
 
-extern const QString PROGRAMCOMPANY;
-extern const QString PROGRAMAUTHOR;
-extern const QString PROGRAMNAME;
-extern const QString PROGRAMVERSION;
-extern const QString PROGRAMURL;
-extern const QString PROGRAMDISCUSSURL;
-extern const QString PROGRAMUPDATECHECKURL;
-extern const QString TARGETLISTURL;
-extern const QString TARGETLISTUPDATECHECKURL;
-extern const int UPDATECHECKTIMEOUT;
-extern const int PINGTIMEOUT;
-extern const int DOWNLOADTESTSECS;
-extern int PINGSPERTARGET;
-extern QMutex MUTEX;
-extern qint64 BYTESDOWNLOADED;
-extern bool STOPBENCHMARK;
-
-
-#endif // EXTERNS_H
+PlainTarget::PlainTarget(const Target &target)
+{
+    name = target.getName();
+    address = target.getAddress();
+    rtt = target.getRttAvg();
+    rttAsString = target.getRttAvgAsString();
+    aliveFlag = target.isAlive();
+    packetLoss = target.getPacketLoss();
+    packetLossAsString = target.getPacketLossAsString();
+    jitter = target.getJitter();
+    jitterAsString = target.getJitterAsString();
+    rank = target.getRank();
+}

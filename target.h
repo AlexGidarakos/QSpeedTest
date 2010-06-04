@@ -18,10 +18,8 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef TARGET_H
 #define TARGET_H
-
 #include <QObject>
 #include <QString>
 #include <QList>
@@ -33,22 +31,22 @@ class Target : public QObject
 
     public:
         Target();
-        Target(const Target&);
+        Target(const Target&, QObject *parent = 0);
         Target& operator=(const Target&);
         void reset();
-        QString getName();
-        void setName(QString);
-        QString getAddress();
-        void setAddress(QString);
+        QString getName() const { return name; }
+        void setName(QString value) { name = value; }
+        QString getAddress() const { return address; }
+        void setAddress(QString value) { address = value; }
         void addRtt(double);
-        double getRttAvg();
-        QString getRttAvgAsString();
-        double getPacketLoss();
-        QString getPacketLossAsString();
-        double getJitter();
-        QString getJitterAsString();
-        QString getRank();
-        bool isAlive();
+        double getRttAvg() const;
+        QString getRttAvgAsString() const;
+        double getPacketLoss() const { return packetLoss; }
+        QString getPacketLossAsString() const;
+        double getJitter() const;
+        QString getJitterAsString() const;
+        QString getRank() const;
+        bool isAlive() const { return replies; }
         void ping();
 
     private:
@@ -56,16 +54,14 @@ class Target : public QObject
         QString address;
         QList<double> rtt;
         double rttSum;
-        QString rttAvgAsString;
         int replies;
         double packetLoss;
-        QString packetLossAsString;
         double jitterSum;
-        QString jitterAsString;
         QString rank;
 
     signals:
         void newTestResult(QString);
 };
+
 
 #endif // TARGET_H

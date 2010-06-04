@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "targetlist.h"
 #include "externs.h"
 #include <QMessageBox>
@@ -28,7 +27,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QNetworkReply>
 #include <QEventLoop>
 #include <QTextStream>
-
+#include <QTimer>
 
 TargetList::TargetList(QObject *parent) : QObject(parent)
 {
@@ -41,12 +40,6 @@ TargetList::TargetList(QObject *parent) : QObject(parent)
 }
 
 
-TargetList::~TargetList()
-{
-    delete settings;
-}
-
-
 void TargetList::purge()
 {
     version.clear();
@@ -55,6 +48,7 @@ void TargetList::purge()
     contactUrl.clear();
     numberOfTargets = 0;
     groups.clear();
+    fileHosts.clear();
 }
 
 
@@ -66,12 +60,14 @@ bool TargetList::isUpdateAvailable()
     QString remoteVersion;
 
     emit logMessage(trUtf8("Checking online for an updated version of the target list"));
+    QTimer::singleShot(UPDATECHECKTIMEOUT *1000, &loop, SLOT(quit()));
     download = manager.get(QNetworkRequest(QUrl(TARGETLISTUPDATECHECKURL)));
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
-    if(download->error())
+    if(download->isRunning() || download->error())
     {
+        download->abort();
         emit logMessage(trUtf8("Update site unreachable"));
         delete download;
         return false;

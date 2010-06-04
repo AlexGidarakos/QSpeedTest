@@ -18,13 +18,11 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "externs.h"
 #include <QDesktopWidget>
 #include <QDateTime>
-#include <QTimer>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -46,6 +44,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+
 int MainWindow::parallelThreads()
 {
     return ui->spinBoxParallelThreads->value();
@@ -64,10 +68,9 @@ bool MainWindow::downloadTestEnabled()
 }
 
 
-void MainWindow::showClipboardConfirmation(QString value)
+void MainWindow::showStatusBarMessage(QString value)
 {
-    ui->labelCopyToClipboard->setText(value);
-    QTimer::singleShot(4 * 1000, ui->labelCopyToClipboard, SLOT(clear()));
+    ui->statusBar->showMessage(value, 5 * 1000);
 }
 
 
@@ -88,12 +91,6 @@ void MainWindow::centerOnDesktop()
 }
 
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
-
 void MainWindow::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
@@ -107,30 +104,6 @@ void MainWindow::changeEvent(QEvent *e)
         default:
             break;
     }
-}
-
-
-void MainWindow::enablePushButtonStartStop()
-{
-    ui->pushButtonStartStop->setEnabled(true);
-}
-
-
-void MainWindow::updateLogMessages(QString message)
-{
-    ui->plainTextEditLogMessages->appendPlainText(QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + message);
-}
-
-
-void MainWindow::updateTestResults(QString message)
-{
-    ui->plainTextEditTestResults->appendPlainText(message);
-}
-
-
-void MainWindow::on_pushButtonExit_clicked()
-{
-    close();
 }
 
 
@@ -149,8 +122,8 @@ void MainWindow::on_pushButtonStartStop_clicked()
     {
         ui->pushButtonStartStop->setText(trUtf8("Stop"));
         ui->pushButtonExit->setEnabled(false);
-        ui->pushButtonCopyVbCode->setEnabled(false);
-        ui->pushButtonCopyHtmlCode->setEnabled(false);
+        ui->pushButtonVbCode->setEnabled(false);
+        ui->pushButtonHtmlCode->setEnabled(false);
         ui->comboBoxTestMode->setEnabled(false);
         ui->spinBoxParallelThreads->setEnabled(false);
         ui->spinBoxPingsPerTarget->setEnabled(false);
@@ -168,7 +141,25 @@ void MainWindow::on_pushButtonStartStop_clicked()
 }
 
 
-void MainWindow::updateButtons(bool testAborted)
+void MainWindow::enablePushButtonStartStop()
+{
+    ui->pushButtonStartStop->setEnabled(true);
+}
+
+
+void MainWindow::updateLogMessages(QString value)
+{
+    ui->plainTextEditLogMessages->appendPlainText(QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + value);
+}
+
+
+void MainWindow::updateTestResults(QString value)
+{
+    ui->plainTextEditTestResults->appendPlainText(value);
+}
+
+
+void MainWindow::benchmarkFinished(bool testAborted)
 {
     ui->pushButtonStartStop->setText(trUtf8("Start"));
     ui->pushButtonStartStop->setEnabled(true);
@@ -184,21 +175,9 @@ void MainWindow::updateButtons(bool testAborted)
     }
     else
     {
-        ui->pushButtonCopyVbCode->setEnabled(true);
-        ui->pushButtonCopyHtmlCode->setEnabled(true);
+        ui->pushButtonVbCode->setEnabled(true);
+        ui->pushButtonHtmlCode->setEnabled(true);
     }
-}
-
-
-void MainWindow::on_pushButtonCopyVbCode_clicked()
-{
-    emit pushButtonCopyVbCodeClicked();
-}
-
-
-void MainWindow::on_pushButtonCopyHtmlCode_clicked()
-{
-    emit pushButtonCopyHtmlCodeClicked();
 }
 
 
@@ -214,10 +193,4 @@ void MainWindow::on_comboBoxTestMode_currentIndexChanged(int index)
         ui->spinBoxPingsPerTarget->setEnabled(true);
         ui->spinBoxParallelThreads->setEnabled(true);
     }
-}
-
-
-void MainWindow::on_spinBoxPingsPerTarget_valueChanged(int value)
-{
-    PINGSPERTARGET = value;
 }

@@ -18,14 +18,7 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "targetgroup.h"
-
-
-TargetGroup::TargetGroup()
-{
-    size = 0;
-}
 
 
 void TargetGroup::reset()
@@ -37,13 +30,7 @@ void TargetGroup::reset()
     packetLossAvgAsString.clear();
     rank.clear();
     targetsAlive = 0;
-}
-
-
-void TargetGroup::addTarget(const Target& target)
-{
-    targets.append(target);
-    size++;
+    plainTargets.clear();
 }
 
 
@@ -185,28 +172,4 @@ int TargetGroup::getTargetsAlive()
     }
 
     return targetsAlive;
-}
-
-
-QString TargetGroup::getName()
-{
-    return name;
-}
-
-
-void TargetGroup::setName(QString value)
-{
-    name = value;
-}
-
-
-int TargetGroup::getSize()
-{
-    return size;
-}
-
-
-void TargetGroup::setSize(int value)
-{
-    size = value;
 }
