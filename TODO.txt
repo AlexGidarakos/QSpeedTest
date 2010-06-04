@@ -1,3 +1,4 @@
-100. Implement menu system, with options saved inside qspeedtest.ini
-200. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
-300. Thread safe Singleton pattern for the global variables?
+100. Program icons and logo
+200. Implement menu system, with options saved inside qspeedtest.ini
+300. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
+400. Thread safe Singleton pattern for the global variables?

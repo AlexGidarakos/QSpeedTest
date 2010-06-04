@@ -18,12 +18,9 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "dialogabout.h"
 #include "ui_dialogabout.h"
 #include "externs.h"
-#include <QUrl>
-#include <QDesktopServices>
 
 
 DialogAbout::DialogAbout(QWidget *parent) : QDialog(parent), ui(new Ui::DialogAbout)
@@ -56,32 +53,4 @@ void DialogAbout::changeEvent(QEvent *e)
         default:
             break;
     }
-}
-
-
-void DialogAbout::on_pushButtonOK_clicked()
-{
-    close();
-}
-
-
-void DialogAbout::on_labelHomepage_linkActivated(QString link)
-{
-    QUrl url(link);
-
-    QDesktopServices::openUrl(url);
-}
-
-
-void DialogAbout::on_labelForum_linkActivated(QString link)
-{
-    QUrl url(link);
-
-    QDesktopServices::openUrl(url);
-}
-
-
-void DialogAbout::on_pushButtonAboutQt_clicked()
-{
-    qApp->aboutQt();
 }

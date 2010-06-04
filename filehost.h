@@ -18,10 +18,8 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef FILEHOST_H
 #define FILEHOST_H
-
 #include <QUrl>
 #include <QEventLoop>
 
@@ -31,15 +29,15 @@ class FileHost : public QObject
     Q_OBJECT
 
     public:
-        FileHost();
+        FileHost() {}
         FileHost(QString, QUrl);
-        FileHost(const FileHost&);
+        FileHost(const FileHost&, QObject *parent = 0);
         FileHost& operator=(const FileHost&);
         void downloadTest();
-        QString getName();
-        void setName(QString);
-        QUrl getUrl();
-        void setUrl(QUrl);
+        QString getName() { return name; }
+        void setName(QString value) { name = value; }
+        QUrl getUrl() { return url; }
+        void setUrl(QUrl value) { url = value; }
         qint64 bytesDownloaded;
 
     private:
@@ -48,13 +46,14 @@ class FileHost : public QObject
         QEventLoop *loop;
 
     private slots:
-        void updateBytes(qint64);
+        void updateBytes(qint64 value) { bytesDownloaded = value; }
 
     public slots:
-        void abortDownload();
+        void abortDownload() { loop->quit(); }
 
     signals:
         void newTestResult(QString);
 };
+
 
 #endif // FILEHOST_H

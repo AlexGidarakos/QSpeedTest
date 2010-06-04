@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <QProcess>
 #include <QEventLoop>
 #include <QApplication>
@@ -35,7 +34,7 @@ Target::Target()
 }
 
 
-Target::Target(const Target &target)
+Target::Target(const Target &target, QObject *parent) : QObject(parent)
 {
     name = target.name;
     address = target.address;
@@ -48,8 +47,8 @@ Target::Target(const Target &target)
 }
 
 
-Target& Target::operator=(const Target &target) {
-
+Target& Target::operator=(const Target &target)
+{
     if(this == &target)
         return *this;
 
@@ -70,37 +69,10 @@ void Target::reset()
 {
     rtt.clear();
     rttSum = 0.0;
-    rttAvgAsString.clear();
     jitterSum = 0.0;
-    jitterAsString.clear();
     packetLoss = 100.0;
-    packetLossAsString.clear();
     rank.clear();
     replies = 0;
-}
-
-
-QString Target::getName()
-{
-    return name;
-}
-
-
-void Target::setName(QString value)
-{
-    name = value;
-}
-
-
-QString Target::getAddress()
-{
-    return address;
-}
-
-
-void Target::setAddress(QString value)
-{
-    address = value;
 }
 
 
@@ -118,7 +90,7 @@ void Target::addRtt(double value)
 }
 
 
-double Target::getRttAvg()
+double Target::getRttAvg() const
 {
     if(replies)
     {
@@ -129,46 +101,29 @@ double Target::getRttAvg()
 }
 
 
-QString Target::getRttAvgAsString()
+QString Target::getRttAvgAsString() const
 {
-    if(rttAvgAsString.isEmpty())
+    if(replies)
     {
-        if(replies)
-        {
-            return (rttAvgAsString = QString::number(getRttAvg(), 'f', 2) + " msec");
-        }
-
-        return (rttAvgAsString = "N/A");
+        return QString::number(getRttAvg(), 'f', 2) + " msec";
     }
 
-    return rttAvgAsString;
+    return "N/A";
 }
 
 
-
-double Target::getPacketLoss()
+QString Target::getPacketLossAsString() const
 {
-        return packetLoss;
-}
-
-
-QString Target::getPacketLossAsString()
-{
-    if(packetLossAsString.isEmpty())
+    if(replies)
     {
-        if(replies)
-        {
-            return (packetLossAsString = QString::number(packetLoss, 'f', 2) + "%");
-        }
-
-        return (packetLossAsString = "100.00%");
+        return QString::number(packetLoss, 'f', 2) + "%";
     }
 
-    return packetLossAsString;
+    return "100.00%";
 }
 
 
-double Target::getJitter()
+double Target::getJitter() const
 {
     if(replies < 2)
     {
@@ -179,49 +134,37 @@ double Target::getJitter()
 }
 
 
-QString Target::getJitterAsString()
+QString Target::getJitterAsString() const
 {
-    if(jitterAsString.isEmpty())
+    double jitter;
+
+    if(!replies)
     {
-        if(!replies)
-        {
-            return (jitterAsString = "N/A");
-        }
-
-        double jitter = getJitter();
-
-        return (jitterAsString = ((jitter >= 0.00)? "+" : NULL) + QString::number(jitter, 'f', 2) + " msec");
+        return "N/A";
     }
 
-    return jitterAsString;
+    jitter = getJitter();
+
+    return ((jitter >= 0.00)? "+" : NULL) + QString::number(jitter, 'f', 2) + " msec";
 }
 
 
-QString Target::getRank()
+QString Target::getRank() const
 {
-    if(rank.isEmpty())
-    {
-        if(!replies)
-        {
-            return (rank = "N/A");
-        }
+    double rttAvg;
 
-        double rttAvg = rttSum / replies;
-        if(rttAvg < 30.0) return (rank = "A");
-        else if(rttAvg < 75.0) return (rank = "B");
-        else if(rttAvg < 125.0) return (rank = "C");
-        else if(rttAvg < 200.0) return (rank = "D");
-        else if(rttAvg < 250.0) return (rank = "E");
-        else return (rank = "F");
+    if(!replies)
+    {
+        return "N/A";
     }
 
-    return rank;
-}
-
-
-bool Target::isAlive()
-{
-    return replies;
+    rttAvg = rttSum / replies;
+    if(rttAvg < 30.0) return "A";
+    else if(rttAvg < 75.0) return "B";
+    else if(rttAvg < 125.0) return "C";
+    else if(rttAvg < 200.0) return "D";
+    else if(rttAvg < 250.0) return "E";
+    else return "F";
 }
 
 

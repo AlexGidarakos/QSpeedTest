@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     targetgroup.cpp \
     filehost.cpp \
     testresults.cpp \
-    target.cpp
+    target.cpp \
+    plaintarget.cpp
 HEADERS += mainwindow.h \
     dialogabout.h \
     qspeedtest.h \
@@ -33,7 +34,8 @@ HEADERS += mainwindow.h \
     targetgroup.h \
     filehost.h \
     testresults.h \
-    target.h
+    target.h \
+    plaintarget.h
 FORMS += mainwindow.ui \
     dialogabout.ui
 OTHER_FILES += resources/qspeedtest.ini \

@@ -18,21 +18,20 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef TARGETGROUP_H
 #define TARGETGROUP_H
-
 #include <QString>
 #include <QList>
 #include "target.h"
+#include "plaintarget.h"
 
 
 class TargetGroup
 {
     public:
-        TargetGroup();
+        TargetGroup() { size = 0; }
         void reset();
-        void addTarget(const Target&);
+        void addTarget(const Target &target) { targets.append(target); size++; }
         double getRttSum();
         QString getRttSumAsString();
         double getRttAvg();
@@ -41,11 +40,12 @@ class TargetGroup
         QString getPacketLossAvgAsString();
         QString getRank();
         int getTargetsAlive();
-        QString getName();
-        void setName(QString);
-        int getSize();
-        void setSize(int);
+        QString getName() { return name; }
+        void setName(QString value) { name = value; }
+        int getSize() { return size; }
+        void setSize(int value) { size = value; }
         QList<Target> targets;
+        QList<PlainTarget> plainTargets;
 
     private:
         double rttSum;
@@ -58,5 +58,6 @@ class TargetGroup
         QString name;
         int size;
 };
+
 
 #endif // TARGETGROUP_H

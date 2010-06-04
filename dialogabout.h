@@ -18,11 +18,12 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef DIALOGABOUT_H
 #define DIALOGABOUT_H
-
 #include <QDialog>
+#include <QUrl>
+#include <QDesktopServices>
+#include <QApplication>
 
 
 namespace Ui
@@ -46,10 +47,11 @@ class DialogAbout : public QDialog
         Ui::DialogAbout *ui;
 
     private slots:
-        void on_pushButtonAboutQt_clicked();
-        void on_labelHomepage_linkActivated(QString link);
-        void on_labelForum_linkActivated(QString link);
-        void on_pushButtonOK_clicked();
+        void on_labelHomepage_linkActivated(QString link) { QDesktopServices::openUrl(QUrl(link)); }
+        void on_labelForum_linkActivated(QString link) { QDesktopServices::openUrl(QUrl(link)); }
+        void on_pushButtonOK_clicked() { close(); }
+        void on_pushButtonAboutQt_clicked() { qApp->aboutQt(); }
 };
+
 
 #endif // DIALOGABOUT_H

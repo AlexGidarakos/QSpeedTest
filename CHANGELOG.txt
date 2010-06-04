@@ -1,3 +1,24 @@
+revision 19 - 20100604:                                             |
+    * Bug fix: Loading of a newly downloaded target list led to     |
+      duplicate download target entries                             |
+    * Bug fix: In HTML output, targets' URLs were missing the       |
+      http:// prefix                                                |
+    * Bug fix (possible): Limit the decimal precision in QString    |
+      conversion of download speed results (no decimal digits for   |
+      Kbps, three decimal digits for MB/sec)                        |
+    * In addition to clipboard copying, the code output buttons now |
+      also launch the appropriate application to view the output    |
+    * In HTML and vB output, targets are sorted by RTT in ascending |
+      order                                                         |
+    * Implemented spoiler buttons in HTML output                    |
+    * HTML output is now valid XHTML 1.0 Strict/1.1                 |
+    * Implemented a 3 sec timeout when checking for updates         |
+    * Display "Copied to clipboard" confirmation in the window's    |
+      QStatusBar instead of inside a stray QLabel                   |
+    * Some other minor changes to vBulletin and HTML output format  |
+    * Updated embedded target list                                  |
+
+
 revision 18 - 20100601:                                             |
     * Combined Start/Stop functionality in a single button          |
     * Reduced default window dimensions                             |

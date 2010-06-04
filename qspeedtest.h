@@ -18,14 +18,10 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef QSPEEDTEST_H
 #define QSPEEDTEST_H
-
 #include <QApplication>
-#include <QTime>
 #include <QProcess>
-#include <QNetworkAccessManager>
 #include "externs.h"
 #include "mainwindow.h"
 #include "targetlist.h"
@@ -43,19 +39,6 @@ class QSpeedTest : public QApplication
         QProcess winSystemInfo;
         MainWindow mainWindow;
         TargetList targetList;
-        QString testDateTime;
-        QProcess proc;
-        QEventLoop loop1, loop2;
-        QString winArch;
-        bool foundFlag;
-        QString tracerouteCommand;
-        QString bbrasLine;
-        QProcess traceroute;
-        QNetworkReply *download;
-        QNetworkAccessManager manager;
-        QByteArray contents;
-        QStringList list;
-        QTime timer;
         bool pingTestEnabledFlag;
         bool downloadTestEnabledFlag;
         TestResults results;
@@ -64,6 +47,8 @@ class QSpeedTest : public QApplication
         void checkForProgramUpdates();
         void printHostAndProgramInfo();
         void printLineInfo();
+        void generateHtmlCode();
+        void generateVbCode();
 
     signals:
         void initOK();
@@ -73,8 +58,8 @@ class QSpeedTest : public QApplication
 
     private slots:
         void startBenchmark();
-        void copyVbCode();
-        void copyHtmlCode();
+        void showReport(bool);
 };
+
 
 #endif // QSPEEDTEST_H

@@ -18,10 +18,8 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef TARGETLIST_H
 #define TARGETLIST_H
-
 #include <QObject>
 #include <QSettings>
 #include <QList>
@@ -35,7 +33,7 @@ class TargetList : public QObject
 
     public:
         explicit TargetList(QObject *parent = 0);
-        ~TargetList();
+        ~TargetList() { delete settings; }
         void purge();
         bool isUpdateAvailable();
         bool downloadList();
@@ -59,5 +57,6 @@ class TargetList : public QObject
     public slots:
 
 };
+
 
 #endif // TARGETLIST_H

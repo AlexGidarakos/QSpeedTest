@@ -18,12 +18,11 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
 #include <QMainWindow>
 #include "dialogabout.h"
+#include "externs.h"
 
 
 namespace Ui
@@ -42,7 +41,7 @@ class MainWindow : public QMainWindow
         int parallelThreads();
         bool pingTestEnabled();
         bool downloadTestEnabled();
-        void showClipboardConfirmation(QString);
+        void showStatusBarMessage(QString);
 
     protected:
         void changeEvent(QEvent *e);
@@ -54,21 +53,22 @@ class MainWindow : public QMainWindow
     signals:
         void pushButtonStartClicked();
         void pushButtonStopClicked();
-        void pushButtonCopyVbCodeClicked();
-        void pushButtonCopyHtmlCodeClicked();
+        void pushButtonHtmlCodeClicked(bool);
+        void pushButtonVbCodeClicked(bool);
 
     private slots:
         void on_comboBoxTestMode_currentIndexChanged(int index);
-        void on_spinBoxPingsPerTarget_valueChanged(int);
+        void on_spinBoxPingsPerTarget_valueChanged(int value) { PINGSPERTARGET = value; }
         void enablePushButtonStartStop();
         void updateLogMessages(QString);
         void updateTestResults(QString);
-        void updateButtons(bool benchmarkCompleted);
+        void benchmarkFinished(bool benchmarkCompleted);
         void on_pushButtonStartStop_clicked();
         void on_pushButtonAbout_clicked();
-        void on_pushButtonExit_clicked();
-        void on_pushButtonCopyVbCode_clicked();
-        void on_pushButtonCopyHtmlCode_clicked();
+        void on_pushButtonExit_clicked() { close(); }
+        void on_pushButtonHtmlCode_clicked() { emit pushButtonHtmlCodeClicked(true); }
+        void on_pushButtonVbCode_clicked() { emit pushButtonVbCodeClicked(false); }
 };
+
 
 #endif // MAINWINDOW_H

@@ -18,19 +18,21 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <QString>
 #include <QMutex>
 #include "qspeedtest.h"
+
+
 const QString PROGRAMCOMPANY = "Binary Notion";
 const QString PROGRAMAUTHOR = "parsifal";
 const QString PROGRAMNAME = "QSpeedTest";
-const QString PROGRAMVERSION = "r18";
+const QString PROGRAMVERSION = "r19";
 const QString PROGRAMURL = "https://sourceforge.net/projects/qspeedtest/files/";
 const QString PROGRAMDISCUSSURL = "https://sourceforge.net/apps/phpbb/qspeedtest";
 const QString PROGRAMUPDATECHECKURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.version";
 const QString TARGETLISTURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.ini";
 const QString TARGETLISTUPDATECHECKURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.ini.version";
+const int UPDATECHECKTIMEOUT = 3;
 const int PINGTIMEOUT = 1;
 const int DOWNLOADTESTSECS = 15;
 int PINGSPERTARGET = 4;
