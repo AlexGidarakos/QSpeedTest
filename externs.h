@@ -24,9 +24,10 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QMutex>
 
 
-extern const QString PROGRAMCOMPANY;
-extern const QString PROGRAMAUTHOR;
+extern const QString PROJECTNAME;
+extern const QString PROJECTCOMPANY;
 extern const QString PROGRAMNAME;
+extern const QString PROGRAMAUTHOR;
 extern const QString PROGRAMVERSION;
 extern const QString PROGRAMURL;
 extern const QString PROGRAMDISCUSSURL;

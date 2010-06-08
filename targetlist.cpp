@@ -31,7 +31,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 TargetList::TargetList(QObject *parent) : QObject(parent)
 {
-    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, PROGRAMNAME, PROGRAMNAME.toLower());
+    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, PROJECTNAME, PROGRAMNAME.toLower());
     version.clear();
     numberOfGroups = 0;
     comment.clear();
