@@ -24,8 +24,8 @@ Should the aforementioned URLs permanently cease to work, you can contact me (se
 
 
 2. Requirements for Windows users
-In order to run, this program requires some of the Qt DLLs present in the system, either in a folder included in the PATH variable or in the same folder as the program. For your convenience, a suitable compressed archive with these DLLs is available here:
-    https://sourceforge.net/projects/qspeedtest/files/qspeedtest-win32-required-dlls
+In order to run, this program requires some of the Qt DLLs present in the system, either in the same folder as the program or in a folder included in the PATH variable. For your convenience, a suitable compressed archive with these DLLs is available in 7z and ZIP format here:
+    https://sourceforge.net/projects/qspeedtest/files/qspeedtest-win32-required-libraries
 
 
 3. Build instructions

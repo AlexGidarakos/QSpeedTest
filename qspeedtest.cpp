@@ -327,8 +327,8 @@ void QSpeedTest::startBenchmark()
     timer.start();
     emit logMessage(trUtf8("Test started"));
     results.targetsTotal = targetList.numberOfTargets;
-    results.parallelPingThreads = mainWindow.parallelThreads();
     results.pingsPerTarget = PINGSPERTARGET;
+    results.parallelPingThreads = mainWindow.parallelThreads();
     pingTestEnabledFlag = mainWindow.pingTestEnabled();
     downloadTestEnabledFlag = mainWindow.downloadTestEnabled();
     vbCode.clear();

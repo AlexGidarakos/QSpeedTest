@@ -1,3 +1,12 @@
+revision 20 - 20100608:                                             |
+    * Recompiled program and Qt DLLs reduced file sizes and removed |
+      dependency upon libgcc_s_dw2-1.dll and mingwm10.dll. These 2  |
+      files are no longer included in the new Qt DLLs' compressed   |
+      archive that the project distributes                          |
+    * Changed About box's default size from 320x240 to 400x300 for  |
+      better MacOS X font size accommodation                        |
+
+
 revision 19 - 20100604:                                             |
     * Bug fix: Loading of a newly downloaded target list led to     |
       duplicate download target entries                             |
