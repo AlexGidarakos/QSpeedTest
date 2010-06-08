@@ -1,3 +1,7 @@
+revision 21 - 20100608:                                             |
+    * Previous commit didn't correctly update the About box's file  |
+
+
 revision 20 - 20100608:                                             |
     * Recompiled program and Qt DLLs reduced file sizes and removed |
       dependency upon libgcc_s_dw2-1.dll and mingwm10.dll. These 2  |
