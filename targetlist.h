@@ -18,11 +18,14 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #ifndef TARGETLIST_H
 #define TARGETLIST_H
-#include <QObject>
-#include <QSettings>
-#include <QList>
+
+
+#include <QtCore/QObject>
+#include <QtCore/QSettings>
+#include <QtCore/QList>
 #include "targetgroup.h"
 #include "filehost.h"
 

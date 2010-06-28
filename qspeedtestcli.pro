@@ -12,12 +12,26 @@
 # along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 
-TEMPLATE = subdirs
-SUBDIRS = cli gui
-cli.file = qspeedtestcli.pro
-gui.file = qspeedtestgui.pro
-OTHER_FILES += resources/qspeedtest.ini \
-    CHANGELOG.txt \
-    COPYING.txt \
-    README.txt \
-    TODO.txt
+QT -= gui
+QT += network
+TARGET = qspeedtestcli
+TEMPLATE = app
+CONFIG += console
+CONFIG -= app_bundle
+SOURCES += main_qspeedtestcli.cpp \
+    qspeedtestcli.cpp \
+    plaintarget.cpp \
+    target.cpp \
+    targetgroup.cpp \
+    targetlist.cpp \
+    testresults.cpp \
+    filehost.cpp
+HEADERS += qspeedtestcli.h \
+    externs.h \
+    plaintarget.h \
+    target.h \
+    targetgroup.h \
+    targetlist.h \
+    testresults.h \
+    filehost.h
+RESOURCES += resources/resources.qrc

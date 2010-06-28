@@ -18,10 +18,13 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #ifndef TARGETGROUP_H
 #define TARGETGROUP_H
-#include <QString>
-#include <QList>
+
+
+#include <QtCore/QString>
+#include <QtCore/QList>
 #include "target.h"
 #include "plaintarget.h"
 

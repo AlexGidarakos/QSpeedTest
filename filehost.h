@@ -18,10 +18,13 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #ifndef FILEHOST_H
 #define FILEHOST_H
-#include <QUrl>
-#include <QEventLoop>
+
+
+#include <QtCore/QUrl>
+#include <QtCore/QEventLoop>
 
 
 class FileHost : public QObject

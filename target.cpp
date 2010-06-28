@@ -18,9 +18,10 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QProcess>
-#include <QEventLoop>
-#include <QApplication>
+
+#include <QtCore/QProcess>
+#include <QtCore/QEventLoop>
+#include <QtCore/QCoreApplication>
 #include "target.h"
 #include "externs.h"
 
@@ -232,5 +233,5 @@ void Target::ping()
     }
 
     emit newTestResult(name.leftJustified(27, ' ', true) + "    " + getRttAvgAsString().rightJustified(11, ' ', true) + "    " + getPacketLossAsString().rightJustified(9, ' ', true) + "    " + getJitterAsString().rightJustified(12, ' ', true) + "    " + getRank().rightJustified(3, ' ', true));
-    QApplication::processEvents();
+    qApp->processEvents();
 }

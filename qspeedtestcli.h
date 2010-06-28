@@ -19,50 +19,61 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef QSPEEDTEST_H
-#define QSPEEDTEST_H
+#ifndef QSPEEDTESTCLI_H
+#define QSPEEDTESTCLI_H
 
 
-#include <QtGui/QApplication>
+#include <QtCore/QCoreApplication>
 #include <QtCore/QProcess>
 #include "externs.h"
-#include "mainwindow.h"
 #include "targetlist.h"
 #include "testresults.h"
 
 
-class QSpeedTest : public QApplication
+namespace TestMode
+{
+    enum { Info = 0, Ping, Download, All };
+}
+
+
+class QSpeedTestCli : public QObject
 {
     Q_OBJECT
 
     public:
-        QSpeedTest(int, char**);
+        QSpeedTestCli();
 
     private:
         QProcess winSystemInfo;
-        MainWindow mainWindow;
         TargetList targetList;
-        bool pingTestEnabledFlag;
-        bool downloadTestEnabledFlag;
         TestResults results;
-        QString vbCode;
+        int testMode;
+        QString testModeAsString;
+        bool pingTestEnabled;
+        bool downloadTestEnabled;
+        bool htmlOutputEnabled;
+        bool vbOutputEnabled;
         QString htmlCode;
+        QString vbCode;
+
+        void parseArguments();
         void checkForProgramUpdates();
+        void startBenchmark();
+        void saveReports();
         void printHostAndProgramInfo();
         void printLineInfo();
         void generateHtmlCode();
         void generateVbCode();
 
     signals:
-        void initOK();
         void logMessage(QString);
         void newTestResult(QString);
-        void benchmarkFinished(bool completed);
 
     private slots:
-        void startBenchmark();
-        void showReport(bool);
+        void start();
+        void updateLogMessages(QString);
+        void updateTestResults(QString);
 };
 
 
-#endif // QSPEEDTEST_H
+#endif // QSPEEDTESTCLI_H

@@ -18,12 +18,15 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #ifndef DIALOGABOUT_H
 #define DIALOGABOUT_H
-#include <QDialog>
-#include <QUrl>
-#include <QDesktopServices>
-#include <QApplication>
+
+
+#include <QtGui/QDialog>
+#include <QtCore/QUrl>
+#include <QtGui/QDesktopServices>
+#include <QtGui/QApplication>
 
 
 namespace Ui
