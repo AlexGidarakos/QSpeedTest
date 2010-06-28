@@ -18,11 +18,12 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "externs.h"
-#include <QDesktopWidget>
-#include <QDateTime>
+#include <QtGui/QDesktopWidget>
+#include <QtCore/QDateTime>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)

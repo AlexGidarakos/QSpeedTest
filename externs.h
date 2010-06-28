@@ -18,14 +18,16 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #ifndef EXTERNS_H
 #define EXTERNS_H
-#include <QString>
-#include <QMutex>
+
+
+#include <QtCore/QString>
+#include <QtCore/QMutex>
 
 
 extern const QString PROJECTNAME;
-extern const QString PROJECTCOMPANY;
 extern const QString PROGRAMNAME;
 extern const QString PROGRAMAUTHOR;
 extern const QString PROGRAMVERSION;
@@ -38,6 +40,7 @@ extern const int UPDATECHECKTIMEOUT;
 extern const int PINGTIMEOUT;
 extern const int DOWNLOADTESTSECS;
 extern int PINGSPERTARGET;
+extern int PARALLELPINGS;
 extern QMutex MUTEX;
 extern qint64 BYTESDOWNLOADED;
 extern bool STOPBENCHMARK;

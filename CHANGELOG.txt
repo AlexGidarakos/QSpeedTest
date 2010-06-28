@@ -1,3 +1,8 @@
+revision 22 - 20100628:                                             |
+    * Renamed QSpeedTest's executable to QSpeedTestGUI              |
+    * Merged source tree with QSpeedTestCLI                         |
+
+
 revision 21 - 20100608:                                             |
     * Previous commit didn't correctly update the About box's file  |
 

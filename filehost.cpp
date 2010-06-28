@@ -18,13 +18,14 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include "filehost.h"
 #include "externs.h"
-#include <QNetworkAccessManager>
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QApplication>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtCore/QEventLoop>
+#include <QtNetwork/QNetworkReply>
+#include <QtCore/QTimer>
+#include <QtCore/QCoreApplication>
 
 
 FileHost::FileHost(QString name, QUrl url)

@@ -18,16 +18,18 @@ You should have received a copy of the GNU General Public License
 along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include "targetlist.h"
 #include "externs.h"
-#include <QMessageBox>
-#include <QDir>
-#include <QUrl>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QEventLoop>
-#include <QTextStream>
-#include <QTimer>
+#include <QtGui/QMessageBox>
+#include <QtCore/QDir>
+#include <QtCore/QUrl>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtCore/QEventLoop>
+#include <QtCore/QTextStream>
+#include <QtCore/QTimer>
+
 
 TargetList::TargetList(QObject *parent) : QObject(parent)
 {
@@ -328,6 +330,7 @@ bool TargetList::init()
     {
         if(isUpdateAvailable())
         {
+#ifdef QSPEEDTEST_H
             int reply = QMessageBox::question(NULL, trUtf8("Target list update available"), trUtf8("An updated version of the target list is available online.\n\nWould you like to update now?"), QMessageBox::Yes, QMessageBox::No);
 
             if(reply == QMessageBox::Yes)
@@ -351,6 +354,7 @@ bool TargetList::init()
             {
                 emit logMessage(trUtf8("Update aborted"));
             }
+#endif // QSPEEDTEST_H
         }
 
         return true;
