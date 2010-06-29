@@ -48,6 +48,7 @@ QSpeedTestCli::QSpeedTestCli()
 void QSpeedTestCli::start()
 {
     parseArguments();
+    results.cpuCores = QThread::idealThreadCount();
     winSystemInfo.setProcessChannelMode(QProcess::MergedChannels);
 
 #ifdef Q_WS_WIN
@@ -73,9 +74,14 @@ void QSpeedTestCli::start()
         }
     }
 
-    for(int i = 0; i < targetList.fileHosts.size(); i++)
+    for(int i = 0; i < targetList.fileHostsDomestic.size(); i++)
     {
-        connect(&targetList.fileHosts[i], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
+        connect(&targetList.fileHostsDomestic[i], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
+    }
+
+    for(int i = 0; i < targetList.fileHostsInternational.size(); i++)
+    {
+        connect(&targetList.fileHostsInternational[i], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
     }
 
     results.targetListVersion = targetList.version;
@@ -330,8 +336,7 @@ void QSpeedTestCli::printHostAndProgramInfo()
     results.testTime = QTime::currentTime().toString("hhmmss");
     results.testDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss");
     updateTestResults(trUtf8("Report created by:       %1 %2\n"
-                             "Target list version:     %3\n"
-                             "Target list comment:     %4\n"
+                             "Target list used:        %3 %4\n"
                              "Target list contact URL: %5").arg(results.programName).arg(results.programVersion).arg(results.targetListVersion).arg(results.targetListComment).arg(results.targetListContactUrl));
     proc.setProcessChannelMode(QProcess::MergedChannels);
     connect(&proc, SIGNAL(finished(int)), &loop, SLOT(quit()));
@@ -422,8 +427,8 @@ void QSpeedTestCli::printHostAndProgramInfo()
 #endif // Q_WS_MAC
 #endif // Q_WS_WIN
 
-    updateTestResults(trUtf8("Host OS:                 %1\n"
-                             "Test date and time:      %2").arg(results.hostOS).arg(results.testDateTime));
+    updateTestResults(trUtf8("Host OS / CPU cores:     %1 / %2\n"
+                             "Test date and time:      %3").arg(results.hostOS).arg(results.cpuCores).arg(results.testDateTime));
 }
 
 
@@ -566,43 +571,61 @@ void QSpeedTestCli::startBenchmark()
         qSort(targetList.groups[i].plainTargets);
         results.rttSum += targetList.groups[i].getRttSum();
         results.targetsAlive += targetList.groups[i].getTargetsAlive();
-        updateTestResults(trUtf8("Group sum: %1\nGroup average: %2\n").arg(targetList.groups[i].getRttSumAsString()).arg(targetList.groups[i].getRttAvgAsString()));
+        updateTestResults(trUtf8("Group sum:     %1\n"
+                                 "Group average: %2\n").arg(targetList.groups[i].getRttSumAsString()).arg(targetList.groups[i].getRttAvgAsString()));
     }
 
     if(downloadTestEnabled)
     {
-        updateTestResults(trUtf8("Downloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
-        QThreadPool::globalInstance()->setMaxThreadCount(targetList.fileHosts.size());
+        foreach(QList<FileHost>* fileHosts, QList<QList<FileHost>*>() << &targetList.fileHostsDomestic << &targetList.fileHostsInternational)
+        {
+            BYTESDOWNLOADED = 0;
+            updateTestResults(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
+            QThreadPool::globalInstance()->setMaxThreadCount(fileHosts->size());
+            QtConcurrent::blockingMap(*fileHosts, &FileHost::downloadTest);
+            qApp->processEvents();
 
-        BYTESDOWNLOADED = 0;
-        QtConcurrent::blockingMap(targetList.fileHosts, &FileHost::downloadTest);
-        qApp->processEvents();
-        results.speedInKbps = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
-        results.speedInMBps = results.speedInKbps / 8192;                        // (results.speedInKbps / 1024) / 8
-
+            if(fileHosts == &targetList.fileHostsDomestic)
+            {
+                MUTEX.lock();
+                results.speedInKbpsDomestic = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.unlock();
+                results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
+            }
+            else
+            {
+                MUTEX.lock();
+                results.speedInKbpsInternational = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.unlock();
+                results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
+            }
+        }
     }
 
     results.testDuration = (timer.elapsed() * 1.0) / 1000;
     updateTestResults(trUtf8("\n"
-                             "Test mode:             %1\n"
-                             "Test completed in:     %2 sec").arg(testModeAsString).arg(results.testDuration));
+                             "Test mode:                 %1\n"
+                             "Test completed in:         %2 sec").arg(testModeAsString).arg(results.testDuration));
 
     if(pingTestEnabled)
     {
         updateTestResults(trUtf8(""
-                             "Pings/target:          %1\n"
-                             "Parallel ping threads: %2").arg(results.pingsPerTarget).arg(results.parallelPingThreads));
+                             "Pings/target:              %1\n"
+                             "Parallel ping threads:     %2").arg(results.pingsPerTarget).arg(results.parallelPingThreads));
         updateTestResults(trUtf8(""
-                             "Targets alive:         %1 / %2\n"
-                             "Test total ping time:  %3\n"
-                             "Average ping/target:   %4").arg(results.targetsAlive).arg(results.targetsTotal).arg(results.getRttSumAsString()).arg(results.getRttAvgAsString()));
+                             "Targets alive:             %1 / %2\n"
+                             "Test total ping time:      %3\n"
+                             "Average ping/target:       %4").arg(results.targetsAlive).arg(results.targetsTotal).arg(results.getRttSumAsString()).arg(results.getRttAvgAsString()));
     }
 
     if(downloadTestEnabled)
     {
         updateTestResults(trUtf8(""
-                             "Download speed:        %1 Kbps\n"
-                             "                       %2 MB/sec").arg(results.speedInKbps, 0, 'f', 0).arg(results.speedInMBps, 0, 'f', 3));
+                             "Download speed - Domestic: %1 Kbps\n"
+                             "                           %2 MB/sec").arg(results.speedInKbpsDomestic, 0, 'f', 0).arg(results.speedInMBpsDomestic, 0, 'f', 3));
+        updateTestResults(trUtf8(""
+                             "Download speed - International: %1 Kbps\n"
+                             "                           %2 MB/sec").arg(results.speedInKbpsInternational, 0, 'f', 0).arg(results.speedInMBpsInternational, 0, 'f', 3));
     }
 
     updateLogMessages(trUtf8("Test complete"));
@@ -618,7 +641,7 @@ void QSpeedTestCli::saveReports()
     if(htmlOutputEnabled)
     {
         generateHtmlCode();
-        fileName = QDir::currentPath() + QString("/%1-%2%3-%4.html").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
+        fileName = QDir::currentPath() + QString("/%1_%2%3_%4.html").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
         fileName = QDir::toNativeSeparators(fileName);
         file.setFileName(fileName);
         outStream.setDevice(&file);
@@ -638,7 +661,7 @@ void QSpeedTestCli::saveReports()
     if(vbOutputEnabled)
     {
         generateVbCode();
-        fileName = QDir::currentPath() + QString("/%1-%2%3-%4.vb.txt").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
+        fileName = QDir::currentPath() + QString("/%1_%2%3_%4.vb.txt").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
         fileName = QDir::toNativeSeparators(fileName);
         file.setFileName(fileName);
         outStream.setDevice(&file);
@@ -674,9 +697,9 @@ void QSpeedTestCli::generateHtmlCode()
                        "        <table border=\"1\" cellpadding=\"4\">\n"
                        "            <tr><td>&nbsp;</td><td align=\"center\">Client info</td></tr>\n"
                        "            <tr><td>Report created by</td><td align=\"center\">%1 %2 - <a href=\"%3\">Download</a> - <a href=\"%4\">Discuss</a></td></tr>\n").arg(results.programName).arg(results.programVersion).arg(results.programUrl).arg(results.programDiscussUrl);
-    htmlCode += trUtf8("            <tr><td>Target list used</td><td align=\"center\"><a href=\"%1\">%2</a></td></tr>\n").arg(results.targetListContactUrl).arg(results.targetListComment);
-    htmlCode += trUtf8("            <tr><td>Host OS</td><td align=\"center\">%1</td></tr>\n"
-                       "            <tr><td>Test date and time</td><td align=\"center\">%2</td></tr>\n").arg(results.hostOS).arg(results.testDateTime);
+    htmlCode += trUtf8("            <tr><td>Target list used</td><td align=\"center\">%1 <a href=\"%2\">%3</a></td></tr>\n").arg(results.targetListVersion).arg(results.targetListContactUrl).arg(results.targetListComment);
+    htmlCode += trUtf8("            <tr><td>Host OS / CPU cores</td><td align=\"center\">%1 / %2</td></tr>\n"
+                       "            <tr><td>Test date and time</td><td align=\"center\">%3</td></tr>\n").arg(results.hostOS).arg(results.cpuCores).arg(results.testDateTime);
     htmlCode += trUtf8("            <tr><td>ISP</td><td align=\"center\">%1</td></tr>\n"
                        "            <tr><td>Internet IP</td><td align=\"center\">%2</td></tr>\n"
                        "            <tr><td>BBRAS</td><td align=\"center\">%3</td></tr>\n"
@@ -762,8 +785,11 @@ void QSpeedTestCli::generateHtmlCode()
     if(downloadTestEnabled)
     {
         htmlCode += trUtf8(""
-                       "            <tr><td><b>Download speed</b></td><td align=\"center\"><b>%1 Kbps</b></td></tr>\n"
-                       "            <tr><td>&nbsp;</td><td align=\"center\"><b>%2 MB/sec</b></td></tr>\n").arg(results.speedInKbps, 0, 'f', 0).arg(results.speedInMBps, 0, 'f', 3);
+                       "            <tr><td><b>Download speed - Domestic</b></td></tr>\n"
+                       "            <tr><td align=\"center\"><b>%1 Kbps</b></td><td align=\"center\"><b>%2 MB/sec</b></td></tr>\n").arg(results.speedInKbpsDomestic, 0, 'f', 0).arg(results.speedInMBpsDomestic, 0, 'f', 3);
+        htmlCode += trUtf8(""
+                       "            <tr><td><b>Download speed - International</b></td></tr>\n"
+                       "            <tr><td align=\"center\"><b>%1 Kbps</b></td><td align=\"center\"><b>%2 MB/sec</b></td></tr>\n").arg(results.speedInKbpsInternational, 0, 'f', 0).arg(results.speedInMBpsInternational, 0, 'f', 3);
     }
 
     htmlCode +=        "        </table>\n"
@@ -788,10 +814,9 @@ void QSpeedTestCli::generateVbCode()
 
     vbCode  = trUtf8("[table=head] | Client info\n"
                      "Report created by | [center]%1 %2 - [url=%3]Download[/url] - [url=%4]Discuss[/url][/center] |\n"
-                     "Target list version | [center]%5[/center] |\n"
-                     "Target list comment | [center][url=%6]%7[/url][/center] |\n"
-                     "Host OS | [center]%8[/center] |\n"
-                     "Test date and time | [center]%9[/center] |\n").arg(results.programName).arg(results.programVersion).arg(results.programUrl).arg(results.programDiscussUrl).arg(results.targetListVersion).arg(results.targetListContactUrl).arg(results.targetListComment).arg(results.hostOS).arg(results.testDateTime);
+                     "Target list used | [center]%5 [url=%6]%7[/url][/center] |\n"
+                     "Host OS / CPU cores | [center]%8 / %9[/center] |\n"
+                     "Test date and time | [center]%10[/center] |\n").arg(results.programName).arg(results.programVersion).arg(results.programUrl).arg(results.programDiscussUrl).arg(results.targetListVersion).arg(results.targetListContactUrl).arg(results.targetListComment).arg(results.hostOS).arg(results.cpuCores).arg(results.testDateTime);
     vbCode += trUtf8("ISP | [center]%1[/center] |\n"
                      "Internet IP | [center]%2[/center] |\n"
                      "BBRAS | [center]%3[/center] |\n"
@@ -840,8 +865,11 @@ void QSpeedTestCli::generateVbCode()
     if(downloadTestEnabled)
     {
         vbCode += trUtf8(""
-                     "[b]Download speed[/b] | [center][b]%1 Kbps[/b][/center] |\n"
-                     " | [center][b]%2 MB/sec[/b][/center] |\n").arg(results.speedInKbps, 0, 'f', 0).arg(results.speedInMBps, 0, 'f', 3);
+                     "[b]Download speed - Domestic[/b] | |\n"
+                     "[center][b]%1 Kbps[/b][/center] | [center][b]%2 MB/sec[/b][/center] |\n").arg(results.speedInKbpsDomestic, 0, 'f', 0).arg(results.speedInMBpsDomestic, 0, 'f', 3);
+        vbCode += trUtf8(""
+                     "[b]Download speed - International[/b] | |\n"
+                     "[center][b]%1 Kbps[/b][/center] | [center][b]%2 MB/sec[/b][/center] |\n").arg(results.speedInKbpsInternational, 0, 'f', 0).arg(results.speedInMBpsInternational, 0, 'f', 3);
     }
 
     vbCode +=        "[/table]\n\n";

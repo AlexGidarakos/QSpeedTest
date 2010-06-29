@@ -50,7 +50,8 @@ void TargetList::purge()
     contactUrl.clear();
     numberOfTargets = 0;
     groups.clear();
-    fileHosts.clear();
+    fileHostsDomestic.clear();
+    fileHostsInternational.clear();
 }
 
 
@@ -175,11 +176,11 @@ bool TargetList::load()
 
     comment = settings->value("TargetListInfo/Comment", QString("")).toString();
     contactUrl = settings->value("TargetListInfo/ContactURL", QString("")).toString();
-    tempNumberOfGroups = settings->value("TargetListInfo/NumberOfGroups", QString("")).toInt();
+    tempNumberOfGroups = settings->value("TargetListInfo/NumberOfPingGroups", QString("")).toInt();
 
     if(tempNumberOfGroups < 1)
     {
-        emit logMessage(trUtf8("Error: Key \"NumberOfGroups\" missing from section [TargetListInfo] or has incompatible value"));
+        emit logMessage(trUtf8("Error: Key \"NumberOfPingGroups\" missing from section [TargetListInfo] or has incompatible value"));
         return false;
     }
 
@@ -188,49 +189,49 @@ bool TargetList::load()
         newGroup.setSize(0);
         newGroup.targets.clear();
 
-        if(!settings->childGroups().contains(QString("Group%1").arg(i)))
+        if(!settings->childGroups().contains(QString("PingGroup%1").arg(i)))
         {
-            emit logMessage(trUtf8("Error: Section [Group%1] missing").arg(i));
+            emit logMessage(trUtf8("Error: Section [PingGroup%1] missing").arg(i));
             return false;
         }
 
-        newGroup.setName(settings->value(QString("Group%1/Name").arg(i), QString("")).toString());
+        newGroup.setName(settings->value(QString("PingGroup%1/Name").arg(i), QString("")).toString());
 
         if(newGroup.getName().isEmpty())
         {
-            emit logMessage(trUtf8("Error: Key \"Name\" missing from section [Group%1] or has incompatible value").arg(i));
+            emit logMessage(trUtf8("Error: Key \"Name\" missing from section [PingGroup%1] or has incompatible value").arg(i));
             return false;
         }
 
-        tempGroupSize = settings->value(QString("Group%1/NumberOfTargets").arg(i), QString("")).toInt();
+        tempGroupSize = settings->value(QString("PingGroup%1/NumberOfTargets").arg(i), QString("")).toInt();
 
         if(tempGroupSize < 1)
         {
-            emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [Group%1] or has incompatible value").arg(i));
+            emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [PingGroup%1] or has incompatible value").arg(i));
             return false;
         }
 
         for(int j = 1; j <= tempGroupSize; j++)
         {
-            newTarget.setName(settings->value(QString("Group%1/%2/Name").arg(i).arg(j), QString("")).toString());
+            newTarget.setName(settings->value(QString("PingGroup%1/%2/Name").arg(i).arg(j), QString("")).toString());
 
             if(newTarget.getName().isEmpty())
             {
-                emit logMessage(trUtf8("Error: Key \"%2\\Name\" missing from section [Group%1] or has incompatible value").arg(i).arg(j));
+                emit logMessage(trUtf8("Error: Key \"%2\\Name\" missing from section [PingGroup%1] or has incompatible value").arg(i).arg(j));
                 return false;
             }
 
-            newTarget.setAddress(settings->value(QString("Group%1/%2/Address").arg(i).arg(j), QString("")).toString());
+            newTarget.setAddress(settings->value(QString("PingGroup%1/%2/Address").arg(i).arg(j), QString("")).toString());
 
             if(newTarget.getAddress().isEmpty())
             {
-                emit logMessage(trUtf8("Error: Key \"%2\\Address\" missing from section [Group%1] or is not a proper IP address or URL").arg(i).arg(j));
+                emit logMessage(trUtf8("Error: Key \"%2\\Address\" missing from section [PingGroup%1] or is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
             if(!QUrl(newTarget.getAddress()).isValid())
             {
-                emit logMessage(trUtf8("Error: Key \"%2\\Address\" in section [Group%1] is not a proper IP address or URL").arg(i).arg(j));
+                emit logMessage(trUtf8("Error: Key \"%2\\Address\" in section [PingGroup%1] is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
@@ -242,52 +243,63 @@ bool TargetList::load()
         numberOfTargets += newGroup.getSize();
     }
 
-    if(!settings->childGroups().contains("DownloadTest"))
+    foreach(QString location, QList<QString>() << "Domestic" << "International")
     {
-        emit logMessage(trUtf8("Error: Section [DownloadTest] missing"));
-        return false;
-    }
-
-    tempGroupSize = settings->value(QString("DownloadTest/NumberOfTargets"), QString("")).toInt();
-
-    if(tempGroupSize < 1)
-    {
-        emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [DownloadTest] or has incompatible value"));
-        return false;
-    }
-
-    for(int i = 1; i <= tempGroupSize; i++)
-    {
-        newFileHost.setName(settings->value(QString("DownloadTest/%1/Name").arg(i), QString("")).toString());
-
-        if(newFileHost.getName().isEmpty())
+        if(!settings->childGroups().contains("FileHosts" + location))
         {
-            emit logMessage(trUtf8("Error: Key \"%1\\Name\" missing from section [DownloadTest] or has incompatible value").arg(i));
+            emit logMessage(trUtf8("Error: Section [FileHosts%1] missing").arg(location));
             return false;
         }
 
-        newFileHost.setUrl(QUrl(settings->value(QString("DownloadTest/%1/URL").arg(i), QString("")).toString()));
+        tempGroupSize = settings->value(QString("FileHosts%1/NumberOfTargets").arg(location), QString("")).toInt();
 
-        if(newFileHost.getUrl().isEmpty())
+        if(tempGroupSize < 1)
         {
-            emit logMessage(trUtf8("Error: Key \"%1\\URL\" missing from section [DownloadTest] or is not a proper file URL").arg(i));
+            emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [FileHosts%1] or has incompatible value").arg(location));
             return false;
         }
 
-        if(!newFileHost.getUrl().isValid())
+        for(int i = 1; i <= tempGroupSize; i++)
         {
-            emit logMessage(trUtf8("Error: Key \"%1\\URL\" in section [DownloadTest] is not a proper file URL").arg(i));
-            return false;
-        }
+            newFileHost.setName(settings->value(QString("FileHosts%1/%2/Name").arg(location).arg(i), QString("")).toString());
 
-        fileHosts.append(newFileHost);
+            if(newFileHost.getName().isEmpty())
+            {
+                emit logMessage(trUtf8("Error: Key \"%1\\Name\" missing from section [FileHosts%2] or has incompatible value").arg(i).arg(location));
+                return false;
+            }
+
+            newFileHost.setUrl(QUrl(settings->value(QString("FileHosts%1/%2/URL").arg(location).arg(i), QString("")).toString()));
+
+            if(newFileHost.getUrl().isEmpty())
+            {
+                emit logMessage(trUtf8("Error: Key \"%1\\URL\" missing from section [FileHosts%2] or is not a proper file URL").arg(i).arg(location));
+                return false;
+            }
+
+            if(!newFileHost.getUrl().isValid())
+            {
+                emit logMessage(trUtf8("Error: Key \"%1\\URL\" in section [FileHosts%2] is not a proper file URL").arg(i).arg(location));
+                return false;
+            }
+
+            if(location == QString("Domestic"))
+            {
+                fileHostsDomestic.append(newFileHost);
+            }
+            else
+            {
+                fileHostsInternational.append(newFileHost);
+            }
+        }
     }
 
     emit logMessage(trUtf8("Target list version: %1").arg(version));
     emit logMessage(trUtf8("Target list comment: %1").arg(comment));
     emit logMessage(trUtf8("Target list contact URL: %1").arg(contactUrl));
-    emit logMessage(trUtf8("%1 ping targets in %2 groups were successfully loaded").arg(numberOfTargets).arg(numberOfGroups));
-    emit logMessage(trUtf8("%1 download test targets were successfully loaded").arg(fileHosts.size()));
+    emit logMessage(trUtf8("%1 ping targets in %2 groups were loaded").arg(numberOfTargets).arg(numberOfGroups));
+    emit logMessage(trUtf8("%1 domestic download test targets were loaded").arg(fileHostsDomestic.size()));
+    emit logMessage(trUtf8("%1 international download test targets were loaded").arg(fileHostsInternational.size()));
     return true;
 }
 
