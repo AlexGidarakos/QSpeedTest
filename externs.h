@@ -40,10 +40,12 @@ extern const int UPDATECHECKTIMEOUT;
 extern const int PINGTIMEOUT;
 extern const int DOWNLOADTESTSECS;
 extern int PINGSPERTARGET;
-extern int PARALLELPINGS;
 extern QMutex MUTEX;
 extern qint64 BYTESDOWNLOADED;
 extern bool STOPBENCHMARK;
+#ifdef QSPEEDTESTCLI_H
+extern int PARALLELPINGS;
+#endif // QSPEEDTESTCLI_H
 
 
 #endif // EXTERNS_H

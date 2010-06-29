@@ -72,7 +72,6 @@ void FileHost::downloadTest()
     MUTEX.lock();
     BYTESDOWNLOADED += bytesDownloaded;
     MUTEX.unlock();
-
     emit newTestResult(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
     delete file;
     delete loop;

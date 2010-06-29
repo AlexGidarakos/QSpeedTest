@@ -42,8 +42,8 @@ class QSpeedTest : public QApplication
         QProcess winSystemInfo;
         MainWindow mainWindow;
         TargetList targetList;
-        bool pingTestEnabledFlag;
-        bool downloadTestEnabledFlag;
+        bool pingTestEnabled;
+        bool downloadTestEnabled;
         TestResults results;
         QString vbCode;
         QString htmlCode;

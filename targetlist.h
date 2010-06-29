@@ -49,7 +49,8 @@ class TargetList : public QObject
         int numberOfGroups;
         int numberOfTargets;
         QList<TargetGroup> groups;
-        QList<FileHost> fileHosts;
+        QList<FileHost> fileHostsDomestic;
+        QList<FileHost> fileHostsInternational;
 
     private:
         QSettings *settings;

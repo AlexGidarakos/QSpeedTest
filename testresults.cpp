@@ -37,8 +37,10 @@ void TestResults::reset()
 {
     rttSum = 0.0;
     targetsAlive = 0;
-    speedInKbps = 0.0;
-    speedInMBps = 0.0;
+    speedInKbpsDomestic = 0.0;
+    speedInMBpsDomestic = 0.0;
+    speedInKbpsInternational = 0.0;
+    speedInMBpsInternational = 0.0;
     testDuration = 0.0;
 }
 

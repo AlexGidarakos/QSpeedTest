@@ -13,7 +13,7 @@
 
 
 QT += network
-TARGET = qspeedtestgui
+TARGET = qspeedtest
 TEMPLATE = app
 INCLUDEPATH = .
 SOURCES += \
@@ -26,7 +26,7 @@ SOURCES += \
     testresults.cpp \
     target.cpp \
     plaintarget.cpp \
-    main_qspeedtestgui.cpp
+    main_qspeedtest.cpp
 HEADERS += mainwindow.h \
     dialogabout.h \
     qspeedtest.h \
