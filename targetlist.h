@@ -34,32 +34,29 @@ class TargetList : public QObject
 {
     Q_OBJECT
 
-    public:
-        explicit TargetList(QObject *parent = 0);
-        ~TargetList() { delete settings; }
-        void purge();
-        bool isUpdateAvailable();
-        bool downloadList();
-        bool load();
-        bool restoreEmbedded();
-        bool init();
-        QString version;
-        QString comment;
-        QString contactUrl;
-        int numberOfGroups;
-        int numberOfTargets;
-        QList<TargetGroup> groups;
-        QList<FileHost> fileHostsDomestic;
-        QList<FileHost> fileHostsInternational;
+public:
+    explicit TargetList(QObject *parent = 0);
+    ~TargetList() { delete settings; }
+    void purge();
+    bool isUpdateAvailable();
+    bool downloadList();
+    bool load();
+    bool restoreEmbedded();
+    bool init();
+    QString version;
+    QString comment;
+    QString contactUrl;
+    int numberOfGroups;
+    int numberOfTargets;
+    QList<TargetGroup> groups;
+    QList<FileHost> fileHostsDomestic;
+    QList<FileHost> fileHostsInternational;
 
-    private:
-        QSettings *settings;
+private:
+    QSettings *settings;
 
-    signals:
-        void logMessage(QString);
-
-    public slots:
-
+signals:
+    void logMessage(QString);
 };
 
 

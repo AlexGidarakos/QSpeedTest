@@ -15,7 +15,6 @@
 QT += network
 TARGET = qspeedtest
 TEMPLATE = app
-INCLUDEPATH = .
 SOURCES += \
     mainwindow.cpp \
     dialogabout.cpp \

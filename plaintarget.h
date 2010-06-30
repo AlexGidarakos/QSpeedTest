@@ -29,32 +29,32 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 class PlainTarget
 {
-    public:
-        PlainTarget() {}
-        PlainTarget(const Target&);
-        bool operator<(const PlainTarget &plainTarget) const { return (rtt < plainTarget.rtt); }
-        QString getName() { return name; }
-        QString getAddress() { return address; }
-        double getRtt() { return rtt; }
-        QString getRttAsString() { return rttAsString; }
-        double getPacketLoss() { return packetLoss; }
-        QString getPacketLossAsString() { return packetLossAsString; }
-        double getJitter() { return jitter; }
-        QString getJitterAsString() { return jitterAsString; }
-        QString getRank() { return rank; }
-        bool isAlive() { return aliveFlag; }
+public:
+    PlainTarget() {}
+    PlainTarget(const Target&);
+    bool operator<(const PlainTarget &plainTarget) const { return (rtt < plainTarget.rtt); }
+    QString getName() { return name; }
+    QString getAddress() { return address; }
+    double getRtt() { return rtt; }
+    QString getRttAsString() { return rttAsString; }
+    double getPacketLoss() { return packetLoss; }
+    QString getPacketLossAsString() { return packetLossAsString; }
+    double getJitter() { return jitter; }
+    QString getJitterAsString() { return jitterAsString; }
+    QString getRank() { return rank; }
+    bool isAlive() { return aliveFlag; }
 
-    private:
-        QString name;
-        QString address;
-        double rtt;
-        QString rttAsString;
-        bool aliveFlag;
-        double packetLoss;
-        QString packetLossAsString;
-        double jitter;
-        QString jitterAsString;
-        QString rank;
+private:
+    QString name;
+    QString address;
+    double rtt;
+    QString rttAsString;
+    bool aliveFlag;
+    double packetLoss;
+    QString packetLossAsString;
+    double jitter;
+    QString jitterAsString;
+    QString rank;
 };
 
 

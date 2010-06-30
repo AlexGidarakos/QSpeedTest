@@ -32,38 +32,38 @@ class Target : public QObject
 {
     Q_OBJECT
 
-    public:
-        Target();
-        Target(const Target&, QObject *parent = 0);
-        Target& operator=(const Target&);
-        void reset();
-        QString getName() const { return name; }
-        void setName(QString value) { name = value; }
-        QString getAddress() const { return address; }
-        void setAddress(QString value) { address = value; }
-        void addRtt(double);
-        double getRttAvg() const;
-        QString getRttAvgAsString() const;
-        double getPacketLoss() const { return packetLoss; }
-        QString getPacketLossAsString() const;
-        double getJitter() const;
-        QString getJitterAsString() const;
-        QString getRank() const;
-        bool isAlive() const { return replies; }
-        void ping();
+public:
+    Target();
+    Target(const Target&, QObject *parent = 0);
+    Target& operator=(const Target&);
+    void reset();
+    QString getName() const { return name; }
+    void setName(QString value) { name = value; }
+    QString getAddress() const { return address; }
+    void setAddress(QString value) { address = value; }
+    void addRtt(double);
+    double getRttAvg() const;
+    QString getRttAvgAsString() const;
+    double getPacketLoss() const { return packetLoss; }
+    QString getPacketLossAsString() const;
+    double getJitter() const;
+    QString getJitterAsString() const;
+    QString getRank() const;
+    bool isAlive() const { return replies; }
+    void ping();
 
-    private:
-        QString name;
-        QString address;
-        QList<double> rtt;
-        double rttSum;
-        int replies;
-        double packetLoss;
-        double jitterSum;
-        QString rank;
+private:
+    QString name;
+    QString address;
+    QList<double> rtt;
+    double rttSum;
+    int replies;
+    double packetLoss;
+    double jitterSum;
+    QString rank;
 
-    signals:
-        void newTestResult(QString);
+signals:
+    void newTestResult(QString);
 };
 
 

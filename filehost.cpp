@@ -67,6 +67,7 @@ void FileHost::downloadTest()
     file = manager.get(QNetworkRequest(url));
     connect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     loop->exec();
+    disconnect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     file->abort();
     qApp->processEvents();
     MUTEX.lock();
