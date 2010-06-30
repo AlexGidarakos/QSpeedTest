@@ -606,28 +606,28 @@ void QSpeedTestCli::startBenchmark()
 
     results.testDuration = (timer.elapsed() * 1.0) / 1000;
     updateTestResults(trUtf8("\n"
-                             "Test mode:                 %1\n"
-                             "Test completed in:         %2 sec").arg(testModeAsString).arg(results.testDuration));
+                             "Test mode:                      %1\n"
+                             "Test completed in:              %2 sec").arg(testModeAsString).arg(results.testDuration));
 
     if(pingTestEnabled)
     {
         updateTestResults(trUtf8(""
-                             "Pings/target:              %1\n"
-                             "Parallel ping threads:     %2").arg(results.pingsPerTarget).arg(results.parallelPingThreads));
+                             "Pings/target:                   %1\n"
+                             "Parallel ping threads:          %2").arg(results.pingsPerTarget).arg(results.parallelPingThreads));
         updateTestResults(trUtf8(""
-                             "Targets alive:             %1 / %2\n"
-                             "Test total ping time:      %3\n"
-                             "Average ping/target:       %4").arg(results.targetsAlive).arg(results.targetsTotal).arg(results.getRttSumAsString()).arg(results.getRttAvgAsString()));
+                             "Targets alive:                  %1 / %2\n"
+                             "Test total ping time:           %3\n"
+                             "Average ping/target:            %4").arg(results.targetsAlive).arg(results.targetsTotal).arg(results.getRttSumAsString()).arg(results.getRttAvgAsString()));
     }
 
     if(downloadTestEnabled)
     {
         updateTestResults(trUtf8(""
-                             "Download speed - Domestic: %1 Kbps\n"
-                             "                           %2 MB/sec").arg(results.speedInKbpsDomestic, 0, 'f', 0).arg(results.speedInMBpsDomestic, 0, 'f', 3));
+                             "Download speed - Domestic:      %1 Kbps\n"
+                             "                                %2 MB/sec").arg(results.speedInKbpsDomestic, 0, 'f', 0).arg(results.speedInMBpsDomestic, 0, 'f', 3));
         updateTestResults(trUtf8(""
                              "Download speed - International: %1 Kbps\n"
-                             "                           %2 MB/sec").arg(results.speedInKbpsInternational, 0, 'f', 0).arg(results.speedInMBpsInternational, 0, 'f', 3));
+                             "                                %2 MB/sec").arg(results.speedInKbpsInternational, 0, 'f', 0).arg(results.speedInMBpsInternational, 0, 'f', 3));
     }
 
     updateLogMessages(trUtf8("Test complete"));
