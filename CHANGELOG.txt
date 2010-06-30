@@ -1,3 +1,12 @@
+revision 25 - 20100630                                              |
+    * Bumped QSpeedTest revision to r25                             |
+    * Bumped QSpeedTestCLI revision to r4                           |
+    * Both: Always check for updated target list first              |
+    * Both: New method for measuring downloaded bytes from each file|
+      host. No global variable and QMutex are needed. Hopefully it  |
+      will solve the "outrageously big speeds reported" bug         |
+
+
 revision 24 - 20100630                                              |
     * Bumped QSpeedTest revision to r24                             |
     * Bumped QSpeedTestCLI revision to r3                           |
