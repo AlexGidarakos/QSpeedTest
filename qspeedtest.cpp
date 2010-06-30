@@ -359,20 +359,21 @@ void QSpeedTest::startBenchmark()
         if(results.parallelPingThreads > 1)    // multithreaded pinging
         {
             QtConcurrent::blockingMap(targetList.groups[i].targets, &Target::ping);
+            processEvents();
         }
         else    // single-threaded pinging
         {
             for(int j = 0; j < targetList.groups[i].getSize(); j++)
             {
-                if(STOPBENCHMARK)
-                {
-                    emit benchmarkFinished(true);
-                    processEvents();
-                    return;
-                }
-
                 targetList.groups[i].targets[j].ping();
             }
+        }
+
+        if(STOPBENCHMARK)
+        {
+            emit benchmarkFinished(STOPBENCHMARK);
+            processEvents();
+            return;
         }
 
         for(int j = 0; j < targetList.groups[i].getSize(); j++)
@@ -417,6 +418,13 @@ void QSpeedTest::startBenchmark()
             QThreadPool::globalInstance()->setMaxThreadCount(fileHosts->size());
             QtConcurrent::blockingMap(*fileHosts, &FileHost::downloadTest);
             processEvents();
+
+            if(STOPBENCHMARK)
+            {
+                emit benchmarkFinished(STOPBENCHMARK);
+                processEvents();
+                return;
+            }
 
             for(int i = 0; i < fileHosts->size(); i++)
             {
