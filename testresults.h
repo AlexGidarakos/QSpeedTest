@@ -28,37 +28,37 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 class TestResults
 {
-    public:
-        TestResults();
-        void reset();
-        QString getRttSumAsString();
-        QString getRttAvgAsString();
-        QString programName;
-        QString programVersion;
-        QString programUrl;
-        QString programDiscussUrl;
-        QString targetListVersion;
-        QString targetListComment;
-        QString targetListContactUrl;
-        QString testDate;
-        QString testTime;
-        QString testDateTime;
-        QString hostOS;
-        int cpuCores;
-        QString isp;
-        QString ip;
-        QString bbras;
-        double rttSum;
-        int targetsTotal;
-        int targetsAlive;
-        double speedInKbpsDomestic;
-        double speedInMBpsDomestic;
-        double speedInKbpsInternational;
-        double speedInMBpsInternational;
-        QString testMode;
-        double testDuration;
-        int pingsPerTarget;
-        int parallelPingThreads;
+public:
+    TestResults();
+    void reset();
+    QString getRttSumAsString();
+    QString getRttAvgAsString();
+    QString programName;
+    QString programVersion;
+    QString programUrl;
+    QString programDiscussUrl;
+    QString targetListVersion;
+    QString targetListComment;
+    QString targetListContactUrl;
+    QString testDate;
+    QString testTime;
+    QString testDateTime;
+    QString hostOS;
+    int cpuCores;
+    QString isp;
+    QString ip;
+    QString bbras;
+    double rttSum;
+    int targetsTotal;
+    int targetsAlive;
+    double speedInKbpsDomestic;
+    double speedInMBpsDomestic;
+    double speedInKbpsInternational;
+    double speedInMBpsInternational;
+    QString testMode;
+    double testDuration;
+    int pingsPerTarget;
+    int parallelPingThreads;
 };
 
 

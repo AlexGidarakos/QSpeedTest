@@ -35,33 +35,33 @@ class QSpeedTest : public QApplication
 {
     Q_OBJECT
 
-    public:
-        QSpeedTest(int, char**);
+public:
+    QSpeedTest(int, char**);
 
-    private:
-        QProcess winSystemInfo;
-        MainWindow mainWindow;
-        TargetList targetList;
-        bool pingTestEnabled;
-        bool downloadTestEnabled;
-        TestResults results;
-        QString vbCode;
-        QString htmlCode;
-        void checkForProgramUpdates();
-        void printHostAndProgramInfo();
-        void printLineInfo();
-        void generateHtmlCode();
-        void generateVbCode();
+private:
+    QProcess winSystemInfo;
+    MainWindow mainWindow;
+    TargetList targetList;
+    bool pingTestEnabled;
+    bool downloadTestEnabled;
+    TestResults results;
+    QString vbCode;
+    QString htmlCode;
+    void checkForProgramUpdates();
+    void printHostAndProgramInfo();
+    void printLineInfo();
+    void generateHtmlCode();
+    void generateVbCode();
 
-    signals:
-        void initOK();
-        void logMessage(QString);
-        void newTestResult(QString);
-        void benchmarkFinished(bool completed);
+signals:
+    void initOK();
+    void logMessage(QString);
+    void newTestResult(QString);
+    void benchmarkFinished(bool completed);
 
-    private slots:
-        void startBenchmark();
-        void showReport(bool);
+private slots:
+    void startBenchmark();
+    void showReport(bool);
 };
 
 

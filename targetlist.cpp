@@ -117,12 +117,13 @@ bool TargetList::downloadList()
     if(!QDir().exists(info.absolutePath()))
     {
         QDir().mkdir(info.absolutePath());
+        QFile::setPermissions(info.absolutePath(), QFile::WriteUser);
     }
     else
     {
         if(file.exists())
         {
-            QFile::remove(settings->fileName());
+            QFile::rename(settings->fileName(), settings->fileName() + ".bak");
         }
     }
 
@@ -319,7 +320,7 @@ bool TargetList::restoreEmbedded()
     {
         if(file.exists())
         {
-            QFile::remove(settings->fileName());
+            QFile::rename(settings->fileName(), settings->fileName() + ".wrong");
         }
     }
 
@@ -342,31 +343,20 @@ bool TargetList::init()
     {
         if(isUpdateAvailable())
         {
-#ifdef QSPEEDTEST_H
-            int reply = QMessageBox::question(NULL, trUtf8("Target list update available"), trUtf8("An updated version of the target list is available online.\n\nWould you like to update now?"), QMessageBox::Yes, QMessageBox::No);
-
-            if(reply == QMessageBox::Yes)
+            if(downloadList())
             {
-                if(downloadList())
-                {
-                    purge();
-                    settings->sync();
+                purge();
+                settings->sync();
 
-                    if(load())
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                if(load())
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
-            else
-            {
-                emit logMessage(trUtf8("Update aborted"));
-            }
-#endif // QSPEEDTEST_H
         }
 
         return true;

@@ -31,35 +31,35 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 class TargetGroup
 {
-    public:
-        TargetGroup() { size = 0; }
-        void reset();
-        void addTarget(const Target &target) { targets.append(target); size++; }
-        double getRttSum();
-        QString getRttSumAsString();
-        double getRttAvg();
-        QString getRttAvgAsString();
-        double getPacketLossAvg();
-        QString getPacketLossAvgAsString();
-        QString getRank();
-        int getTargetsAlive();
-        QString getName() { return name; }
-        void setName(QString value) { name = value; }
-        int getSize() { return size; }
-        void setSize(int value) { size = value; }
-        QList<Target> targets;
-        QList<PlainTarget> plainTargets;
+public:
+    TargetGroup() { size = 0; }
+    void reset();
+    void addTarget(const Target &target) { targets.append(target); size++; }
+    double getRttSum();
+    QString getRttSumAsString();
+    double getRttAvg();
+    QString getRttAvgAsString();
+    double getPacketLossAvg();
+    QString getPacketLossAvgAsString();
+    QString getRank();
+    int getTargetsAlive();
+    QString getName() { return name; }
+    void setName(QString value) { name = value; }
+    int getSize() { return size; }
+    void setSize(int value) { size = value; }
+    QList<Target> targets;
+    QList<PlainTarget> plainTargets;
 
-    private:
-        double rttSum;
-        QString rttSumAsString;
-        QString rttAvgAsString;
-        double packetLossAvg;
-        QString packetLossAvgAsString;
-        QString rank;
-        int targetsAlive;
-        QString name;
-        int size;
+private:
+    double rttSum;
+    QString rttSumAsString;
+    QString rttAvgAsString;
+    double packetLossAvg;
+    QString packetLossAvgAsString;
+    QString rank;
+    int targetsAlive;
+    QString name;
+    int size;
 };
 
 

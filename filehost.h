@@ -31,31 +31,31 @@ class FileHost : public QObject
 {
     Q_OBJECT
 
-    public:
-        FileHost() {}
-        FileHost(QString, QUrl);
-        FileHost(const FileHost&, QObject *parent = 0);
-        FileHost& operator=(const FileHost&);
-        void downloadTest();
-        QString getName() { return name; }
-        void setName(QString value) { name = value; }
-        QUrl getUrl() { return url; }
-        void setUrl(QUrl value) { url = value; }
-        qint64 bytesDownloaded;
+public:
+    FileHost() {}
+    FileHost(QString, QUrl);
+    FileHost(const FileHost&, QObject *parent = 0);
+    FileHost& operator=(const FileHost&);
+    void downloadTest();
+    QString getName() { return name; }
+    void setName(QString value) { name = value; }
+    QUrl getUrl() { return url; }
+    void setUrl(QUrl value) { url = value; }
+    qint64 bytesDownloaded;
 
-    private:
-        QString name;
-        QUrl url;
-        QEventLoop *loop;
+private:
+    QString name;
+    QUrl url;
+    QEventLoop *loop;
 
-    private slots:
-        void updateBytes(qint64 value) { bytesDownloaded = value; }
+signals:
+    void newTestResult(QString);
 
-    public slots:
-        void abortDownload() { loop->quit(); }
+public slots:
+    void abortDownload() { loop->quit(); }
 
-    signals:
-        void newTestResult(QString);
+private slots:
+    void updateBytes(qint64 value) { bytesDownloaded = value; }
 };
 
 

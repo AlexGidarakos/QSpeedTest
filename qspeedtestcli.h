@@ -40,39 +40,39 @@ class QSpeedTestCli : public QObject
 {
     Q_OBJECT
 
-    public:
-        QSpeedTestCli();
+public:
+    QSpeedTestCli();
 
-    private:
-        QProcess winSystemInfo;
-        TargetList targetList;
-        TestResults results;
-        int testMode;
-        QString testModeAsString;
-        bool pingTestEnabled;
-        bool downloadTestEnabled;
-        bool htmlOutputEnabled;
-        bool vbOutputEnabled;
-        QString htmlCode;
-        QString vbCode;
+private:
+    QProcess winSystemInfo;
+    TargetList targetList;
+    TestResults results;
+    int testMode;
+    QString testModeAsString;
+    bool pingTestEnabled;
+    bool downloadTestEnabled;
+    bool htmlOutputEnabled;
+    bool vbOutputEnabled;
+    QString htmlCode;
+    QString vbCode;
 
-        void parseArguments();
-        void checkForProgramUpdates();
-        void startBenchmark();
-        void saveReports();
-        void printHostAndProgramInfo();
-        void printLineInfo();
-        void generateHtmlCode();
-        void generateVbCode();
+    void parseArguments();
+    void checkForProgramUpdates();
+    void startBenchmark();
+    void saveReports();
+    void printHostAndProgramInfo();
+    void printLineInfo();
+    void generateHtmlCode();
+    void generateVbCode();
 
-    signals:
-        void logMessage(QString);
-        void newTestResult(QString);
+signals:
+    void logMessage(QString);
+    void newTestResult(QString);
 
-    private slots:
-        void start();
-        void updateLogMessages(QString);
-        void updateTestResults(QString);
+private slots:
+    void start();
+    void updateLogMessages(QString);
+    void updateTestResults(QString);
 };
 
 

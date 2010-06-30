@@ -39,21 +39,21 @@ class DialogAbout : public QDialog
 {
     Q_OBJECT
 
-    public:
-        DialogAbout(QWidget *parent = 0);
-        ~DialogAbout();
+public:
+    DialogAbout(QWidget *parent = 0);
+    ~DialogAbout();
 
-    protected:
-        void changeEvent(QEvent *e);
+protected:
+    void changeEvent(QEvent *e);
 
-    private:
-        Ui::DialogAbout *ui;
+private:
+    Ui::DialogAbout *ui;
 
-    private slots:
-        void on_labelHomepage_linkActivated(QString link) { QDesktopServices::openUrl(QUrl(link)); }
-        void on_labelForum_linkActivated(QString link) { QDesktopServices::openUrl(QUrl(link)); }
-        void on_pushButtonOK_clicked() { close(); }
-        void on_pushButtonAboutQt_clicked() { qApp->aboutQt(); }
+private slots:
+    void on_labelHomepage_linkActivated(QString link) { QDesktopServices::openUrl(QUrl(link)); }
+    void on_labelForum_linkActivated(QString link) { QDesktopServices::openUrl(QUrl(link)); }
+    void on_pushButtonOK_clicked() { close(); }
+    void on_pushButtonAboutQt_clicked() { qApp->aboutQt(); }
 };
 
 

@@ -1,3 +1,14 @@
+revision 24 - 20100630                                              |
+    * Bumped QSpeedTest revision to r24                             |
+    * Bumped QSpeedTestCLI revision to r3                           |
+    * Both: Fixed a small bug which led to not downloading an       |
+      available online update of the target list                    |
+    * Both: Instead of overwriting an existing target list with a   |
+      new update, the old list gets renamed with an additional .bak |
+      extension                                                     |
+    * Updated embedded target list                                  |
+
+
 revision 23 - 20100629                                              |
     * QSpeedTestCLI r2: cosmetic changes                            |
     * QSpeedTest r23: cosmetic changes                              |
