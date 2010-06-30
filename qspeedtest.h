@@ -39,7 +39,6 @@ public:
     QSpeedTest(int, char**);
 
 private:
-    QProcess winSystemInfo;
     MainWindow mainWindow;
     TargetList targetList;
     bool pingTestEnabled;

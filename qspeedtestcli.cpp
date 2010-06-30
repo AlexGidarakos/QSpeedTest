@@ -530,7 +530,6 @@ void QSpeedTestCli::printLineInfo()
 void QSpeedTestCli::startBenchmark()
 {
     QTime timer;
-    qint64 bytesDownloaded;
 
     timer.start();
     updateLogMessages(trUtf8("Test started\n"));
@@ -580,25 +579,24 @@ void QSpeedTestCli::startBenchmark()
     {
         foreach(QList<FileHost>* fileHosts, QList<QList<FileHost>*>() << &targetList.fileHostsDomestic << &targetList.fileHostsInternational)
         {
-            bytesDownloaded = 0;
+            BYTESDOWNLOADED = 0;
             updateTestResults(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
             QThreadPool::globalInstance()->setMaxThreadCount(fileHosts->size());
             QtConcurrent::blockingMap(*fileHosts, &FileHost::downloadTest);
             qApp->processEvents();
 
-            for(int i = 0; i < fileHosts->size(); i++)
-            {
-                bytesDownloaded += fileHosts->at(i).bytesDownloaded;
-            }
-
             if(fileHosts == &targetList.fileHostsDomestic)
             {
-                results.speedInKbpsDomestic = bytesDownloaded / (DOWNLOADTESTSECS * 128.0);    // ((bytesDownloaded * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.lock();
+                results.speedInKbpsDomestic = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.unlock();
                 results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
             }
             else
             {
-                results.speedInKbpsInternational = bytesDownloaded / (DOWNLOADTESTSECS * 128.0);    // ((bytesDownloaded * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.lock();
+                results.speedInKbpsInternational = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.unlock();
                 results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
             }
         }
