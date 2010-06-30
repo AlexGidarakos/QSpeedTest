@@ -170,7 +170,7 @@ void MainWindow::benchmarkFinished(bool testAborted)
     if(testAborted)
     {
         this->updateLogMessages(trUtf8("Test aborted"));
-        this->updateTestResults(trUtf8("Test aborted"));
+        this->updateTestResults(trUtf8("\n\nTest aborted"));
     }
     else
     {

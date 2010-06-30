@@ -1,3 +1,9 @@
+revision 26 - 20100630                                              |
+    * Bumped QSpeedTest revision to r26                             |
+    * Bumped QSpeedTestCLI revision to r5                           |
+    * QSpeedTest r26: Fixed a small stop button bug                 |
+
+
 revision 25 - 20100630                                              |
     * Bumped QSpeedTest revision to r25                             |
     * Bumped QSpeedTestCLI revision to r4                           |
