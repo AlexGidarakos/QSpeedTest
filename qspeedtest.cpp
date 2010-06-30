@@ -419,17 +419,17 @@ void QSpeedTest::startBenchmark()
             QtConcurrent::blockingMap(*fileHosts, &FileHost::downloadTest);
             processEvents();
 
+            for(int i = 0; i < fileHosts->size(); i++)
+            {
+                disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));    // because execution of abortDownload when a speed test is not running leads to segfault!
+                bytesDownloaded += fileHosts->at(i).bytesDownloaded;
+            }
+
             if(STOPBENCHMARK)
             {
                 emit benchmarkFinished(STOPBENCHMARK);
                 processEvents();
                 return;
-            }
-
-            for(int i = 0; i < fileHosts->size(); i++)
-            {
-                disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));    // because execution of abortDownload when a speed test is not running leads to segfault!
-                bytesDownloaded += fileHosts->at(i).bytesDownloaded;
             }
 
             if(fileHosts == &targetList.fileHostsDomestic)
