@@ -1,3 +1,7 @@
+revision 28 - 20100630                                              |
+    * QSpeedTestCLI: Previous fix was not submitted properly        |
+
+
 revision 27 - 20100630                                              |
     * Bumped QSpeedTest revision to r27                             |
     * Bumped QSpeedTestCLI revision to r6                           |
