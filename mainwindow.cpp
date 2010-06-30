@@ -134,9 +134,7 @@ void MainWindow::on_pushButtonStartStop_clicked()
     }
     else
     {
-        MUTEX.lock();
         STOPBENCHMARK = true;
-        MUTEX.unlock();
         emit pushButtonStopClicked();
     }
 }

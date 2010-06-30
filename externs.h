@@ -24,7 +24,6 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include <QtCore/QString>
-#include <QtCore/QMutex>
 
 
 extern const QString PROJECTNAME;
@@ -40,8 +39,6 @@ extern const int UPDATECHECKTIMEOUT;
 extern const int PINGTIMEOUT;
 extern const int DOWNLOADTESTSECS;
 extern int PINGSPERTARGET;
-extern QMutex MUTEX;
-extern qint64 BYTESDOWNLOADED;
 extern bool STOPBENCHMARK;
 #ifdef QSPEEDTESTCLI_H
 extern int PARALLELPINGS;

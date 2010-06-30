@@ -139,6 +139,7 @@ void QSpeedTest::printHostAndProgramInfo()
     emit newTestResult(trUtf8("Report created by:       %1 %2\n"
                               "Target list used:        %3 %4\n"
                               "Target list contact URL: %5").arg(results.programName).arg(results.programVersion).arg(results.targetListVersion).arg(results.targetListComment).arg(results.targetListContactUrl));
+    processEvents();
     proc.setProcessChannelMode(QProcess::MergedChannels);
     connect(&proc, SIGNAL(finished(int)), &loop, SLOT(quit()));
 #ifdef Q_WS_WIN
@@ -230,6 +231,7 @@ void QSpeedTest::printHostAndProgramInfo()
 
     emit newTestResult(trUtf8("Host OS / CPU cores:     %1 / %2\n"
                               "Test date and time:      %3").arg(results.hostOS).arg(results.cpuCores).arg(results.testDateTime));
+    processEvents();
 }
 
 
@@ -325,12 +327,14 @@ void QSpeedTest::printLineInfo()
     emit newTestResult(trUtf8("ISP:                     %1\n"
                               "Internet IP:             %2\n"
                               "BBRAS:                   %3\n").arg(results.isp).arg(results.ip).arg(results.bbras));
+    processEvents();
 }
 
 
 void QSpeedTest::startBenchmark()
 {
     QTime timer;
+    qint64 bytesDownloaded;
 
     timer.start();
     emit logMessage(trUtf8("Test started"));
@@ -363,6 +367,7 @@ void QSpeedTest::startBenchmark()
                 if(STOPBENCHMARK)
                 {
                     emit benchmarkFinished(true);
+                    processEvents();
                     return;
                 }
 
@@ -380,6 +385,7 @@ void QSpeedTest::startBenchmark()
         if(STOPBENCHMARK)
         {
             emit benchmarkFinished(STOPBENCHMARK);
+            processEvents();
             return;
         }
 
@@ -393,6 +399,7 @@ void QSpeedTest::startBenchmark()
     if(STOPBENCHMARK)
     {
         emit benchmarkFinished(STOPBENCHMARK);
+        processEvents();
         return;
     }
 
@@ -405,37 +412,28 @@ void QSpeedTest::startBenchmark()
                 connect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));
             }
 
-            BYTESDOWNLOADED = 0;
+            bytesDownloaded = 0;
             emit newTestResult(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
             QThreadPool::globalInstance()->setMaxThreadCount(fileHosts->size());
             QtConcurrent::blockingMap(*fileHosts, &FileHost::downloadTest);
             processEvents();
 
+            for(int i = 0; i < fileHosts->size(); i++)
+            {
+                disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));    // because execution of abortDownload when a speed test is not running leads to segfault!
+                bytesDownloaded += fileHosts->at(i).bytesDownloaded;
+            }
+
             if(fileHosts == &targetList.fileHostsDomestic)
             {
-                MUTEX.lock();
-                results.speedInKbpsDomestic = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
-                MUTEX.unlock();
+                results.speedInKbpsDomestic = bytesDownloaded / (DOWNLOADTESTSECS * 128.0);    // ((bytesDownloaded * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
                 results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
             }
             else
             {
-                MUTEX.lock();
-                results.speedInKbpsInternational = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
-                MUTEX.unlock();
+                results.speedInKbpsInternational = bytesDownloaded / (DOWNLOADTESTSECS * 128.0);    // ((bytesDownloaded * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
                 results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
             }
-
-            for(int i = 0; i < fileHosts->size(); i++)
-            {
-                disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));
-            }
-        }
-
-        if(STOPBENCHMARK)
-        {
-            emit benchmarkFinished(STOPBENCHMARK);
-            return;
         }
 
         if(pingTestEnabled)

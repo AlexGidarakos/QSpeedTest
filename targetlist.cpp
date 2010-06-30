@@ -52,6 +52,7 @@ void TargetList::purge()
     groups.clear();
     fileHostsDomestic.clear();
     fileHostsInternational.clear();
+    settings->sync();
 }
 
 
@@ -339,44 +340,29 @@ bool TargetList::restoreEmbedded()
 
 bool TargetList::init()
 {
-    if(load())
-    {
-        if(isUpdateAvailable())
-        {
-            if(downloadList())
-            {
-                purge();
-                settings->sync();
+    purge();
 
-                if(load())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+    if(isUpdateAvailable())
+    {
+        if(downloadList())
+        {
+            purge();
+
+            if(load())
+            {
+                return true;
             }
         }
-
-        return true;
     }
 
-    if(downloadList())
+    if(load())
     {
-        purge();
-        settings->sync();
-
-        if(load())
-        {
-            return true;
-        }
+        return true;
     }
 
     if(restoreEmbedded())
     {
         purge();
-        settings->sync();
 
         if(load())
         {

@@ -61,6 +61,7 @@ void FileHost::downloadTest()
     QNetworkAccessManager manager;
     QNetworkReply *file;
 
+    bytesDownloaded = 0;
     loop = new QEventLoop;
     QTimer::singleShot(DOWNLOADTESTSECS * 1000, loop, SLOT(quit()));
     emit newTestResult(trUtf8("%1").arg(url.toString()));
@@ -69,11 +70,8 @@ void FileHost::downloadTest()
     loop->exec();
     disconnect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     file->abort();
-    qApp->processEvents();
-    MUTEX.lock();
-    BYTESDOWNLOADED += bytesDownloaded;
-    MUTEX.unlock();
     emit newTestResult(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
+    qApp->processEvents();
     delete file;
     delete loop;
 }
