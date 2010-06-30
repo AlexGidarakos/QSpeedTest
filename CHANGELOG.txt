@@ -1,3 +1,12 @@
+revision 27 - 20100630                                              |
+    * Bumped QSpeedTest revision to r27                             |
+    * Bumped QSpeedTestCLI revision to r6                           |
+    * QSpeedTest r27: Fixed a nasty bug that crashed the program    |
+      when pressing for the 2nd time the stop button during a       |
+      download speed test                                           |
+    * QSpeedTestCLI r6: A small cosmetic fix in stdout output       |
+
+
 revision 26 - 20100630                                              |
     * Bumped QSpeedTest revision to r26                             |
     * Bumped QSpeedTestCLI revision to r5                           |
