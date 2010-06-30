@@ -29,7 +29,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->splitter->setSizes(QList<int>() << 50 << 200);
+    ui->splitter->setSizes(QList<int>() << 60 << 200);
     setWindowTitle(PROGRAMNAME + " " + PROGRAMVERSION);
     ui->spinBoxPingsPerTarget->setValue(PINGSPERTARGET);
     centerOnDesktop();
@@ -134,7 +134,9 @@ void MainWindow::on_pushButtonStartStop_clicked()
     }
     else
     {
+        MUTEX.lock();
         STOPBENCHMARK = true;
+        MUTEX.unlock();
         emit pushButtonStopClicked();
     }
 }
@@ -170,6 +172,7 @@ void MainWindow::benchmarkFinished(bool testAborted)
     if(testAborted)
     {
         this->updateLogMessages(trUtf8("Test aborted"));
+        qApp->processEvents();    // So that the next message does not appear between two ping results
         this->updateTestResults(trUtf8("\n\nTest aborted"));
     }
     else

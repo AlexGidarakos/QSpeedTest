@@ -179,10 +179,6 @@ void Target::ping()
     QString pingCmd;
     int skipLines;
 
-    if(STOPBENCHMARK)
-    {
-        return;
-    }
 #ifdef Q_WS_WIN
     pingCmd = QString("ping -n 1 -w %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
     skipLines = 3;
@@ -194,6 +190,7 @@ void Target::ping()
     pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUT * 1000).arg(address);
 #endif // Q_OS_LINUX
 #endif // Q_WS_WIN
+
     pingProcess.setProcessChannelMode(QProcess::MergedChannels);
     connect(&pingProcess, SIGNAL(finished(int)), &loop, SLOT(quit()));
     reset();
@@ -236,4 +233,5 @@ void Target::ping()
     }
 
     emit newTestResult(name.leftJustified(27, ' ', true) + "    " + getRttAvgAsString().rightJustified(11, ' ', true) + "    " + getPacketLossAsString().rightJustified(9, ' ', true) + "    " + getJitterAsString().rightJustified(12, ' ', true) + "    " + getRank().rightJustified(3, ' ', true));
+    qApp->processEvents();
 }

@@ -154,6 +154,7 @@ bool TargetList::load()
     Target newTarget;
     FileHost newFileHost;
 
+    purge();
     emit logMessage(trUtf8("Loading targets from %1").arg(targetListPath));
 
     if(!QFile::exists(targetListPath))
@@ -340,35 +341,21 @@ bool TargetList::restoreEmbedded()
 
 bool TargetList::init()
 {
-    purge();
+    load();    // Try to load current target list
+    if(isUpdateAvailable() && downloadList());    // Check online for updated target list and if found, download it
 
-    if(isUpdateAvailable())
+    if(load())    // If current target list loads with no errors...
     {
-        if(downloadList())
-        {
-            purge();
-
-            if(load())
-            {
-                return true;
-            }
-        }
+        return true;    // Enable Start button
     }
 
-    if(load())
+    if(restoreEmbedded())    // No correct target list file loaded up to this point. Try to restore a target list from embedded resources. If successful...
     {
-        return true;
-    }
-
-    if(restoreEmbedded())
-    {
-        purge();
-
-        if(load())
+        if(load())    // Try to load it and return true if successful
         {
             return true;
         }
     }
 
-    return false;
+    return false;    // No method gave a readable target list, return false so Start button stays disabled
 }

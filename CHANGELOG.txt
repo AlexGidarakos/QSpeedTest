@@ -1,3 +1,16 @@
+revision 29 - 20100630                                              |
+    * Reverted to r24                                               |
+    * Always check for updated target list first                    |
+    * QSpeedTest: Clicking Stop during domestic download speed test |
+      did not cancel international speed test as well. Fixed        |
+    * QSpeedTest: OS detection done when initializing program. This |
+      trades a little time during program startup for faster        |
+      printing of host information every time a test run starts     |
+    * QSpeedTest: More responsive GUI during download speed tests   |
+    * QSpeedTestCLI: A small cosmetic fix in stdout output          |
+    * QSpeedTestCLI: CTRL+C now properly stops the program          |
+
+
 revision 28 - 20100630                                              |
     * QSpeedTestCLI: Previous fix was not submitted properly        |
 
@@ -24,7 +37,6 @@ revision 25 - 20100630                                              |
     * Both: New method for measuring downloaded bytes from each file|
       host. No global variable and QMutex are needed. Hopefully it  |
       will solve the "outrageously big speeds reported" bug         |
-
 
 revision 24 - 20100630                                              |
     * Bumped QSpeedTest revision to r24                             |

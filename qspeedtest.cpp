@@ -37,16 +37,17 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 {
+    QEventLoop loop;
+    QProcess winSystemInfo, proc;
+
     results.cpuCores = QThread::idealThreadCount();
     winSystemInfo.setProcessChannelMode(QProcess::MergedChannels);
-
 #ifdef Q_WS_WIN
     if(QSysInfo::WindowsVersion == QSysInfo::WV_VISTA || QSysInfo::WindowsVersion == QSysInfo::WV_WINDOWS7)
     {
         winSystemInfo.start("systeminfo", QIODevice::ReadOnly);
     }
 #endif // Q_WS_WIN
-
     STOPBENCHMARK = false;
     connect(this, SIGNAL(initOK()), &mainWindow, SLOT(enablePushButtonStartStop()));
     connect(&mainWindow, SIGNAL(pushButtonStartClicked()), this, SLOT(startBenchmark()));
@@ -61,6 +62,98 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 
     if(targetList.init())
     {
+        emit logMessage(trUtf8("Gathering system info, please wait..."));
+        results.targetListVersion = targetList.version;
+        results.targetListComment = targetList.comment;
+        results.targetListContactUrl = targetList.contactUrl;
+        proc.setProcessChannelMode(QProcess::MergedChannels);
+        connect(&proc, SIGNAL(finished(int)), &loop, SLOT(quit()));
+#ifdef Q_WS_WIN
+        QString winArch = (QProcessEnvironment::systemEnvironment().contains("ProgramFiles(x86)"))? "x64" : "x86";
+
+        switch(QSysInfo::WindowsVersion)
+        {
+            case QSysInfo::WV_2000:
+                results.hostOS = "Windows 2000";
+                break;
+
+            case QSysInfo::WV_XP:
+                results.hostOS = "Windows XP x86";
+                break;
+
+            case QSysInfo::WV_2003:
+                proc.start("cmd /c ver", QIODevice::ReadOnly);
+                loop.exec();
+
+                if(proc.readAll().contains("2003"))
+                {
+                    results.hostOS = "Windows Server 2003 " + winArch;
+                }
+                else
+                {
+                    results.hostOS = "Windows XP x64";
+                }
+
+                break;
+
+            case QSysInfo::WV_VISTA:
+                if(winSystemInfo.state() != QProcess::NotRunning)
+                {
+                    connect(&winSystemInfo, SIGNAL(finished(int)), &loop, SLOT(quit()));
+                    loop.exec();
+                }
+
+                if(winSystemInfo.readAll().contains("Windows Server 2008"))
+                {
+                    results.hostOS = "Windows Server 2008 " + winArch;
+                }
+                else
+                {
+                    results.hostOS = "Windows Vista " + winArch;
+                }
+
+                break;
+
+            case QSysInfo::WV_WINDOWS7:
+                if(winSystemInfo.state() != QProcess::NotRunning)
+                {
+                    connect(&winSystemInfo, SIGNAL(finished(int)), &loop, SLOT(quit()));
+                    loop.exec();
+                }
+
+                if(winSystemInfo.readAll().contains("Windows Server 2008"))
+                {
+                    results.hostOS = "Windows Server 2008 R2 " + winArch;
+                }
+                else
+                {
+                   results.hostOS = "Windows 7 " + winArch;
+                }
+
+                break;
+
+            default:
+                results.hostOS = "Windows (unknown version)";
+        }
+#else
+#ifdef Q_WS_MAC
+        proc.start("sw_vers -productVersion", QIODevice::ReadOnly);
+        loop.exec();
+        results.hostOS = "Mac OS X " + proc.readLine().trimmed();
+        proc.start("uname -m", QIODevice::ReadOnly);
+#else
+#ifdef Q_OS_LINUX
+        proc.start("uname -o", QIODevice::ReadOnly);
+#else
+        proc.start("uname -s", QIODevice::ReadOnly);
+#endif // Q_OS_LINUX
+        loop.exec();
+        results.hostOS = proc.readLine().trimmed();
+        proc.start("uname -rm", QIODevice::ReadOnly);
+        loop.exec();
+        results.hostOS += " " + proc.readLine().trimmed();
+#endif // Q_WS_MAC
+#endif // Q_WS_WIN
         for(int i = 0; i < targetList.numberOfGroups; i++)
         {
             for(int j = 0; j < targetList.groups[i].getSize(); j++)
@@ -79,6 +172,7 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
             connect(&targetList.fileHostsInternational[i], SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
         }
 
+        emit logMessage(trUtf8("Ready"));
         emit initOK();
     }
 }
@@ -127,111 +221,14 @@ void QSpeedTest::checkForProgramUpdates()
 
 void QSpeedTest::printHostAndProgramInfo()
 {
-    QEventLoop loop;
-    QProcess proc;
-
-    results.targetListVersion = targetList.version;
-    results.targetListComment = targetList.comment;
-    results.targetListContactUrl = targetList.contactUrl;
     results.testDate = QDate::currentDate().toString("yyyyMMdd");
     results.testTime = QTime::currentTime().toString("hhmmss");
     results.testDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss");
     emit newTestResult(trUtf8("Report created by:       %1 %2\n"
                               "Target list used:        %3 %4\n"
                               "Target list contact URL: %5").arg(results.programName).arg(results.programVersion).arg(results.targetListVersion).arg(results.targetListComment).arg(results.targetListContactUrl));
-    processEvents();
-    proc.setProcessChannelMode(QProcess::MergedChannels);
-    connect(&proc, SIGNAL(finished(int)), &loop, SLOT(quit()));
-#ifdef Q_WS_WIN
-    QString winArch = (QProcessEnvironment::systemEnvironment().contains("ProgramFiles(x86)"))? "x64" : "x86";
-
-    switch(QSysInfo::WindowsVersion)
-    {
-        case QSysInfo::WV_2000:
-            results.hostOS = "Windows 2000";
-            break;
-
-        case QSysInfo::WV_XP:
-            results.hostOS = "Windows XP x86";
-            break;
-
-        case QSysInfo::WV_2003:
-            proc.start("cmd /c ver", QIODevice::ReadOnly);
-            loop.exec();
-
-            if(proc.readAll().contains("2003"))
-            {
-                results.hostOS = "Windows Server 2003 " + winArch;
-            }
-            else
-            {
-                results.hostOS = "Windows XP x64";
-            }
-
-            break;
-
-        case QSysInfo::WV_VISTA:
-            if(winSystemInfo.state() != QProcess::NotRunning)
-            {
-                connect(&winSystemInfo, SIGNAL(finished(int)), &loop, SLOT(quit()));
-                loop.exec();
-            }
-
-            if(winSystemInfo.readAll().contains("Windows Server 2008"))
-            {
-                results.hostOS = "Windows Server 2008 " + winArch;
-            }
-            else
-            {
-                results.hostOS = "Windows Vista " + winArch;
-            }
-
-            break;
-
-        case QSysInfo::WV_WINDOWS7:
-            if(winSystemInfo.state() != QProcess::NotRunning)
-            {
-                connect(&winSystemInfo, SIGNAL(finished(int)), &loop, SLOT(quit()));
-                loop.exec();
-            }
-
-            if(winSystemInfo.readAll().contains("Windows Server 2008"))
-            {
-                results.hostOS = "Windows Server 2008 R2 " + winArch;
-            }
-            else
-            {
-               results.hostOS = "Windows 7 " + winArch;
-            }
-
-            break;
-
-        default:
-            results.hostOS = "Windows (unknown version)";
-    }
-#else
-#ifdef Q_WS_MAC
-    proc.start("sw_vers -productVersion", QIODevice::ReadOnly);
-    loop.exec();
-    results.hostOS = "Mac OS X " + proc.readLine().trimmed();
-    proc.start("uname -m", QIODevice::ReadOnly);
-#else
-#ifdef Q_OS_LINUX
-    proc.start("uname -o", QIODevice::ReadOnly);
-#else
-    proc.start("uname -s", QIODevice::ReadOnly);
-#endif // Q_OS_LINUX
-    loop.exec();
-    results.hostOS = proc.readLine().trimmed();
-    proc.start("uname -rm", QIODevice::ReadOnly);
-    loop.exec();
-    results.hostOS += " " + proc.readLine().trimmed();
-#endif // Q_WS_MAC
-#endif // Q_WS_WIN
-
     emit newTestResult(trUtf8("Host OS / CPU cores:     %1 / %2\n"
                               "Test date and time:      %3").arg(results.hostOS).arg(results.cpuCores).arg(results.testDateTime));
-    processEvents();
 }
 
 
@@ -327,14 +324,12 @@ void QSpeedTest::printLineInfo()
     emit newTestResult(trUtf8("ISP:                     %1\n"
                               "Internet IP:             %2\n"
                               "BBRAS:                   %3\n").arg(results.isp).arg(results.ip).arg(results.bbras));
-    processEvents();
 }
 
 
 void QSpeedTest::startBenchmark()
 {
     QTime timer;
-    qint64 bytesDownloaded;
 
     timer.start();
     emit logMessage(trUtf8("Test started"));
@@ -359,21 +354,19 @@ void QSpeedTest::startBenchmark()
         if(results.parallelPingThreads > 1)    // multithreaded pinging
         {
             QtConcurrent::blockingMap(targetList.groups[i].targets, &Target::ping);
-            processEvents();
         }
         else    // single-threaded pinging
         {
             for(int j = 0; j < targetList.groups[i].getSize(); j++)
             {
+                if(STOPBENCHMARK)
+                {
+                    emit benchmarkFinished(true);
+                    return;
+                }
+
                 targetList.groups[i].targets[j].ping();
             }
-        }
-
-        if(STOPBENCHMARK)
-        {
-            emit benchmarkFinished(STOPBENCHMARK);
-            processEvents();
-            return;
         }
 
         for(int j = 0; j < targetList.groups[i].getSize(); j++)
@@ -386,7 +379,6 @@ void QSpeedTest::startBenchmark()
         if(STOPBENCHMARK)
         {
             emit benchmarkFinished(STOPBENCHMARK);
-            processEvents();
             return;
         }
 
@@ -400,7 +392,6 @@ void QSpeedTest::startBenchmark()
     if(STOPBENCHMARK)
     {
         emit benchmarkFinished(STOPBENCHMARK);
-        processEvents();
         return;
     }
 
@@ -413,34 +404,36 @@ void QSpeedTest::startBenchmark()
                 connect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));
             }
 
-            bytesDownloaded = 0;
+            BYTESDOWNLOADED = 0;
             emit newTestResult(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
             QThreadPool::globalInstance()->setMaxThreadCount(fileHosts->size());
             QtConcurrent::blockingMap(*fileHosts, &FileHost::downloadTest);
             processEvents();
 
+            if(fileHosts == &targetList.fileHostsDomestic)
+            {
+                MUTEX.lock();
+                results.speedInKbpsDomestic = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.unlock();
+                results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
+            }
+            else
+            {
+                MUTEX.lock();
+                results.speedInKbpsInternational = (BYTESDOWNLOADED) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+                MUTEX.unlock();
+                results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
+            }
+
             for(int i = 0; i < fileHosts->size(); i++)
             {
-                disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));    // because execution of abortDownload when a speed test is not running leads to segfault!
-                bytesDownloaded += fileHosts->at(i).bytesDownloaded;
+                disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(fileHosts->operator [](i)), SLOT(abortDownload()));
             }
 
             if(STOPBENCHMARK)
             {
                 emit benchmarkFinished(STOPBENCHMARK);
-                processEvents();
                 return;
-            }
-
-            if(fileHosts == &targetList.fileHostsDomestic)
-            {
-                results.speedInKbpsDomestic = bytesDownloaded / (DOWNLOADTESTSECS * 128.0);    // ((bytesDownloaded * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
-                results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
-            }
-            else
-            {
-                results.speedInKbpsInternational = bytesDownloaded / (DOWNLOADTESTSECS * 128.0);    // ((bytesDownloaded * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
-                results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
             }
         }
 
