@@ -25,6 +25,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtGui/QApplication>
 #include <QtCore/QProcess>
+#include <QtNetwork/QNetworkReply>
 #include "externs.h"
 #include "mainwindow.h"
 #include "targetlist.h"
@@ -44,10 +45,17 @@ private:
     bool pingTestEnabled;
     bool downloadTestEnabled;
     TestResults results;
-    QString vbCode;
+    QProcess traceroute;
+    QString tracerouteCommand;
+    QString bbrasLine;
+    QNetworkAccessManager manager;
+    QNetworkReply *download;
     QString htmlCode;
+    QString vbCode;
+
     void checkForProgramUpdates();
     void printHostAndProgramInfo();
+    void getLineInfo();    // Only starts downloading necessary files without blocking. The actual parsing (and blocking, if necessary) is performed in printLineInfo
     void printLineInfo();
     void generateHtmlCode();
     void generateVbCode();
