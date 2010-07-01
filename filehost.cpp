@@ -62,6 +62,7 @@ void FileHost::downloadTest()
     QNetworkReply *file;
 
     loop = new QEventLoop;
+    bytesDownloaded = 0;
     QTimer::singleShot(DOWNLOADTESTSECS * 1000, loop, SLOT(quit()));
     emit newTestResult(trUtf8("%1").arg(url.toString()));
     file = manager.get(QNetworkRequest(url));
@@ -76,11 +77,4 @@ void FileHost::downloadTest()
     qApp->processEvents();
     delete file;
     delete loop;
-}
-
-
-void FileHost::updateBytes(qint64 value)
-{
-    bytesDownloaded = value;
-    qApp->processEvents();
 }

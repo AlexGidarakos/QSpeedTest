@@ -13,9 +13,9 @@
 
 
 TEMPLATE = subdirs
-SUBDIRS = cli gui
-cli.file = qspeedtestcli.pro
+SUBDIRS = gui cli
 gui.file = qspeedtestgui.pro
+cli.file = qspeedtestcli.pro
 OTHER_FILES += resources/qspeedtest.ini \
     CHANGELOG.txt \
     COPYING.txt \

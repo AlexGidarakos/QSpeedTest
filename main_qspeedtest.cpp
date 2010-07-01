@@ -27,7 +27,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 const QString PROJECTNAME = "QSpeedTest";
 const QString PROGRAMNAME = "QSpeedTest";
 const QString PROGRAMAUTHOR = "parsifal";
-const QString PROGRAMVERSION = "r30";
+const QString PROGRAMVERSION = "r31";
 const QString PROGRAMURL = "https://sourceforge.net/projects/qspeedtest/files/";
 const QString PROGRAMDISCUSSURL = "https://sourceforge.net/apps/phpbb/qspeedtest";
 const QString PROGRAMUPDATECHECKURL = "http://qspeedtest.sourceforge.net/updates/qspeedtest.version";
