@@ -1,3 +1,9 @@
+revision 31 - 20100701                                              |
+    * QSpeedTest: Too many calls to processEvents() in the FileHost |
+      class' "updateBytes" slot could potentially lead to crashes,  |
+      so this statement was removed                                 |
+
+
 revision 30 - 20100701                                              |
     * Major changes in console, HTML and vbCode output              |
     * Fixed Start button delay                                      |

@@ -166,8 +166,12 @@ void MainWindow::benchmarkFinished(bool testAborted)
     ui->pushButtonStartStop->setEnabled(true);
     ui->pushButtonExit->setEnabled(true);
     ui->comboBoxTestMode->setEnabled(true);
-    ui->spinBoxParallelThreads->setEnabled(true);
-    ui->spinBoxPingsPerTarget->setEnabled(true);
+
+    if(ui->comboBoxTestMode->currentIndex() != 2)
+    {
+        ui->spinBoxParallelThreads->setEnabled(true);
+        ui->spinBoxPingsPerTarget->setEnabled(true);
+    }
 
     if(testAborted)
     {

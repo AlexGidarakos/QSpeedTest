@@ -55,7 +55,7 @@ public slots:
     void abortDownload() { loop->quit(); }
 
 private slots:
-    void updateBytes(qint64);
+    void updateBytes(qint64 value) { bytesDownloaded = value; }
 };
 
 
