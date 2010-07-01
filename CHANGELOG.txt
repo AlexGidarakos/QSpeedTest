@@ -1,3 +1,8 @@
+revision 30 - 20100701                                              |
+    * Major changes in console, HTML and vbCode output              |
+    * Fixed Start button delay                                      |
+
+
 revision 29 - 20100630                                              |
     * Reverted to r24                                               |
     * Always check for updated target list first                    |

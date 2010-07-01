@@ -25,6 +25,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QProcess>
+#include <QtNetwork/QNetworkReply>
 #include "externs.h"
 #include "targetlist.h"
 #include "testresults.h"
@@ -44,7 +45,6 @@ public:
     QSpeedTestCli();
 
 private:
-    QProcess winSystemInfo;
     TargetList targetList;
     TestResults results;
     int testMode;
@@ -53,6 +53,11 @@ private:
     bool downloadTestEnabled;
     bool htmlOutputEnabled;
     bool vbOutputEnabled;
+    QProcess traceroute;
+    QString tracerouteCommand;
+    QString bbrasLine;
+    QNetworkAccessManager manager;
+    QNetworkReply *download;
     QString htmlCode;
     QString vbCode;
 
@@ -61,6 +66,7 @@ private:
     void startBenchmark();
     void saveReports();
     void printHostAndProgramInfo();
+    void getLineInfo();    // Only starts downloading necessary files without blocking. The actual parsing (and blocking, if necessary) is performed in printLineInfo
     void printLineInfo();
     void generateHtmlCode();
     void generateVbCode();

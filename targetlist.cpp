@@ -342,7 +342,7 @@ bool TargetList::restoreEmbedded()
 bool TargetList::init()
 {
     load();    // Try to load current target list
-    if(isUpdateAvailable() && downloadList());    // Check online for updated target list and if found, download it
+    if(isUpdateAvailable() && downloadList()) {}    // Check online for updated target list and if found, download it
 
     if(load())    // If current target list loads with no errors...
     {

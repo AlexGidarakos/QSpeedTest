@@ -1,3 +1,4 @@
+050. Speedup program startup
 100. Program icons and logo
 200. Implement menu system, with options saved inside qspeedtest.ini
 300. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
