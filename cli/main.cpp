@@ -19,19 +19,16 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#include "plaintarget.h"
+#include "qspeedtestcli.h"
+#include <QtCore/QString>
 
 
-PlainTarget::PlainTarget(const Target &target)
+int main(int argc, char *argv[])
 {
-    name = target.getName();
-    address = target.getAddress();
-    rtt = target.getRttAvg();
-    rttAsString = target.getRttAvgAsString();
-    aliveFlag = target.isAlive();
-    packetLoss = target.getPacketLoss();
-    packetLossAsString = target.getPacketLossAsString();
-    jitter = target.getJitter();
-    jitterAsString = target.getJitterAsString();
-    rank = target.getRank();
+    QCoreApplication app(argc, argv);
+    QSpeedTestCli cli;
+
+    QMetaObject::invokeMethod(&cli, "start", Qt::QueuedConnection);
+
+    return app.exec();
 }

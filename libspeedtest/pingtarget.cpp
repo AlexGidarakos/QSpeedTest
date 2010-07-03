@@ -21,12 +21,13 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtCore/QProcess>
 #include <QtCore/QEventLoop>
-#include <QtCore/QCoreApplication>
-#include "target.h"
-#include "externs.h"
+#include "pingtarget.h"
 
 
-Target::Target()
+quint8 LIBSPEEDTEST_EXPORT PINGSPERTARGET = 4;
+
+
+PingTarget::PingTarget()
 {
     jitterSum = 0.0;
     packetLoss = 100.0;
@@ -35,7 +36,7 @@ Target::Target()
 }
 
 
-Target::Target(const Target &target, QObject *parent) : QObject(parent)
+PingTarget::PingTarget(const PingTarget &target, QObject *parent) : QObject(parent)
 {
     name = target.name;
     address = target.address;
@@ -48,7 +49,7 @@ Target::Target(const Target &target, QObject *parent) : QObject(parent)
 }
 
 
-Target& Target::operator=(const Target &target)
+PingTarget& PingTarget::operator=(const PingTarget &target)
 {
     if(this == &target)
         return *this;
@@ -66,7 +67,7 @@ Target& Target::operator=(const Target &target)
 }
 
 
-void Target::reset()
+void PingTarget::reset()
 {
     rtt.clear();
     rttSum = 0.0;
@@ -77,7 +78,7 @@ void Target::reset()
 }
 
 
-void Target::addRtt(double value)
+void PingTarget::addRtt(double value)
 {
     if(replies)
     {
@@ -91,7 +92,7 @@ void Target::addRtt(double value)
 }
 
 
-double Target::getRttAvg() const
+double PingTarget::getRttAvg() const
 {
     if(replies)
     {
@@ -102,7 +103,7 @@ double Target::getRttAvg() const
 }
 
 
-QString Target::getRttAvgAsString() const
+QString PingTarget::getRttAvgAsString() const
 {
     if(replies)
     {
@@ -113,7 +114,7 @@ QString Target::getRttAvgAsString() const
 }
 
 
-QString Target::getPacketLossAsString() const
+QString PingTarget::getPacketLossAsString() const
 {
     if(replies)
     {
@@ -124,7 +125,7 @@ QString Target::getPacketLossAsString() const
 }
 
 
-double Target::getJitter() const
+double PingTarget::getJitter() const
 {
     if(replies < 2)
     {
@@ -135,7 +136,7 @@ double Target::getJitter() const
 }
 
 
-QString Target::getJitterAsString() const
+QString PingTarget::getJitterAsString() const
 {
     double jitter;
 
@@ -150,7 +151,7 @@ QString Target::getJitterAsString() const
 }
 
 
-QString Target::getRank() const
+QString PingTarget::getRank() const
 {
     double rttAvg;
 
@@ -169,7 +170,7 @@ QString Target::getRank() const
 }
 
 
-void Target::ping()
+void PingTarget::ping()
 {
     QByteArray contents;
     QString newRtt;
@@ -197,10 +198,13 @@ void Target::ping()
 
     for(int i = 0; i < PINGSPERTARGET; i++)
     {
+        MUTEX.lock();
         if(STOPBENCHMARK)
         {
+            MUTEX.unlock();
             return;
         }
+        MUTEX.unlock();
 
         pingProcess.start(pingCmd, QIODevice::ReadOnly);
         loop.exec();
@@ -233,5 +237,4 @@ void Target::ping()
     }
 
     emit newTestResult(name.leftJustified(27, ' ', true) + "    " + getRttAvgAsString().rightJustified(11, ' ', true) + "    " + getPacketLossAsString().rightJustified(9, ' ', true) + "    " + getJitterAsString().rightJustified(12, ' ', true) + "    " + getRank().rightJustified(3, ' ', true));
-    qApp->processEvents();
 }

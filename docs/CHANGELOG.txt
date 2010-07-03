@@ -1,3 +1,8 @@
+revision 32 - 20100703                                              |
+    * Code refactoring for modular structure: libspeedtest library  |
+      created, split source code files to separate directories etc. |
+
+
 revision 31 - 20100701                                              |
     * QSpeedTest: Too many calls to processEvents() in the FileHost |
       class' "updateBytes" slot could potentially lead to crashes,  |

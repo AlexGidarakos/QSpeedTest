@@ -25,7 +25,6 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtGui/QMainWindow>
 #include "dialogabout.h"
-#include "externs.h"
 
 
 namespace Ui
@@ -60,8 +59,8 @@ signals:
     void pushButtonVbCodeClicked(bool);
 
 private slots:
-    void on_comboBoxTestMode_currentIndexChanged(int index);
-    void on_spinBoxPingsPerTarget_valueChanged(int value) { PINGSPERTARGET = value; }
+    void on_comboBoxTestMode_currentIndexChanged(int);
+    void on_spinBoxPingsPerTarget_valueChanged(int);
     void enablePushButtonStartStop();
     void updateLogMessages(QString);
     void updateTestResults(QString);

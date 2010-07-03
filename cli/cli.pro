@@ -17,21 +17,9 @@ QT += network
 TARGET = qspeedtestcli
 TEMPLATE = app
 CONFIG += console
-CONFIG -= app_bundle
-SOURCES += main_qspeedtestcli.cpp \
-    qspeedtestcli.cpp \
-    plaintarget.cpp \
-    target.cpp \
-    targetgroup.cpp \
-    targetlist.cpp \
-    testresults.cpp \
-    filehost.cpp
-HEADERS += qspeedtestcli.h \
-    externs.h \
-    plaintarget.h \
-    target.h \
-    targetgroup.h \
-    targetlist.h \
-    testresults.h \
-    filehost.h
-RESOURCES += resources/resources.qrc
+DESTDIR = ../bin
+INCLUDEPATH += ../libspeedtest
+LIBS += -L../bin -L../libspeedtest -lspeedtest
+SOURCES += main.cpp \
+    qspeedtestcli.cpp
+HEADERS += qspeedtestcli.h

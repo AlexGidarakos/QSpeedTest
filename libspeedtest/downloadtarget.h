@@ -19,34 +19,39 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef FILEHOST_H
-#define FILEHOST_H
+#ifndef DOWNLOADTARGET_H
+#define DOWNLOADTARGET_H
 
 
+#include "libspeedtest_global.h"
 #include <QtCore/QUrl>
 #include <QtCore/QEventLoop>
 
 
-class FileHost : public QObject
+const quint8 DOWNLOADTESTSECS = 15;
+
+
+class LIBSPEEDTEST_EXPORT DownloadTarget : public QObject
 {
     Q_OBJECT
 
 public:
-    FileHost() {}
-    FileHost(QString, QUrl);
-    FileHost(const FileHost&, QObject *parent = 0);
-    FileHost& operator=(const FileHost&);
+    DownloadTarget();
+    DownloadTarget(QString, QUrl);
+    DownloadTarget(const DownloadTarget&, QObject *parent = 0);
+    DownloadTarget& operator=(const DownloadTarget&);
     void downloadTest();
-    QString getName() { return name; }
+    QString getName() const { return name; }
     void setName(QString value) { name = value; }
-    QUrl getUrl() { return url; }
+    QUrl getUrl() const { return url; }
     void setUrl(QUrl value) { url = value; }
-    qint64 bytesDownloaded;
+    qint64 getBytesDownloaded() const { return bytesDownloaded; }
 
 private:
     QString name;
     QUrl url;
     QEventLoop *loop;
+    qint64 bytesDownloaded;
 
 signals:
     void newTestResult(QString);
@@ -59,4 +64,4 @@ private slots:
 };
 
 
-#endif // FILEHOST_H
+#endif // DOWNLOADTARGET_H

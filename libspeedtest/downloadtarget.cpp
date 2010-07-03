@@ -19,8 +19,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#include "filehost.h"
-#include "externs.h"
+#include "downloadtarget.h"
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtCore/QEventLoop>
 #include <QtNetwork/QNetworkReply>
@@ -28,35 +27,40 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QCoreApplication>
 
 
-FileHost::FileHost(QString name, QUrl url)
+DownloadTarget::DownloadTarget()
+{
+}
+
+
+DownloadTarget::DownloadTarget(QString name, QUrl url)
 {
     this->name = name;
     this->url = url;
 }
 
 
-FileHost::FileHost(const FileHost &fileHost, QObject *parent) : QObject(parent)
+DownloadTarget::DownloadTarget(const DownloadTarget &target, QObject *parent) : QObject(parent)
 {
-    name = fileHost.name;
-    url = fileHost.url;
-    bytesDownloaded = fileHost.bytesDownloaded;
+    name = target.name;
+    url = target.url;
+    bytesDownloaded = target.bytesDownloaded;
 }
 
 
-FileHost& FileHost::operator=(const FileHost &fileHost) {
+DownloadTarget& DownloadTarget::operator=(const DownloadTarget &target) {
 
-    if(this == &fileHost)
+    if(this == &target)
         return *this;
 
-    name = fileHost.name;
-    url = fileHost.url;
-    bytesDownloaded = fileHost.bytesDownloaded;
+    name = target.name;
+    url = target.url;
+    bytesDownloaded = target.bytesDownloaded;
 
     return *this;
 }
 
 
-void FileHost::downloadTest()
+void DownloadTarget::downloadTest()
 {
     QNetworkAccessManager manager;
     QNetworkReply *file;
@@ -70,9 +74,6 @@ void FileHost::downloadTest()
     loop->exec();
     disconnect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     file->abort();
-    MUTEX.lock();
-    BYTESDOWNLOADED += bytesDownloaded;
-    MUTEX.unlock();
     emit newTestResult(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
     qApp->processEvents();
     delete file;
