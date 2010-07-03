@@ -13,29 +13,30 @@
 
 
 QT += network
-TARGET = qspeedtest
-TEMPLATE = app
-SOURCES += \
-    mainwindow.cpp \
-    dialogabout.cpp \
-    qspeedtest.cpp \
+QT -= gui
+DESTDIR = ../bin
+TARGET = speedtest
+TEMPLATE = lib
+DEFINES += LIBSPEEDTEST_LIBRARY
+SOURCES += testresults.cpp \
+    downloadtarget.cpp \
+    pingtarget.cpp \
+    pinggroup.cpp \
     targetlist.cpp \
-    targetgroup.cpp \
-    filehost.cpp \
-    testresults.cpp \
-    target.cpp \
-    plaintarget.cpp \
-    main_qspeedtest.cpp
-HEADERS += mainwindow.h \
-    dialogabout.h \
-    qspeedtest.h \
-    externs.h \
-    targetlist.h \
-    targetgroup.h \
-    filehost.h \
+    hostinfo.cpp
+HEADERS += libspeedtest_global.h \
     testresults.h \
-    target.h \
-    plaintarget.h
-FORMS += mainwindow.ui \
-    dialogabout.ui
-RESOURCES += resources/resources.qrc
+    downloadtarget.h \
+    pingtarget.h \
+    pinggroup.h \
+    targetlist.h \
+    hostinfo.h
+RESOURCES += ../resources/resources.qrc
+COPYCOMMAND = $$_PRO_FILE_PWD_/../docs/*.txt ../bin
+win32 {
+    COPYCOMMAND = copy $$replace(COPYCOMMAND, "/", "\\")
+}
+else {
+    COPYCOMMAND = cp $$COPYCOMMAND
+}
+QMAKE_POST_LINK = $$COPYCOMMAND

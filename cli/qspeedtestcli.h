@@ -26,9 +26,12 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QCoreApplication>
 #include <QtCore/QProcess>
 #include <QtNetwork/QNetworkReply>
-#include "externs.h"
 #include "targetlist.h"
 #include "testresults.h"
+#include "hostinfo.h"
+
+
+extern quint8 PINGSPERTARGET;
 
 
 namespace TestMode
@@ -43,31 +46,25 @@ class QSpeedTestCli : public QObject
 
 public:
     QSpeedTestCli();
+    ~QSpeedTestCli();
 
 private:
-    TargetList targetList;
+    TargetList *targetList;
     TestResults results;
+    HostInfo *hostInfo;
     int testMode;
     QString testModeAsString;
     bool pingTestEnabled;
     bool downloadTestEnabled;
     bool htmlOutputEnabled;
     bool vbOutputEnabled;
-    QProcess traceroute;
-    QString tracerouteCommand;
-    QString bbrasLine;
-    QNetworkAccessManager manager;
-    QNetworkReply *download;
     QString htmlCode;
     QString vbCode;
 
     void parseArguments();
     void checkForProgramUpdates();
-    void startBenchmark();
+    void runBenchmark();
     void saveReports();
-    void printHostAndProgramInfo();
-    void getLineInfo();    // Only starts downloading necessary files without blocking. The actual parsing (and blocking, if necessary) is performed in printLineInfo
-    void printLineInfo();
     void generateHtmlCode();
     void generateVbCode();
 

@@ -19,22 +19,22 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef TARGETGROUP_H
-#define TARGETGROUP_H
+#ifndef PINGGROUP_H
+#define PINGGROUP_H
 
 
+#include "libspeedtest_global.h"
+#include "pingtarget.h"
 #include <QtCore/QString>
 #include <QtCore/QList>
-#include "target.h"
-#include "plaintarget.h"
 
 
-class TargetGroup
+class LIBSPEEDTEST_EXPORT PingGroup
 {
 public:
-    TargetGroup() { size = 0; }
+    PingGroup() { size = 0; }
     void reset();
-    void addTarget(const Target &target) { targets.append(target); size++; }
+    void addTarget(const PingTarget &target) { targets.append(target); size++; }
     double getRttSum();
     QString getRttSumAsString();
     double getRttAvg();
@@ -43,12 +43,12 @@ public:
     QString getPacketLossAvgAsString();
     QString getRank();
     int getTargetsAlive();
-    QString getName() { return name; }
+    QString getName() const { return name; }
     void setName(QString value) { name = value; }
-    int getSize() { return size; }
+    int getSize() const { return size; }
     void setSize(int value) { size = value; }
-    QList<Target> targets;
-    QList<PlainTarget> plainTargets;
+    void sort();
+    QList<PingTarget> targets;
 
 private:
     double rttSum;
@@ -63,4 +63,4 @@ private:
 };
 
 
-#endif // TARGETGROUP_H
+#endif // PINGGROUP_H

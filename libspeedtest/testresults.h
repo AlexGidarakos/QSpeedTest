@@ -23,16 +23,23 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #define TESTRESULTS_H
 
 
+#include "libspeedtest_global.h"
+#include "targetlist.h"
 #include <QtCore/QString>
 
 
-class TestResults
+class LIBSPEEDTEST_EXPORT TestResults : public QObject
 {
+    Q_OBJECT
+
 public:
     TestResults();
     void reset();
-    QString getRttSumAsString();
+    void print();
     QString getRttAvgAsString();
+    QString getHtmlCode(TargetList*);
+    QString getVbCode(TargetList*);
+
     QString programName;
     QString programVersion;
     QString programUrl;
@@ -44,7 +51,7 @@ public:
     QString testTime;
     QString testDateTime;
     QString hostOS;
-    int cpuCores;
+    quint8 cpuCores;
     QString isp;
     QString ip;
     QString bbras;
@@ -56,9 +63,14 @@ public:
     double speedInKbpsInternational;
     double speedInMBpsInternational;
     QString testMode;
+    bool pingTestEnabled;
+    bool downloadTestEnabled;
     double testDuration;
-    int pingsPerTarget;
-    int parallelPingThreads;
+    quint8 pingsPerTarget;
+    quint8 parallelPingThreads;
+
+signals:
+    void message(QString);
 };
 
 

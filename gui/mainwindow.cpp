@@ -142,6 +142,12 @@ void MainWindow::on_pushButtonStartStop_clicked()
 }
 
 
+void MainWindow::on_spinBoxPingsPerTarget_valueChanged(int value)
+{
+    PINGSPERTARGET = value;
+}
+
+
 void MainWindow::enablePushButtonStartStop()
 {
     ui->pushButtonStartStop->setEnabled(true);
@@ -160,7 +166,7 @@ void MainWindow::updateTestResults(QString value)
 }
 
 
-void MainWindow::benchmarkFinished(bool testAborted)
+void MainWindow::benchmarkFinished(bool testCompleted)
 {
     ui->pushButtonStartStop->setText(trUtf8("Start"));
     ui->pushButtonStartStop->setEnabled(true);
@@ -173,16 +179,16 @@ void MainWindow::benchmarkFinished(bool testAborted)
         ui->spinBoxPingsPerTarget->setEnabled(true);
     }
 
-    if(testAborted)
+    if(testCompleted)
+    {
+        ui->pushButtonVbCode->setEnabled(true);
+        ui->pushButtonHtmlCode->setEnabled(true);
+    }
+    else
     {
         this->updateLogMessages(trUtf8("Test aborted"));
         qApp->processEvents();    // So that the next message does not appear between two ping results
         this->updateTestResults(trUtf8("\n\nTest aborted"));
-    }
-    else
-    {
-        ui->pushButtonVbCode->setEnabled(true);
-        ui->pushButtonHtmlCode->setEnabled(true);
     }
 }
 

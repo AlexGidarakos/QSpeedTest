@@ -19,10 +19,10 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#include "targetgroup.h"
+#include "pinggroup.h"
 
 
-void TargetGroup::reset()
+void PingGroup::reset()
 {
     rttSum = 0.0;
     rttSumAsString.clear();
@@ -31,11 +31,10 @@ void TargetGroup::reset()
     packetLossAvgAsString.clear();
     rank.clear();
     targetsAlive = 0;
-    plainTargets.clear();
 }
 
 
-double TargetGroup::getRttSum()
+double PingGroup::getRttSum()
 {
     if(rttSum > 0.0)
     {
@@ -51,7 +50,7 @@ double TargetGroup::getRttSum()
 }
 
 
-QString TargetGroup::getRttSumAsString()
+QString PingGroup::getRttSumAsString()
 {
     if(rttSumAsString.isEmpty())
     {
@@ -67,7 +66,7 @@ QString TargetGroup::getRttSumAsString()
 }
 
 
-double TargetGroup::getRttAvg()
+double PingGroup::getRttAvg()
 {
     if(rttSum > 0.0)
     {
@@ -83,7 +82,7 @@ double TargetGroup::getRttAvg()
 }
 
 
-QString TargetGroup::getRttAvgAsString()
+QString PingGroup::getRttAvgAsString()
 {
     if(rttAvgAsString.isEmpty())
     {
@@ -99,7 +98,7 @@ QString TargetGroup::getRttAvgAsString()
 }
 
 
-double TargetGroup::getPacketLossAvg()
+double PingGroup::getPacketLossAvg()
 {
     if(packetLossAvg > 0.0)
     {
@@ -120,7 +119,7 @@ double TargetGroup::getPacketLossAvg()
 }
 
 
-QString TargetGroup::getPacketLossAvgAsString()
+QString PingGroup::getPacketLossAvgAsString()
 {
     if(packetLossAvgAsString.isEmpty())
     {
@@ -136,7 +135,7 @@ QString TargetGroup::getPacketLossAvgAsString()
 }
 
 
-QString TargetGroup::getRank()
+QString PingGroup::getRank()
 {
     if(rank.isEmpty())
     {
@@ -159,7 +158,7 @@ QString TargetGroup::getRank()
 }
 
 
-int TargetGroup::getTargetsAlive()
+int PingGroup::getTargetsAlive()
 {
     if(!targetsAlive)
     {
@@ -173,4 +172,35 @@ int TargetGroup::getTargetsAlive()
     }
 
     return targetsAlive;
+}
+
+
+void PingGroup::sort()
+{
+    QList<PingTarget> targetsSorted;
+
+    while(!targets.isEmpty())
+    {
+        double min = targets.first().getRttAvg();
+        int index = 0;
+        double temp;
+
+        int size = targets.size();
+
+        for(int i = 0; i < size; i++)
+        {
+            if((temp = targets[i].getRttAvg()) < min)
+            {
+                min = temp;
+                index = i;
+            }
+        }
+
+        targetsSorted.append((targets.takeAt(index)));
+    }
+
+    while(!targetsSorted.isEmpty())
+    {
+        targets.append(targetsSorted.takeFirst());
+    }
 }

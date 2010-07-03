@@ -12,11 +12,19 @@
 # along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 
-TEMPLATE = subdirs
-CONFIG += ordered
-SUBDIRS = libspeedtest cli gui
-OTHER_FILES += resources/defaulttargetlist.ini \
-    TODO.txt \
-    docs/CHANGELOG.txt \
-    docs/COPYING.txt \
-    docs/README.txt
+QT += network
+TARGET = qspeedtest
+TEMPLATE = app
+DESTDIR = ../bin
+INCLUDEPATH += ../libspeedtest
+LIBS += -L../bin -L../libspeedtest -lspeedtest
+SOURCES += main.cpp \
+    qspeedtest.cpp \
+    mainwindow.cpp \
+    dialogabout.cpp
+HEADERS += qspeedtest.h \
+    mainwindow.h \
+    dialogabout.h \
+    externs.h
+FORMS += mainwindow.ui \
+    dialogabout.ui

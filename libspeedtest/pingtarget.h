@@ -19,23 +19,30 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef TARGET_H
-#define TARGET_H
+#ifndef PINGTARGET_H
+#define PINGTARGET_H
 
 
+#include "libspeedtest_global.h"
+#include <QtCore/QMutex>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QList>
 
 
-class Target : public QObject
+const quint8 PINGTIMEOUT = 1;
+extern QMutex MUTEX;
+extern bool STOPBENCHMARK;
+
+
+class LIBSPEEDTEST_EXPORT PingTarget : public QObject
 {
     Q_OBJECT
 
 public:
-    Target();
-    Target(const Target&, QObject *parent = 0);
-    Target& operator=(const Target&);
+    PingTarget();
+    PingTarget(const PingTarget&, QObject *parent = 0);
+    PingTarget& operator=(const PingTarget&);
     void reset();
     QString getName() const { return name; }
     void setName(QString value) { name = value; }
@@ -67,4 +74,4 @@ signals:
 };
 
 
-#endif // TARGET_H
+#endif // PINGTARGET_H
