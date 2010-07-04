@@ -35,8 +35,7 @@ extern QMutex MUTEX;
 extern bool STOPBENCHMARK;
 
 
-class LIBSPEEDTEST_EXPORT PingTarget : public QObject
-{
+class LIBSPEEDTEST_EXPORT PingTarget : public QObject {
     Q_OBJECT
 
 public:

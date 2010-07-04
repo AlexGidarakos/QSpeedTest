@@ -31,8 +31,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 const quint8 DOWNLOADTESTSECS = 15;
 
 
-class LIBSPEEDTEST_EXPORT DownloadTarget : public QObject
-{
+class LIBSPEEDTEST_EXPORT DownloadTarget : public QObject {
     Q_OBJECT
 
 public:
@@ -51,13 +50,15 @@ private:
     QString name;
     QUrl url;
     QEventLoop *loop;
+    bool *stopBenchmark;
     qint64 bytesDownloaded;
 
 signals:
     void newTestResult(QString);
+    void sigProgress(quint8);
 
 public slots:
-    void abortDownload() { loop->quit(); }
+    void abortDownload() { *stopBenchmark = true; loop->quit(); }
 
 private slots:
     void updateBytes(qint64 value) { bytesDownloaded = value; }

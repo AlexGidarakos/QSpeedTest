@@ -30,8 +30,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtNetwork/QNetworkReply>
 
 
-class LIBSPEEDTEST_EXPORT HostInfo
-{
+class LIBSPEEDTEST_EXPORT HostInfo {
 public:
     HostInfo(TestResults*);
     void init();

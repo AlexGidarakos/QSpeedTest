@@ -35,8 +35,7 @@ const QString TARGETLISTURL = "http://qspeedtest.sourceforge.net/updates/qspeedt
 const quint8 UPDATECHECKTIMEOUT = 3;
 
 
-class LIBSPEEDTEST_EXPORT TargetList : public QObject
-{
+class LIBSPEEDTEST_EXPORT TargetList : public QObject {
     Q_OBJECT
 
 public:
@@ -48,8 +47,7 @@ public:
     bool load();
     bool restoreEmbedded();
     bool init();
-    qint64 getBytesDomestic() const;
-    qint64 getBytesInternational() const;
+    qint64 getBytesDownloaded(QList<DownloadTarget>&) const;
     QString getVersion() const { return version; }
     QString getComment() const { return comment; }
     QString getContactUrl() const { return contactUrl; }

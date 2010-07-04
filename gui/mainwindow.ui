@@ -345,6 +345,9 @@
       </item>
      </layout>
     </item>
+    <item row="4" column="0">
+     <widget class="QProgressBar" name="progressBar"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">

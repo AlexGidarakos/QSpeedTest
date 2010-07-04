@@ -27,20 +27,17 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QCoreApplication>
 
 
-DownloadTarget::DownloadTarget()
-{
+DownloadTarget::DownloadTarget() {
 }
 
 
-DownloadTarget::DownloadTarget(QString name, QUrl url)
-{
+DownloadTarget::DownloadTarget(QString name, QUrl url) {
     this->name = name;
     this->url = url;
 }
 
 
-DownloadTarget::DownloadTarget(const DownloadTarget &target, QObject *parent) : QObject(parent)
-{
+DownloadTarget::DownloadTarget(const DownloadTarget &target, QObject *parent) : QObject(parent) {
     name = target.name;
     url = target.url;
     bytesDownloaded = target.bytesDownloaded;
@@ -60,22 +57,31 @@ DownloadTarget& DownloadTarget::operator=(const DownloadTarget &target) {
 }
 
 
-void DownloadTarget::downloadTest()
-{
+void DownloadTarget::downloadTest() {
     QNetworkAccessManager manager;
     QNetworkReply *file;
 
     loop = new QEventLoop;
+    stopBenchmark = new bool;
+    *stopBenchmark = false;
     bytesDownloaded = 0;
-    QTimer::singleShot(DOWNLOADTESTSECS * 1000, loop, SLOT(quit()));
     emit newTestResult(trUtf8("%1").arg(url.toString()));
+    qApp->processEvents();
     file = manager.get(QNetworkRequest(url));
     connect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
-    loop->exec();
+
+    for(int i = 0; i < DOWNLOADTESTSECS && !(*stopBenchmark); i++) {
+        QTimer::singleShot(1000, loop, SLOT(quit()));
+        loop->exec();
+        emit sigProgress(i);
+        qApp->processEvents();
+    }
+
     disconnect(file, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateBytes(qint64)));
     file->abort();
     emit newTestResult(trUtf8("%1: %2 bytes").arg(name).arg(bytesDownloaded));
     qApp->processEvents();
     delete file;
     delete loop;
+    delete stopBenchmark;
 }

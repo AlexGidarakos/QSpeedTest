@@ -22,16 +22,19 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "externs.h"
+#include "downloadtarget.h"
 #include <QtGui/QDesktopWidget>
 #include <QtCore/QDateTime>
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
-{
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     ui->splitter->setSizes(QList<int>() << 60 << 200);
     setWindowTitle(PROGRAMNAME + " " + PROGRAMVERSION);
     ui->spinBoxPingsPerTarget->setValue(PINGSPERTARGET);
+    ui->statusBar->addWidget(ui->progressBar);
+    ui->progressBar->setVisible(false);
+    ui->progressBar->setRange(0, DOWNLOADTESTSECS - 1);
     centerOnDesktop();
 #ifndef Q_WS_WIN
 #ifdef Q_WS_MAC
@@ -45,38 +48,32 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
 
-int MainWindow::parallelThreads()
-{
+int MainWindow::parallelThreads() {
     return ui->spinBoxParallelThreads->value();
 }
 
 
-bool MainWindow::pingTestEnabled()
-{
+bool MainWindow::pingTestEnabled() {
     return (ui->comboBoxTestMode->currentIndex() != 2);
 }
 
 
-bool MainWindow::downloadTestEnabled()
-{
+bool MainWindow::downloadTestEnabled() {
     return (ui->comboBoxTestMode->currentIndex() != 1);
 }
 
 
-void MainWindow::showStatusBarMessage(QString value)
-{
+void MainWindow::showStatusBarMessage(QString value) {
     ui->statusBar->showMessage(value, 5 * 1000);
 }
 
 
-void MainWindow::centerOnDesktop()
-{
+void MainWindow::centerOnDesktop() {
     int screenWidth, width, screenHeight, height, x, y;
     QSize windowSize;
 
@@ -92,12 +89,26 @@ void MainWindow::centerOnDesktop()
 }
 
 
-void MainWindow::changeEvent(QEvent *e)
-{
+void MainWindow::showProgressBar() {
+    ui->progressBar->reset();
+    ui->progressBar->setVisible(true);
+}
+
+
+void MainWindow::hideProgressBar() {
+    ui->progressBar->setVisible(false);
+}
+
+
+void MainWindow::updateProgressBar(quint8 value) {
+    ui->progressBar->setValue(value);
+}
+
+
+void MainWindow::changeEvent(QEvent *e) {
     QMainWindow::changeEvent(e);
 
-    switch(e->type())
-    {
+    switch(e->type()) {
         case QEvent::LanguageChange:
             ui->retranslateUi(this);
             break;
@@ -108,8 +119,7 @@ void MainWindow::changeEvent(QEvent *e)
 }
 
 
-void MainWindow::on_pushButtonAbout_clicked()
-{
+void MainWindow::on_pushButtonAbout_clicked() {
     DialogAbout *dialog = new DialogAbout(this);
 
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -117,10 +127,8 @@ void MainWindow::on_pushButtonAbout_clicked()
 }
 
 
-void MainWindow::on_pushButtonStartStop_clicked()
-{
-    if(!ui->pushButtonStartStop->text().compare(trUtf8("Start")))
-    {
+void MainWindow::on_pushButtonStartStop_clicked() {
+    if(!ui->pushButtonStartStop->text().compare(trUtf8("Start"))) {
         ui->pushButtonStartStop->setText(trUtf8("Stop"));
         ui->pushButtonExit->setEnabled(false);
         ui->pushButtonVbCode->setEnabled(false);
@@ -132,8 +140,7 @@ void MainWindow::on_pushButtonStartStop_clicked()
         STOPBENCHMARK = false;
         emit pushButtonStartClicked();
     }
-    else
-    {
+    else {
         MUTEX.lock();
         STOPBENCHMARK = true;
         MUTEX.unlock();
@@ -142,50 +149,42 @@ void MainWindow::on_pushButtonStartStop_clicked()
 }
 
 
-void MainWindow::on_spinBoxPingsPerTarget_valueChanged(int value)
-{
+void MainWindow::on_spinBoxPingsPerTarget_valueChanged(int value) {
     PINGSPERTARGET = value;
 }
 
 
-void MainWindow::enablePushButtonStartStop()
-{
+void MainWindow::enablePushButtonStartStop() {
     ui->pushButtonStartStop->setEnabled(true);
 }
 
 
-void MainWindow::updateLogMessages(QString value)
-{
+void MainWindow::updateLogMessages(QString value) {
     ui->plainTextEditLogMessages->appendPlainText(QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + value);
 }
 
 
-void MainWindow::updateTestResults(QString value)
-{
+void MainWindow::updateTestResults(QString value) {
     ui->plainTextEditTestResults->appendPlainText(value);
 }
 
 
-void MainWindow::benchmarkFinished(bool testCompleted)
-{
+void MainWindow::benchmarkFinished(bool testCompleted) {
     ui->pushButtonStartStop->setText(trUtf8("Start"));
     ui->pushButtonStartStop->setEnabled(true);
     ui->pushButtonExit->setEnabled(true);
     ui->comboBoxTestMode->setEnabled(true);
 
-    if(ui->comboBoxTestMode->currentIndex() != 2)
-    {
+    if(ui->comboBoxTestMode->currentIndex() != 2) {
         ui->spinBoxParallelThreads->setEnabled(true);
         ui->spinBoxPingsPerTarget->setEnabled(true);
     }
 
-    if(testCompleted)
-    {
+    if(testCompleted) {
         ui->pushButtonVbCode->setEnabled(true);
         ui->pushButtonHtmlCode->setEnabled(true);
     }
-    else
-    {
+    else {
         this->updateLogMessages(trUtf8("Test aborted"));
         qApp->processEvents();    // So that the next message does not appear between two ping results
         this->updateTestResults(trUtf8("\n\nTest aborted"));
@@ -193,15 +192,12 @@ void MainWindow::benchmarkFinished(bool testCompleted)
 }
 
 
-void MainWindow::on_comboBoxTestMode_currentIndexChanged(int index)
-{
-    if(index == 2)
-    {
+void MainWindow::on_comboBoxTestMode_currentIndexChanged(int index) {
+    if(index == 2) {
         ui->spinBoxPingsPerTarget->setEnabled(false);
         ui->spinBoxParallelThreads->setEnabled(false);
     }
-    else
-    {
+    else {
         ui->spinBoxPingsPerTarget->setEnabled(true);
         ui->spinBoxParallelThreads->setEnabled(true);
     }

@@ -29,14 +29,12 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QApplication>
 
 
-namespace Ui
-{
+namespace Ui {
     class DialogAbout;
 }
 
 
-class DialogAbout : public QDialog
-{
+class DialogAbout : public QDialog {
     Q_OBJECT
 
 public:

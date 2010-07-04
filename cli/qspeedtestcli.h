@@ -34,14 +34,12 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 extern quint8 PINGSPERTARGET;
 
 
-namespace TestMode
-{
+namespace TestMode {
     enum { Info = 0, Ping, Download, All };
 }
 
 
-class QSpeedTestCli : public QObject
-{
+class QSpeedTestCli : public QObject {
     Q_OBJECT
 
 public:
