@@ -1,3 +1,12 @@
+revision 33 - 20100704                                              |
+    * Feature request: Added progress bar to indicate the progress  |
+      of a speed test                                               |
+    * HTML and vB code output: Added a Google Chart URL showing     |
+      average latency per ping group                                |
+    * HTML and vB code output: Fixed a small bug regarding the      |
+      "Speed only" mode                                             |
+
+
 revision 32 - 20100703                                              |
     * Code refactoring for modular structure: libspeedtest library  |
       created, split source code files to separate directories etc. |

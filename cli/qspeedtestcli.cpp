@@ -32,7 +32,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 const QString PROJECTNAME = "QSpeedTest";
 const QString PROGRAMNAME = "QSpeedTestCLI";
-const QString PROGRAMVERSION = "r32";
+const QString PROGRAMVERSION = "r33";
 const QString PROGRAMAUTHOR = "parsifal";
 const QString PROGRAMURL = "https://sourceforge.net/projects/qspeedtest/files/";
 const QString PROGRAMDISCUSSURL = "https://sourceforge.net/apps/phpbb/qspeedtest";
@@ -40,8 +40,7 @@ const QString PROGRAMUPDATECHECKURL = "http://qspeedtest.sourceforge.net/updates
 quint8 PARALLELPINGS = 4;
 
 
-QSpeedTestCli::QSpeedTestCli()
-{
+QSpeedTestCli::QSpeedTestCli() {
     results.programName = PROGRAMNAME;
     results.programVersion = PROGRAMVERSION;
     results.programUrl = PROGRAMURL;
@@ -57,15 +56,13 @@ QSpeedTestCli::QSpeedTestCli()
 }
 
 
-QSpeedTestCli::~QSpeedTestCli()
-{
+QSpeedTestCli::~QSpeedTestCli() {
     if(targetList) delete targetList;
     if(hostInfo) delete hostInfo;
 }
 
 
-void QSpeedTestCli::start()
-{
+void QSpeedTestCli::start() {
     parseArguments();
     targetList = new TargetList(PROJECTNAME, PROGRAMNAME);
     hostInfo = new HostInfo(&results);
@@ -74,29 +71,18 @@ void QSpeedTestCli::start()
     connect(this, SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
     checkForProgramUpdates();
 
-    if(!targetList->init())
-    {
+    if(!targetList->init()) {
         updateLogMessages(trUtf8("Unsuccessful initialization of the target list, %1 will now exit").arg(PROGRAMNAME));
         exit(8);
     }
 
     for(int i = 0; i < targetList->groups.size(); i++)
-    {
         for(int j = 0; j < targetList->groups[i].getSize(); j++)
-        {
             connect(&targetList->groups[i].targets[j], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
-        }
-    }
 
-    for(int i = 0; i < targetList->fileHostsDomestic.size(); i++)
-    {
-        connect(&targetList->fileHostsDomestic[i], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
-    }
-
-    for(int i = 0; i < targetList->fileHostsInternational.size(); i++)
-    {
-        connect(&targetList->fileHostsInternational[i], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
-    }
+    foreach(QList<DownloadTarget> *targets, QList<QList<DownloadTarget>*>() << &targetList->fileHostsDomestic << &targetList->fileHostsInternational)
+        for(int i = 0; i < targets->size(); i++)
+            connect(&(targets->operator [](i)), SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
 
     connect(&results, SIGNAL(message(QString)), this, SLOT(updateTestResults(QString)));
     results.targetListVersion = targetList->getVersion();
@@ -109,8 +95,7 @@ void QSpeedTestCli::start()
 }
 
 
-void QSpeedTestCli::parseArguments()
-{
+void QSpeedTestCli::parseArguments() {
     QStringList args(qApp->arguments());
     int count = args.count();
     QString arg;
@@ -118,8 +103,7 @@ void QSpeedTestCli::parseArguments()
     QString message;
     int number;
 
-    if(count == 1)
-    {
+    if(count == 1) {
         qDebug() << qPrintable(trUtf8("No parameters specified, running with defaults:\n"
                                       "Mode:             Ping and speed\n"
                                       "Pings per target: %1\n"
@@ -129,21 +113,15 @@ void QSpeedTestCli::parseArguments()
         return;
     }
 
-    for(int i = 1; i < count; i++)    // no point checking arg[0], it is always the executable's name
-    {
+    for(int i = 1; i < count; i++) {   // no point checking arg[0], it is always the executable's name
         arg = args.at(i).toLower();
 
         if(i < count - 1)    // if there is a next argument after the current
-        {
             argNext = args.at(i + 1);
-        }
         else
-        {
             argNext.clear();
-        }
 
-        if(arg == "--help" || arg == "-h" || arg == "help" || arg == "/?" || arg == "?")
-        {
+        if(arg == "--help" || arg == "-h" || arg == "help" || arg == "/?" || arg == "?") {
             message = trUtf8("%1 %2 by %3 - %4").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMAUTHOR).arg(PROGRAMURL);
             message = trUtf8("\n    Usage: %1 [PARAMETERS]\n\n"
                              "    [PARAMETERS] are optional and can be any from the following\n\n"
@@ -172,24 +150,18 @@ void QSpeedTestCli::parseArguments()
             exit(0);
         }
 
-        if(arg == "--version" || arg == "-v")
-        {
+        if(arg == "--version" || arg == "-v") {
             qDebug() << qPrintable(trUtf8("%1 %2").arg(PROGRAMNAME).arg(PROGRAMVERSION));
-
             exit(0);
         }
 
-        if(arg == "--mode" || arg == "-m")
-        {
-            if(argNext.isEmpty())
-            {
+        if(arg == "--mode" || arg == "-m") {
+            if(argNext.isEmpty()) {
                 qDebug() << qPrintable(trUtf8("Error #1: No value specified after --mode (-m) switch"));
-
                 exit(1);
             }
 
-            if(argNext == "info")
-            {
+            if(argNext == "info") {
                 testMode = TestMode::Info;
                 testModeAsString = trUtf8("Info only");
                 pingTestEnabled = results.pingTestEnabled = false;
@@ -198,8 +170,7 @@ void QSpeedTestCli::parseArguments()
                 continue;
             }
 
-            if(argNext == "ping")
-            {
+            if(argNext == "ping") {
                 testMode = TestMode::Ping;
                 testModeAsString = trUtf8("Ping only");
                 downloadTestEnabled = results.downloadTestEnabled = false;
@@ -207,8 +178,7 @@ void QSpeedTestCli::parseArguments()
                 continue;
             }
 
-            if(argNext == "speed")
-            {
+            if(argNext == "speed") {
                 testMode = TestMode::Download;
                 testModeAsString = trUtf8("Speed only");
                 pingTestEnabled = results.pingTestEnabled = false;
@@ -216,31 +186,24 @@ void QSpeedTestCli::parseArguments()
                 continue;
             }
 
-            if(argNext == "all")
-            {
+            if(argNext == "all") {
                 testMode = TestMode::All;
                 i++;
                 continue;
             }
 
             qDebug() << qPrintable(trUtf8("Error #2: Value \"%1\" after --mode (-m) switch not a known mode").arg(argNext));
-
             exit(2);
         }
 
-        if(arg == "--pings" || arg == "-p")
-        {
-            if(argNext.isEmpty())
-            {
+        if(arg == "--pings" || arg == "-p") {
+            if(argNext.isEmpty()) {
                 qDebug() << qPrintable(trUtf8("Error #3: No value specified after --pings (-p) switch"));
-
                 exit(3);
             }
 
-            if((!(number = argNext.toInt())) || number < 1 || number > 100)
-            {
+            if((!(number = argNext.toInt())) || number < 1 || number > 100) {
                 qDebug() << qPrintable(trUtf8("Error #4: Value \"%1\" after --pings (-p) switch not an integer between 1 and 100").arg(argNext));
-
                 exit(4);
             }
 
@@ -249,19 +212,14 @@ void QSpeedTestCli::parseArguments()
             continue;
         }
 
-        if(arg == "--threads" || arg == "-t")
-        {
-            if(argNext.isEmpty())
-            {
+        if(arg == "--threads" || arg == "-t") {
+            if(argNext.isEmpty()) {
                 qDebug() << qPrintable(trUtf8("Error #5: No value specified after --threads (-t) switch"));
-
                 exit(5);
             }
 
-            if((!(number = argNext.toInt())) || number < 1 || number > 8)
-            {
+            if((!(number = argNext.toInt())) || number < 1 || number > 8) {
                 qDebug() << qPrintable(trUtf8("Error #6: Value \"%1\" after --threads (-t) switch not an integer between 1 and 8").arg(argNext));
-
                 exit(6);
             }
 
@@ -270,20 +228,17 @@ void QSpeedTestCli::parseArguments()
             continue;
         }
 
-        if(arg == "--nohtml" || arg == "-nh")
-        {
+        if(arg == "--nohtml" || arg == "-nh") {
             htmlOutputEnabled = false;
             continue;
         }
 
-        if(arg == "--novb" || arg == "-nv")
-        {
+        if(arg == "--novb" || arg == "-nv") {
             vbOutputEnabled = false;
             continue;
         }
 
         qDebug() << qPrintable(trUtf8("Error #7: Unknown switch or parameter \"%1\"").arg(arg));
-
         exit(7);
     }
 
@@ -297,8 +252,7 @@ void QSpeedTestCli::parseArguments()
 }
 
 
-void QSpeedTestCli::checkForProgramUpdates()
-{
+void QSpeedTestCli::checkForProgramUpdates() {
     QNetworkAccessManager manager;
     QNetworkReply *download;
     QEventLoop loop;
@@ -310,41 +264,33 @@ void QSpeedTestCli::checkForProgramUpdates()
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
-    if(download->isRunning() || download->error())
-    {
+    if(download->isRunning() || download->error()) {
         download->abort();
         download->deleteLater();
         updateLogMessages(trUtf8("Update site unreachable"));
         return;
     }
 
-    if((remoteVersion = download->readLine().mid(1).toInt()) > PROGRAMVERSION.mid(1).toInt())
-    {
+    if((remoteVersion = download->readLine().mid(1).toInt()) > PROGRAMVERSION.mid(1).toInt()) {
         updateLogMessages(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
         updateLogMessages(trUtf8("You can find the new version at %1").arg(PROGRAMURL));
     }
     else
-    {
         updateLogMessages(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
-    }
 }
 
 
-void QSpeedTestCli::updateLogMessages(QString value)
-{
+void QSpeedTestCli::updateLogMessages(QString value) {
     qDebug() << qPrintable((QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + value));
 }
 
 
-void QSpeedTestCli::updateTestResults(QString value)
-{
+void QSpeedTestCli::updateTestResults(QString value) {
     qDebug() << qPrintable(value);
 }
 
 
-void QSpeedTestCli::runBenchmark()
-{
-
+void QSpeedTestCli::runBenchmark() {
     QTime timer;
 
     timer.start();
@@ -359,23 +305,16 @@ void QSpeedTestCli::runBenchmark()
     QThreadPool::globalInstance()->setMaxThreadCount(PARALLELPINGS - 1);
     hostInfo->init();
 
-    for(int i = 0; i < targetList->groups.size() && pingTestEnabled; i++)
-    {
+    for(int i = 0; i < targetList->groups.size() && pingTestEnabled; i++) {
         targetList->groups[i].reset();
         updateTestResults(targetList->groups[i].getName().leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
         updateTestResults("-------------------------------------------------------------------------------");
 
         if(PARALLELPINGS > 1)    // multithreaded pinging
-        {
             QtConcurrent::blockingMap(targetList->groups[i].targets, &PingTarget::ping);
-        }
         else    // single-threaded pinging
-        {
             for(int j = 0; j < targetList->groups[i].getSize(); j++)
-            {
                 targetList->groups[i].targets[j].ping();
-            }
-        }
 
         qApp->processEvents();
         targetList->groups[i].sort();
@@ -385,19 +324,17 @@ void QSpeedTestCli::runBenchmark()
                                  "Group average: %2\n").arg(targetList->groups[i].getRttSumAsString()).arg(targetList->groups[i].getRttAvgAsString()));
     }
 
-    if(downloadTestEnabled)
-    {
-        foreach(QList<DownloadTarget>* targets, QList<QList<DownloadTarget>*>() << &targetList->fileHostsDomestic << &targetList->fileHostsInternational)
-        {
+    if(downloadTestEnabled) {
+        foreach(QList<DownloadTarget> *targets, QList<QList<DownloadTarget>*>() << &targetList->fileHostsDomestic << &targetList->fileHostsInternational) {
             updateTestResults(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
             QThreadPool::globalInstance()->setMaxThreadCount(targets->size());
             QtConcurrent::blockingMap(*targets, &DownloadTarget::downloadTest);
             qApp->processEvents();
         }
 
-        results.speedInKbpsDomestic = targetList->getBytesDomestic() / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+        results.speedInKbpsDomestic = targetList->getBytesDownloaded(targetList->fileHostsDomestic) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
         results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
-        results.speedInKbpsInternational = targetList->getBytesInternational() / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+        results.speedInKbpsInternational = targetList->getBytesDownloaded(targetList->fileHostsInternational) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
         results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
     }
 
@@ -409,14 +346,12 @@ void QSpeedTestCli::runBenchmark()
 }
 
 
-void QSpeedTestCli::saveReports()
-{
+void QSpeedTestCli::saveReports() {
     QFile file;
     QString fileName;
     QTextStream outStream;
 
-    if(htmlOutputEnabled)
-    {
+    if(htmlOutputEnabled) {
         generateHtmlCode();
         fileName = QDir::currentPath() + QString("/%1_%2%3_%4.html").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
         fileName = QDir::toNativeSeparators(fileName);
@@ -424,8 +359,7 @@ void QSpeedTestCli::saveReports()
         outStream.setDevice(&file);
         outStream.setCodec("UTF-8");
 
-        if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             updateLogMessages(trUtf8("Error writing HTML report %1").arg(fileName));
             return;
         }
@@ -435,8 +369,7 @@ void QSpeedTestCli::saveReports()
         updateLogMessages(trUtf8("HTML report saved to %1").arg(fileName));
     }
 
-    if(vbOutputEnabled)
-    {
+    if(vbOutputEnabled) {
         generateVbCode();
         fileName = QDir::currentPath() + QString("/%1_%2%3_%4.vb.txt").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
         fileName = QDir::toNativeSeparators(fileName);
@@ -444,8 +377,7 @@ void QSpeedTestCli::saveReports()
         outStream.setDevice(&file);
         outStream.setCodec("UTF-8");
 
-        if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             updateLogMessages(trUtf8("Error writing vBulletin report %1").arg(fileName));
             return;
         }
@@ -457,23 +389,17 @@ void QSpeedTestCli::saveReports()
 }
 
 
-void QSpeedTestCli::generateHtmlCode()
-{
+void QSpeedTestCli::generateHtmlCode() {
     if(!htmlCode.isEmpty())
-    {
         return;
-    }
 
     htmlCode = results.getHtmlCode(targetList);
 }
 
 
-void QSpeedTestCli::generateVbCode()
-{
+void QSpeedTestCli::generateVbCode() {
     if(!vbCode.isEmpty())
-    {
         return;
-    }
 
     vbCode = results.getVbCode(targetList);
 }

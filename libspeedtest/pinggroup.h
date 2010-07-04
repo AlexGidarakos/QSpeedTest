@@ -29,8 +29,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QList>
 
 
-class LIBSPEEDTEST_EXPORT PingGroup
-{
+class LIBSPEEDTEST_EXPORT PingGroup {
 public:
     PingGroup() { size = 0; }
     void reset();

@@ -33,8 +33,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 
 
-class QSpeedTest : public QApplication
-{
+class QSpeedTest : public QApplication {
     Q_OBJECT
 
 public:
@@ -64,6 +63,7 @@ signals:
 
 private slots:
     void runBenchmark();
+    void slotUpdateProgress(quint8);
     void showReport(bool);
 };
 

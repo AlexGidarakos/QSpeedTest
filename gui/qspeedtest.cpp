@@ -35,8 +35,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QDir>
 
 
-QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
-{
+QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv) {
     results.programName = PROGRAMNAME;
     results.programVersion = PROGRAMVERSION;
     results.programUrl = PROGRAMURL;
@@ -56,27 +55,20 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
     checkForProgramUpdates();
 
     if(!targetList->init())
-    {
         return;
-    }
 
     results.targetListVersion = targetList->getVersion();
     results.targetListComment = targetList->getComment();
     results.targetListContactUrl = targetList->getContactUrl();
 
     for(int i = 0; i < targetList->groups.size(); i++)
-    {
         connectPingGroup(targetList->groups[i]);
-    }
 
-    for(int i = 0; i < targetList->fileHostsDomestic.size(); i++)
-    {
-        connect(&targetList->fileHostsDomestic[i], SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
-    }
+    foreach(QList<DownloadTarget> *targets, QList<QList<DownloadTarget>*>() << &targetList->fileHostsDomestic << &targetList->fileHostsInternational) {
+        connect(&(targets->operator [](0)), SIGNAL(sigProgress(quint8)), this, SLOT(slotUpdateProgress(quint8)));
 
-    for(int i = 0; i < targetList->fileHostsInternational.size(); i++)
-    {
-        connect(&targetList->fileHostsInternational[i], SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
+        for(int i = 0; i < targets->size(); i++)
+            connect(&(targets->operator [](i)), SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
     }
 
     emit logMessage(trUtf8("Ready"));
@@ -84,15 +76,13 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
 }
 
 
-QSpeedTest::~QSpeedTest()
-{
+QSpeedTest::~QSpeedTest() {
     delete targetList;
     delete hostInfo;
 }
 
 
-void QSpeedTest::checkForProgramUpdates()
-{
+void QSpeedTest::checkForProgramUpdates() {
     QNetworkAccessManager manager;
     QNetworkReply *download;
     QEventLoop loop;
@@ -104,27 +94,23 @@ void QSpeedTest::checkForProgramUpdates()
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
-    if(download->isRunning() || download->error())
-    {
+    if(download->isRunning() || download->error()) {
         download->abort();
         emit logMessage(trUtf8("Update site unreachable"));
         delete download;
         return;
     }
 
-    if((remoteVersion = download->readLine().mid(1).toInt()) > PROGRAMVERSION.mid(1).toInt())
-    {
+    if((remoteVersion = download->readLine().mid(1).toInt()) > PROGRAMVERSION.mid(1).toInt()) {
         emit logMessage(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
         int reply = QMessageBox::question(NULL, trUtf8("Update available"), trUtf8("An updated version of %1 (%2) is available online.\n\nWould you like to open the download page in your browser?").arg(PROGRAMNAME).arg(remoteVersion), QMessageBox::Yes, QMessageBox::No);
 
-        if(reply == QMessageBox::Yes)
-        {
+        if(reply == QMessageBox::Yes) {
             emit logMessage(trUtf8("Opening download page %1").arg(PROGRAMURL));
             QDesktopServices::openUrl(QUrl(PROGRAMURL));
         }
     }
-    else
-    {
+    else {
         emit logMessage(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
     }
 
@@ -132,17 +118,13 @@ void QSpeedTest::checkForProgramUpdates()
 }
 
 
-void QSpeedTest::connectPingGroup(PingGroup &group)
-{
+void QSpeedTest::connectPingGroup(PingGroup &group) {
     for(int i = 0; i < group.targets.size(); i++)
-    {
         connect(&group.targets[i], SIGNAL(newTestResult(QString)), &mainWindow, SLOT(updateTestResults(QString)));
-    }
 }
 
 
-void QSpeedTest::runBenchmark()
-{
+void QSpeedTest::runBenchmark() {
     QTime timer;
 
     timer.start();
@@ -158,23 +140,17 @@ void QSpeedTest::runBenchmark()
     QThreadPool::globalInstance()->setMaxThreadCount(results.parallelPingThreads - 1);
     hostInfo->init();
 
-    for(int i = 0; i < targetList->groups.size() && pingTestEnabled; i++)
-    {
+    for(int i = 0; i < targetList->groups.size() && pingTestEnabled; i++) {
         targetList->groups[i].reset();
         emit newTestResult(targetList->groups[i].getName().leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
         emit newTestResult("-------------------------------------------------------------------------------");
 
         if(results.parallelPingThreads > 1)    // multithreaded pinging
-        {
             QtConcurrent::blockingMap(targetList->groups[i].targets, &PingTarget::ping);
-        }
         else    // single-threaded pinging
-        {
-            for(int j = 0; j < targetList->groups[i].getSize(); j++)
-            {
+            for(int j = 0; j < targetList->groups[i].getSize(); j++) {
                 MUTEX.lock();
-                if(STOPBENCHMARK)
-                {
+                if(STOPBENCHMARK) {
                     MUTEX.unlock();
                     emit benchmarkFinished(false);
                     return;
@@ -183,11 +159,10 @@ void QSpeedTest::runBenchmark()
 
                 targetList->groups[i].targets[j].ping();
             }
-        }
+
 
         MUTEX.lock();
-        if(STOPBENCHMARK)
-        {
+        if(STOPBENCHMARK) {
             MUTEX.unlock();
             emit benchmarkFinished(false);
             return;
@@ -204,28 +179,23 @@ void QSpeedTest::runBenchmark()
         processEvents();
     }
 
-    if(downloadTestEnabled)
-    {
-        foreach(QList<DownloadTarget>* targets, QList<QList<DownloadTarget>*>() << &targetList->fileHostsDomestic << &targetList->fileHostsInternational)
-        {
+    if(downloadTestEnabled) {
+        foreach(QList<DownloadTarget> *targets, QList<QList<DownloadTarget>*>() << &targetList->fileHostsDomestic << &targetList->fileHostsInternational) {
             for(int i = 0; i < targets->size(); i++)
-            {
                 connect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(targets->operator [](i)), SLOT(abortDownload()));
-            }
 
             emit newTestResult(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
             QThreadPool::globalInstance()->setMaxThreadCount(targets->size());
+            mainWindow.showProgressBar();
             QtConcurrent::blockingMap(*targets, &DownloadTarget::downloadTest);
+            mainWindow.hideProgressBar();
             processEvents();
 
             for(int i = 0; i < targets->size(); i++)
-            {
                 disconnect(&mainWindow, SIGNAL(pushButtonStopClicked()), &(targets->operator [](i)), SLOT(abortDownload()));
-            }
 
             MUTEX.lock();
-            if(STOPBENCHMARK)
-            {
+            if(STOPBENCHMARK) {
                 MUTEX.unlock();
                 emit benchmarkFinished(false);
                 return;
@@ -233,17 +203,14 @@ void QSpeedTest::runBenchmark()
             MUTEX.unlock();
         }
 
-        results.speedInKbpsDomestic = targetList->getBytesDomestic() / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+        results.speedInKbpsDomestic = targetList->getBytesDownloaded(targetList->fileHostsDomestic) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
         results.speedInMBpsDomestic = results.speedInKbpsDomestic / 8192;    // (results.speedInKbpsDomestic / 1024) / 8
-        results.speedInKbpsInternational = targetList->getBytesInternational() / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
+        results.speedInKbpsInternational = targetList->getBytesDownloaded(targetList->fileHostsInternational) / (DOWNLOADTESTSECS * 128.0);    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
         results.speedInMBpsInternational = results.speedInKbpsInternational / 8192;    // (results.speedInKbpsInernational / 1024) / 8
-
-        if(pingTestEnabled) results.testMode = (pingTestEnabled)? trUtf8("Ping and speed") : trUtf8("Speed only");
+        results.testMode = (pingTestEnabled)? trUtf8("Ping and speed") : trUtf8("Speed only");
     }
     else
-    {
         results.testMode = trUtf8("Ping only");
-    }
 
     hostInfo->retrieve();
     results.testDuration = (timer.elapsed() * 1.0) / 1000;
@@ -253,19 +220,21 @@ void QSpeedTest::runBenchmark()
 }
 
 
-void QSpeedTest::showReport(bool showHtml)
-{
+void QSpeedTest::slotUpdateProgress(quint8 value) {
+    mainWindow.updateProgressBar(value);
+}
+
+
+void QSpeedTest::showReport(bool showHtml) {
     QFile file;
     QString fileName;
     QTextStream outStream;
 
-    if(showHtml)
-    {
+    if(showHtml) {
         generateHtmlCode();
         fileName = QDir::tempPath() + QString("/%1_%2%3.html").arg(results.programName).arg(results.testDate).arg(results.testTime);
     }
-    else
-    {
+    else {
         generateVbCode();
         fileName = QDir::tempPath() + QString("/%1_%2%3.vb.txt").arg(results.programName).arg(results.testDate).arg(results.testTime);
     }
@@ -275,8 +244,7 @@ void QSpeedTest::showReport(bool showHtml)
     outStream.setDevice(&file);
     outStream.setCodec("UTF-8");
 
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(NULL, trUtf8("Error"), trUtf8("Error writing temporary file %1").arg(fileName));
         return;
     }
@@ -289,12 +257,9 @@ void QSpeedTest::showReport(bool showHtml)
 }
 
 
-void QSpeedTest::generateHtmlCode()
-{
+void QSpeedTest::generateHtmlCode() {
     if(!htmlCode.isEmpty())
-    {
         return;
-    }
 
     htmlCode = results.getHtmlCode(targetList);
 }
@@ -303,9 +268,7 @@ void QSpeedTest::generateHtmlCode()
 void QSpeedTest::generateVbCode()
 {
     if(!vbCode.isEmpty())
-    {
         return;
-    }
 
     vbCode = results.getVbCode(targetList);
 }

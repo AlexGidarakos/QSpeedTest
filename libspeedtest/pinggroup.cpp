@@ -22,8 +22,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "pinggroup.h"
 
 
-void PingGroup::reset()
-{
+void PingGroup::reset() {
     rttSum = 0.0;
     rttSumAsString.clear();
     rttAvgAsString.clear();
@@ -34,30 +33,21 @@ void PingGroup::reset()
 }
 
 
-double PingGroup::getRttSum()
-{
+double PingGroup::getRttSum() {
     if(rttSum > 0.0)
-    {
         return rttSum;
-    }
 
     for(int i = 0; i < targets.size(); i++)
-    {
         rttSum += targets[i].getRttAvg();
-    }
 
     return rttSum;
 }
 
 
-QString PingGroup::getRttSumAsString()
-{
-    if(rttSumAsString.isEmpty())
-    {
+QString PingGroup::getRttSumAsString() {
+    if(rttSumAsString.isEmpty()) {
         if(getTargetsAlive())
-        {
             return (rttSumAsString = QString::number(getRttSum(), 'f', 2) + " msec");
-        }
 
         return (rttSumAsString = "N/A");
     }
@@ -66,30 +56,21 @@ QString PingGroup::getRttSumAsString()
 }
 
 
-double PingGroup::getRttAvg()
-{
+double PingGroup::getRttAvg() {
     if(rttSum > 0.0)
-    {
         return (rttSum / targetsAlive);
-    }
 
     if(getTargetsAlive())
-    {
         return (getRttSum() / getTargetsAlive());
-    }
 
     return 0.0;
 }
 
 
-QString PingGroup::getRttAvgAsString()
-{
-    if(rttAvgAsString.isEmpty())
-    {
+QString PingGroup::getRttAvgAsString() {
+    if(rttAvgAsString.isEmpty()) {
         if(getTargetsAlive())
-        {
             return (rttAvgAsString = QString::number(getRttAvg(), 'f', 2) + " msec");
-        }
 
         return (rttAvgAsString = "N/A");
     }
@@ -98,19 +79,13 @@ QString PingGroup::getRttAvgAsString()
 }
 
 
-double PingGroup::getPacketLossAvg()
-{
+double PingGroup::getPacketLossAvg() {
     if(packetLossAvg > 0.0)
-    {
         return packetLossAvg;
-    }
 
-    if(getTargetsAlive())
-    {
+    if(getTargetsAlive()) {
         for(int i = 0; i < targets.size(); i++)
-        {
             packetLossAvg += targets[i].getPacketLoss();
-        }
 
         packetLossAvg /= targetsAlive;
     }
@@ -119,14 +94,10 @@ double PingGroup::getPacketLossAvg()
 }
 
 
-QString PingGroup::getPacketLossAvgAsString()
-{
-    if(packetLossAvgAsString.isEmpty())
-    {
+QString PingGroup::getPacketLossAvgAsString() {
+    if(packetLossAvgAsString.isEmpty())     {
         if(getTargetsAlive())
-        {
             return (packetLossAvgAsString = QString::number(getPacketLossAvg(), 'f', 2) + "%");
-        }
 
         return (packetLossAvgAsString = "100%");
     }
@@ -135,12 +106,9 @@ QString PingGroup::getPacketLossAvgAsString()
 }
 
 
-QString PingGroup::getRank()
-{
-    if(rank.isEmpty())
-    {
-        if(getTargetsAlive())
-        {
+QString PingGroup::getRank() {
+    if(rank.isEmpty()) {
+        if(getTargetsAlive())  {
             double rttAvg = getRttAvg();
 
             if(rttAvg < 30.0) return (rank = "A");
@@ -158,29 +126,20 @@ QString PingGroup::getRank()
 }
 
 
-int PingGroup::getTargetsAlive()
-{
+int PingGroup::getTargetsAlive() {
     if(!targetsAlive)
-    {
         for(int i = 0; i < targets.size(); i++)
-        {
             if(targets[i].isAlive())
-            {
                 targetsAlive++;
-            }
-        }
-    }
 
     return targetsAlive;
 }
 
 
-void PingGroup::sort()
-{
+void PingGroup::sort() {
     QList<PingTarget> targetsSorted;
 
-    while(!targets.isEmpty())
-    {
+    while(!targets.isEmpty()) {
         double min = targets.first().getRttAvg();
         int index = 0;
         double temp;
@@ -188,19 +147,15 @@ void PingGroup::sort()
         int size = targets.size();
 
         for(int i = 0; i < size; i++)
-        {
             if((temp = targets[i].getRttAvg()) < min)
             {
                 min = temp;
                 index = i;
             }
-        }
 
         targetsSorted.append((targets.takeAt(index)));
     }
 
     while(!targetsSorted.isEmpty())
-    {
         targets.append(targetsSorted.takeFirst());
-    }
 }

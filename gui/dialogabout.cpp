@@ -24,8 +24,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 
 
-DialogAbout::DialogAbout(QWidget *parent) : QDialog(parent), ui(new Ui::DialogAbout)
-{
+DialogAbout::DialogAbout(QWidget *parent) : QDialog(parent), ui(new Ui::DialogAbout) {
     ui->setupUi(this);
     setWindowTitle(trUtf8("About %1").arg(PROGRAMNAME));
     ui->labelVersion->setText(trUtf8("Version number: ") + PROGRAMVERSION);
@@ -35,18 +34,15 @@ DialogAbout::DialogAbout(QWidget *parent) : QDialog(parent), ui(new Ui::DialogAb
 }
 
 
-DialogAbout::~DialogAbout()
-{
+DialogAbout::~DialogAbout() {
     delete ui;
 }
 
 
-void DialogAbout::changeEvent(QEvent *e)
-{
+void DialogAbout::changeEvent(QEvent *e) {
     QDialog::changeEvent(e);
 
-    switch(e->type())
-    {
+    switch(e->type()) {
         case QEvent::LanguageChange:
             ui->retranslateUi(this);
             break;

@@ -27,8 +27,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 quint8 LIBSPEEDTEST_EXPORT PINGSPERTARGET = 4;
 
 
-PingTarget::PingTarget()
-{
+PingTarget::PingTarget() {
     jitterSum = 0.0;
     packetLoss = 100.0;
     replies = 0;
@@ -36,8 +35,7 @@ PingTarget::PingTarget()
 }
 
 
-PingTarget::PingTarget(const PingTarget &target, QObject *parent) : QObject(parent)
-{
+PingTarget::PingTarget(const PingTarget &target, QObject *parent) : QObject(parent) {
     name = target.name;
     address = target.address;
     rtt = target.rtt;
@@ -49,8 +47,7 @@ PingTarget::PingTarget(const PingTarget &target, QObject *parent) : QObject(pare
 }
 
 
-PingTarget& PingTarget::operator=(const PingTarget &target)
-{
+PingTarget& PingTarget::operator=(const PingTarget &target) {
     if(this == &target)
         return *this;
 
@@ -67,8 +64,7 @@ PingTarget& PingTarget::operator=(const PingTarget &target)
 }
 
 
-void PingTarget::reset()
-{
+void PingTarget::reset() {
     rtt.clear();
     rttSum = 0.0;
     jitterSum = 0.0;
@@ -78,12 +74,9 @@ void PingTarget::reset()
 }
 
 
-void PingTarget::addRtt(double value)
-{
+void PingTarget::addRtt(double value) {
     if(replies)
-    {
         jitterSum += rtt.last() - value;
-    }
 
     rtt.append(value);
     rttSum += value;
@@ -92,58 +85,43 @@ void PingTarget::addRtt(double value)
 }
 
 
-double PingTarget::getRttAvg() const
-{
+double PingTarget::getRttAvg() const {
     if(replies)
-    {
         return rttSum / (replies * 1.0);
-    }
 
     return 0.0;
 }
 
 
-QString PingTarget::getRttAvgAsString() const
-{
+QString PingTarget::getRttAvgAsString() const {
     if(replies)
-    {
         return QString::number(getRttAvg(), 'f', 2) + " msec";
-    }
 
     return "N/A";
 }
 
 
-QString PingTarget::getPacketLossAsString() const
-{
+QString PingTarget::getPacketLossAsString() const {
     if(replies)
-    {
         return QString::number(packetLoss, 'f', 2) + "%";
-    }
 
     return "100.00%";
 }
 
 
-double PingTarget::getJitter() const
-{
+double PingTarget::getJitter() const {
     if(replies < 2)
-    {
         return 0.0;
-    }
 
     return (jitterSum / replies);
 }
 
 
-QString PingTarget::getJitterAsString() const
-{
+QString PingTarget::getJitterAsString() const {
     double jitter;
 
     if(!replies)
-    {
         return "N/A";
-    }
 
     jitter = getJitter();
 
@@ -151,14 +129,11 @@ QString PingTarget::getJitterAsString() const
 }
 
 
-QString PingTarget::getRank() const
-{
+QString PingTarget::getRank() const {
     double rttAvg;
 
     if(!replies)
-    {
         return "N/A";
-    }
 
     rttAvg = rttSum / replies;
     if(rttAvg < 30.0) return "A";
@@ -170,8 +145,7 @@ QString PingTarget::getRank() const
 }
 
 
-void PingTarget::ping()
-{
+void PingTarget::ping() {
     QByteArray contents;
     QString newRtt;
     QStringList list;
@@ -196,11 +170,9 @@ void PingTarget::ping()
     connect(&pingProcess, SIGNAL(finished(int)), &loop, SLOT(quit()));
     reset();
 
-    for(int i = 0; i < PINGSPERTARGET; i++)
-    {
+    for(int i = 0; i < PINGSPERTARGET; i++) {
         MUTEX.lock();
-        if(STOPBENCHMARK)
-        {
+        if(STOPBENCHMARK) {
             MUTEX.unlock();
             return;
         }
@@ -210,19 +182,14 @@ void PingTarget::ping()
         loop.exec();
 
         for(int j = 0; j < skipLines; j++)
-        {
             contents = pingProcess.readLine().trimmed();
-        }
 
 #ifdef Q_WS_WIN
         if(!contents.contains(QString("=").toAscii()))
-        {
             contents = pingProcess.readLine().trimmed();
-        }
 #endif // Q_WS_WIN
 
-        if(contents.contains(QString("=").toAscii()))
-        {
+        if(contents.contains(QString("=").toAscii())) {
             newRtt = contents;
             list = newRtt.split("=");
 #ifdef Q_WS_WIN

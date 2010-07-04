@@ -34,8 +34,7 @@ QMutex LIBSPEEDTEST_EXPORT MUTEX;
 bool LIBSPEEDTEST_EXPORT STOPBENCHMARK = false;
 
 
-TargetList::TargetList(QString projectName, QString programName, QObject *parent) : QObject(parent)
-{
+TargetList::TargetList(QString projectName, QString programName, QObject *parent) : QObject(parent) {
     settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, projectName, programName.toLower() + ".targets");
     version.clear();
     comment.clear();
@@ -44,8 +43,7 @@ TargetList::TargetList(QString projectName, QString programName, QObject *parent
 }
 
 
-void TargetList::purge()
-{
+void TargetList::purge() {
     version.clear();
     comment.clear();
     contactUrl.clear();
@@ -57,8 +55,7 @@ void TargetList::purge()
 }
 
 
-bool TargetList::isUpdateAvailable()
-{
+bool TargetList::isUpdateAvailable() {
     QNetworkAccessManager manager;
     QNetworkReply *download;
     QEventLoop loop;
@@ -70,8 +67,7 @@ bool TargetList::isUpdateAvailable()
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
-    if(download->isRunning() || download->error())
-    {
+    if(download->isRunning() || download->error()) {
         download->abort();
         emit logMessage(trUtf8("Update site unreachable"));
         delete download;
@@ -80,8 +76,7 @@ bool TargetList::isUpdateAvailable()
 
     download->readLine();
 
-    if((remoteVersion = download->readLine().trimmed().right(12)) > version)
-    {
+    if((remoteVersion = download->readLine().trimmed().right(12)) > version) {
         emit logMessage(trUtf8("Update available, remote target list version: %1").arg(remoteVersion));
         delete download;
         return true;
@@ -93,8 +88,7 @@ bool TargetList::isUpdateAvailable()
 }
 
 
-bool TargetList::downloadList()
-{
+bool TargetList::downloadList() {
     QNetworkAccessManager manager;
     QNetworkReply *download;
     QEventLoop loop;
@@ -109,8 +103,7 @@ bool TargetList::downloadList()
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
-    if(download->error())
-    {
+    if(download->error()) {
         emit logMessage(trUtf8("Error: Download failed"));
         delete download;
         return false;
@@ -118,21 +111,15 @@ bool TargetList::downloadList()
 
     emit logMessage(trUtf8("Download complete. Writing to file"));
 
-    if(!QDir().exists(info.absolutePath()))
-    {
+    if(!QDir().exists(info.absolutePath())) {
         QDir().mkdir(info.absolutePath());
         QFile::setPermissions(info.absolutePath(), QFile::WriteUser);
     }
     else
-    {
         if(file.exists())
-        {
             QFile::rename(settings->fileName(), settings->fileName() + ".bak");
-        }
-    }
 
-    if(file.open(QFile::WriteOnly))
-    {
+    if(file.open(QFile::WriteOnly)) {
         out.setDevice(&file);
         out << download->readAll();
         file.close();
@@ -148,8 +135,7 @@ bool TargetList::downloadList()
 }
 
 
-bool TargetList::load()
-{
+bool TargetList::load() {
     QString targetListPath = QDir::toNativeSeparators(settings->fileName());
     int tempNumberOfGroups;
     int tempGroupSize;
@@ -160,22 +146,19 @@ bool TargetList::load()
     purge();
     emit logMessage(trUtf8("Loading targets from %1").arg(targetListPath));
 
-    if(!QFile::exists(targetListPath))
-    {
+    if(!QFile::exists(targetListPath)) {
         emit logMessage(trUtf8("Error: File not found"));
         return false;
     }
 
-    if(!settings->childGroups().contains("TargetListInfo"))
-    {
+    if(!settings->childGroups().contains("TargetListInfo")) {
         emit logMessage(trUtf8("Error: Section [TargetListInfo] missing"));
         return false;
     }
 
     version = settings->value("TargetListInfo/Version", QString("")).toString();
 
-    if(version.isEmpty())
-    {
+    if(version.isEmpty()) {
         emit logMessage(trUtf8("Error: Key \"Version\" missing from section [TargetListInfo]"));
         return false;
     }
@@ -184,59 +167,50 @@ bool TargetList::load()
     contactUrl = settings->value("TargetListInfo/ContactURL", QString("")).toString();
     tempNumberOfGroups = settings->value("TargetListInfo/NumberOfPingGroups", QString("")).toInt();
 
-    if(tempNumberOfGroups < 1)
-    {
+    if(tempNumberOfGroups < 1) {
         emit logMessage(trUtf8("Error: Key \"NumberOfPingGroups\" missing from section [TargetListInfo] or has incompatible value"));
         return false;
     }
 
-    for(int i = 1; i <= tempNumberOfGroups; i++)
-    {
+    for(int i = 1; i <= tempNumberOfGroups; i++) {
         newGroup.setSize(0);
         newGroup.targets.clear();
 
-        if(!settings->childGroups().contains(QString("PingGroup%1").arg(i)))
-        {
+        if(!settings->childGroups().contains(QString("PingGroup%1").arg(i))) {
             emit logMessage(trUtf8("Error: Section [PingGroup%1] missing").arg(i));
             return false;
         }
 
         newGroup.setName(settings->value(QString("PingGroup%1/Name").arg(i), QString("")).toString());
 
-        if(newGroup.getName().isEmpty())
-        {
+        if(newGroup.getName().isEmpty()) {
             emit logMessage(trUtf8("Error: Key \"Name\" missing from section [PingGroup%1] or has incompatible value").arg(i));
             return false;
         }
 
         tempGroupSize = settings->value(QString("PingGroup%1/NumberOfTargets").arg(i), QString("")).toInt();
 
-        if(tempGroupSize < 1)
-        {
+        if(tempGroupSize < 1) {
             emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [PingGroup%1] or has incompatible value").arg(i));
             return false;
         }
 
-        for(int j = 1; j <= tempGroupSize; j++)
-        {
+        for(int j = 1; j <= tempGroupSize; j++) {
             newPingTarget.setName(settings->value(QString("PingGroup%1/%2/Name").arg(i).arg(j), QString("")).toString());
 
-            if(newPingTarget.getName().isEmpty())
-            {
+            if(newPingTarget.getName().isEmpty()) {
                 emit logMessage(trUtf8("Error: Key \"%2\\Name\" missing from section [PingGroup%1] or has incompatible value").arg(i).arg(j));
                 return false;
             }
 
             newPingTarget.setAddress(settings->value(QString("PingGroup%1/%2/Address").arg(i).arg(j), QString("")).toString());
 
-            if(newPingTarget.getAddress().isEmpty())
-            {
+            if(newPingTarget.getAddress().isEmpty()) {
                 emit logMessage(trUtf8("Error: Key \"%2\\Address\" missing from section [PingGroup%1] or is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
 
-            if(!QUrl(newPingTarget.getAddress()).isValid())
-            {
+            if(!QUrl(newPingTarget.getAddress()).isValid()) {
                 emit logMessage(trUtf8("Error: Key \"%2\\Address\" in section [PingGroup%1] is not a proper IP address or URL").arg(i).arg(j));
                 return false;
             }
@@ -248,54 +222,43 @@ bool TargetList::load()
         numberOfTargets += newGroup.getSize();
     }
 
-    foreach(QString location, QList<QString>() << "Domestic" << "International")
-    {
-        if(!settings->childGroups().contains("FileHosts" + location))
-        {
+    foreach(QString location, QList<QString>() << "Domestic" << "International") {
+        if(!settings->childGroups().contains("FileHosts" + location)) {
             emit logMessage(trUtf8("Error: Section [FileHosts%1] missing").arg(location));
             return false;
         }
 
         tempGroupSize = settings->value(QString("FileHosts%1/NumberOfTargets").arg(location), QString("")).toInt();
 
-        if(tempGroupSize < 1)
-        {
+        if(tempGroupSize < 1) {
             emit logMessage(trUtf8("Error: Key \"NumberOfTargets\" missing from section [FileHosts%1] or has incompatible value").arg(location));
             return false;
         }
 
-        for(int i = 1; i <= tempGroupSize; i++)
-        {
+        for(int i = 1; i <= tempGroupSize; i++) {
             newDownloadTarget.setName(settings->value(QString("FileHosts%1/%2/Name").arg(location).arg(i), QString("")).toString());
 
-            if(newDownloadTarget.getName().isEmpty())
-            {
+            if(newDownloadTarget.getName().isEmpty()) {
                 emit logMessage(trUtf8("Error: Key \"%1\\Name\" missing from section [FileHosts%2] or has incompatible value").arg(i).arg(location));
                 return false;
             }
 
             newDownloadTarget.setUrl(QUrl(settings->value(QString("FileHosts%1/%2/URL").arg(location).arg(i), QString("")).toString()));
 
-            if(newDownloadTarget.getUrl().isEmpty())
-            {
+            if(newDownloadTarget.getUrl().isEmpty()) {
                 emit logMessage(trUtf8("Error: Key \"%1\\URL\" missing from section [FileHosts%2] or is not a proper file URL").arg(i).arg(location));
                 return false;
             }
 
-            if(!newDownloadTarget.getUrl().isValid())
-            {
+            if(!newDownloadTarget.getUrl().isValid()) {
                 emit logMessage(trUtf8("Error: Key \"%1\\URL\" in section [FileHosts%2] is not a proper file URL").arg(i).arg(location));
                 return false;
             }
 
             if(location == QString("Domestic"))
-            {
                 fileHostsDomestic.append(newDownloadTarget);
-            }
             else
-            {
                 fileHostsInternational.append(newDownloadTarget);
-            }
         }
     }
 
@@ -309,29 +272,21 @@ bool TargetList::load()
 }
 
 
-bool TargetList::restoreEmbedded()
-{
+bool TargetList::restoreEmbedded() {
     QString filename(settings->fileName());
     QFileInfo info(filename);
     QFile file(filename);
     QFile embedded(":/defaulttargetlist.ini");
 
     if(!QDir().exists(info.absolutePath()))
-    {
         QDir().mkdir(info.absolutePath());
-    }
     else
-    {
         if(file.exists())
-        {
             QFile::rename(settings->fileName(), settings->fileName() + ".wrong");
-        }
-    }
 
     emit logMessage(trUtf8("Extracting a default target list from embedded resources"));
 
-    if(embedded.copy(filename))
-    {
+    if(embedded.copy(filename)) {
         emit logMessage(trUtf8("Successfully copied to %1").arg(QDir::toNativeSeparators(filename)));
         return true;
     }
@@ -341,49 +296,26 @@ bool TargetList::restoreEmbedded()
 }
 
 
-bool TargetList::init()
-{
+bool TargetList::init() {
     load();    // Try to load current target list
     if(isUpdateAvailable() && downloadList()) {}    // Check online for updated target list and if found, download it
 
     if(load())    // If current target list loads with no errors...
-    {
         return true;    // Enable Start button
-    }
 
     if(restoreEmbedded())    // No correct target list file loaded up to this point. Try to restore a target list from embedded resources. If successful...
-    {
         if(load())    // Try to load it and return true if successful
-        {
             return true;
-        }
-    }
 
     return false;    // No method gave a readable target list, return false so Start button stays disabled
 }
 
 
-qint64 TargetList::getBytesDomestic() const
-{
+qint64 TargetList::getBytesDownloaded(QList<DownloadTarget> &targets) const {
     qint64 sum = 0;
 
-    foreach(DownloadTarget target, fileHostsDomestic)
-    {
+    foreach(DownloadTarget target, targets)
         sum += target.getBytesDownloaded();
-    }
-
-    return sum;
-}
-
-
-qint64 TargetList::getBytesInternational() const
-{
-    qint64 sum = 0;
-
-    foreach(DownloadTarget target, fileHostsInternational)
-    {
-        sum += target.getBytesDownloaded();
-    }
 
     return sum;
 }

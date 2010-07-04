@@ -27,14 +27,12 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "dialogabout.h"
 
 
-namespace Ui
-{
+namespace Ui {
     class MainWindow;
 }
 
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -43,6 +41,9 @@ public:
     int parallelThreads();
     bool pingTestEnabled();
     bool downloadTestEnabled();
+    void showProgressBar();
+    void hideProgressBar();
+    void updateProgressBar(quint8);
     void showStatusBarMessage(QString);
 
 protected:

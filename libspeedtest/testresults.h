@@ -28,8 +28,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QString>
 
 
-class LIBSPEEDTEST_EXPORT TestResults : public QObject
-{
+class LIBSPEEDTEST_EXPORT TestResults : public QObject {
     Q_OBJECT
 
 public:
@@ -39,6 +38,7 @@ public:
     QString getRttAvgAsString();
     QString getHtmlCode(TargetList*);
     QString getVbCode(TargetList*);
+    QString getGoogleChartUrl(TargetList*);
 
     QString programName;
     QString programVersion;

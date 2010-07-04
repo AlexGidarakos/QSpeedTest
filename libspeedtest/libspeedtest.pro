@@ -14,7 +14,16 @@
 
 QT += network
 QT -= gui
-DESTDIR = ../bin
+win32 {
+    COPYCOMMAND = $$_PRO_FILE_PWD_/../docs/*.txt ../bin
+    COPYCOMMAND = copy $$replace(COPYCOMMAND, "/", "\\")
+    DLLDESTDIR = ../bin
+}
+else {
+    COPYCOMMAND = $$_PRO_FILE_PWD_/../docs/*.txt ../bin
+    COPYCOMMAND = cp $$COPYCOMMAND
+    DESTDIR = ../bin
+}
 TARGET = speedtest
 TEMPLATE = lib
 DEFINES += LIBSPEEDTEST_LIBRARY
@@ -32,11 +41,4 @@ HEADERS += libspeedtest_global.h \
     targetlist.h \
     hostinfo.h
 RESOURCES += ../resources/resources.qrc
-COPYCOMMAND = $$_PRO_FILE_PWD_/../docs/*.txt ../bin
-win32 {
-    COPYCOMMAND = copy $$replace(COPYCOMMAND, "/", "\\")
-}
-else {
-    COPYCOMMAND = cp $$COPYCOMMAND
-}
 QMAKE_POST_LINK = $$COPYCOMMAND
