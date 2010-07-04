@@ -108,10 +108,18 @@ QString TestResults::getHtmlCode(TargetList *targetList) {
 
     htmlCode +=                     "        </table>\n";
 
-    if(pingTestEnabled)
-        htmlCode += QString(        "        <p>"
-                                    "            <img src=\"%1\" alt=\"Google Chart\" />"
-                                    "        </p>").arg(getGoogleChartUrl(targetList));
+
+    if(pingTestEnabled || downloadTestEnabled) {
+        htmlCode +=                 "        <p>\n";
+
+        if(pingTestEnabled)
+            htmlCode += QString(    "            <img src=\"%1\" alt=\"Google Chart - Latency\" />\n").arg(googleChartUrlPing(targetList));
+
+        if(downloadTestEnabled)
+            htmlCode += QString(    "            <img src=\"%1\" alt=\"Google Chart - Bandwidth\" />\n").arg(googleChartUrlSpeed(targetList));
+
+        htmlCode +=                 "        </p>\n";
+    }
 
     htmlCode += (pingTestEnabled)? ("        <p style=\"margin-bottom: 2px;\"><b>Detailed results</b></p>\n"
                                     "        <div>\n"
@@ -204,8 +212,15 @@ QString TestResults::getVbCode(TargetList *targetList) {
 
     vbCode +=                     "[/table]\n\n";
 
-    if(pingTestEnabled)
-        vbCode += QString(        "[img]%1[/img]\n").arg(getGoogleChartUrl(targetList));
+    if(pingTestEnabled || downloadTestEnabled) {
+        if(pingTestEnabled)
+            vbCode += QString(    "[img]%1[/img] ").arg(googleChartUrlPing(targetList));
+
+        if(downloadTestEnabled)
+            vbCode += QString(    "[img]%1[/img]").arg(googleChartUrlSpeed(targetList));
+
+        vbCode +=                 "\n";
+    }
 
     vbCode += (pingTestEnabled)? ("\n"
                                   "[b]Detailed results[/b]\n"
@@ -231,18 +246,28 @@ QString TestResults::getVbCode(TargetList *targetList) {
 }
 
 
-QString TestResults::getGoogleChartUrl(TargetList *targetList) {
-    QString googleChartUrl = trUtf8("http://chart.apis.google.com/chart?chtt=Average+latency+per+group|(msec)&chs=400x160&cht=bhs&chxt=x,y&chxr=0,0,275&chds=0,275&chm=N++,000000,0,,12&chco=FF0000|00FF00|0000FF&chxl=1:");
+QString TestResults::googleChartUrlPing(TargetList *targetList) {
+    QString url = trUtf8("http://chart.apis.google.com/chart?chtt=Average+latency+per+group|(msec)&chs=300x160&cht=bhs&chxt=x,y&chxr=0,0,280&chds=0,280&chm=N++,000000,0,,11&chco=FF0000|00FF00|0000FF&chxl=1:");
 
     for(int i = targetList->groups.size() - 1; i >= 0; i--)
-        googleChartUrl += QString("|%1").arg(targetList->groups[i].getName().replace(' ', '+'));
+        url += QString("|%1").arg(targetList->groups[i].getName().replace(' ', '+'));
 
-    googleChartUrl += "&chd=t:";
+    url += "&chd=t:";
 
     for(int i = 0; i < targetList->groups.size(); i++)
-        googleChartUrl += QString::number(targetList->groups[i].getRttAvg(), 'f', 2) + ",";
+        url += QString::number(targetList->groups[i].getRttAvg(), 'f', 2) + ",";
 
-    googleChartUrl.chop(1);
+    url.chop(1);
 
-    return googleChartUrl;
+    return url;
+}
+
+
+QString TestResults::googleChartUrlSpeed(TargetList *targetList) {
+    QString url = trUtf8("http://chart.apis.google.com/chart?chtt=Exhaustive+bandwidth+test|(Mbps)&chs=300x160&cht=bhs&chxt=x,y&chxr=0,0,25,2&chds=0,25&chm=N++,000000,0,,11&chco=FF0000|00FF00&chxl=1:|International|Domestic&chd=t:");
+
+    url += QString::number(speedInKbpsDomestic / 1024, 'f', 2) + ",";
+    url += QString::number(speedInKbpsInternational / 1024, 'f', 2);
+
+    return url;
 }

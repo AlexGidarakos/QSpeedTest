@@ -32,7 +32,7 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 const QString PROJECTNAME = "QSpeedTest";
 const QString PROGRAMNAME = "QSpeedTestCLI";
-const QString PROGRAMVERSION = "r33";
+const QString PROGRAMVERSION = "r34";
 const QString PROGRAMAUTHOR = "parsifal";
 const QString PROGRAMURL = "https://sourceforge.net/projects/qspeedtest/files/";
 const QString PROGRAMDISCUSSURL = "https://sourceforge.net/apps/phpbb/qspeedtest";
