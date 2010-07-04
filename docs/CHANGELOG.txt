@@ -1,3 +1,8 @@
+revision 34 - 20100705                                              |
+    * HTML and vB code output: Added second Google Chart URL for    |
+      the bandwidth test results                                    |
+
+
 revision 33 - 20100704                                              |
     * Feature request: Added progress bar to indicate the progress  |
       of a speed test                                               |

@@ -38,7 +38,8 @@ public:
     QString getRttAvgAsString();
     QString getHtmlCode(TargetList*);
     QString getVbCode(TargetList*);
-    QString getGoogleChartUrl(TargetList*);
+    QString googleChartUrlPing(TargetList*);
+    QString googleChartUrlSpeed(TargetList*);
 
     QString programName;
     QString programVersion;
