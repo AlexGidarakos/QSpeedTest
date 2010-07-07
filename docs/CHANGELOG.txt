@@ -1,3 +1,7 @@
+revision 38 - 20100708                                              |
+    * Fixed corruption of the SVN repo caused when commited rev35   |
+
+
 revision 35 - 20100708                                              |
     * libspeedtest: Fixed bug that caused errors when writing new   |
       target list INI under Linux                                   |
