@@ -1,5 +1,8 @@
-050. Speedup program startup
-100. Program icons and logo
-200. Implement menu system, with options saved inside qspeedtest.ini
-300. Relocate ping + download targets to a new .ini file. qspeedtest.ini should be used for persistent program settings only
-400. Thread safe Singleton pattern for the global variables?
+100. Reduce memory usage during download test by connecting to the readyRead slot and dumping the incoming data to a disk file via QIODevice
+200. Implement generic speed test groups in code and INI
+250. Create random colour codes (randomly pick from a predetermined colour pool) for Google Chart URLs
+300. Instead of blockingMap method for the speed test, use asynchronoys downloads and return to appropriate method for finalizing results
+400. Same as above, for ping test
+500. Program icons and logo
+600. Implement menu system, with options saved inside qspeedtest.ini
+700. Thread safe Singleton pattern for the global variables?

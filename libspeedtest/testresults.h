@@ -39,7 +39,7 @@ public:
     QString getHtmlCode(TargetList*);
     QString getVbCode(TargetList*);
     QString googleChartUrlPing(TargetList*);
-    QString googleChartUrlSpeed(TargetList*);
+    QString googleChartUrlSpeed();
 
     QString programName;
     QString programVersion;
