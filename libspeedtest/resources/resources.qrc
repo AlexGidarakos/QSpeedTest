@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qspeedtest.ini</file>
+        <file>default.targets.ini</file>
     </qresource>
 </RCC>
