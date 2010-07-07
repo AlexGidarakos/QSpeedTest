@@ -1,3 +1,8 @@
+revision 35 - 20100708                                              |
+    * libspeedtest: Fixed bug that caused errors when writing new   |
+      target list INI under Linux                                   |
+
+
 revision 34 - 20100705                                              |
     * HTML and vB code output: Added second Google Chart URL for    |
       the bandwidth test results                                    |

@@ -40,12 +40,7 @@ class LIBSPEEDTEST_EXPORT TargetList : public QObject {
 
 public:
     explicit TargetList(QString, QString, QObject *parent = 0);
-    ~TargetList() { delete settings; }
-    void purge();
-    bool isUpdateAvailable();
-    bool downloadList();
-    bool load();
-    bool restoreEmbedded();
+    ~TargetList() { delete iniTargets; }
     bool init();
     qint64 getBytesDownloaded(QList<DownloadTarget>&) const;
     QString getVersion() const { return version; }
@@ -57,11 +52,17 @@ public:
     QList<DownloadTarget> fileHostsInternational;
 
 private:
-    QSettings *settings;
+    QSettings *iniTargets;
     QString version;
     QString comment;
     QString contactUrl;
     int numberOfTargets;
+    void purge();
+    bool exists();
+    bool updateIsAvailable();
+    bool downloadList();
+    bool load();
+    bool restoreEmbedded();
 
 signals:
     void logMessage(QString);

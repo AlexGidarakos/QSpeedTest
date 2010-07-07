@@ -116,7 +116,7 @@ QString TestResults::getHtmlCode(TargetList *targetList) {
             htmlCode += QString(    "            <img src=\"%1\" alt=\"Google Chart - Latency\" />\n").arg(googleChartUrlPing(targetList));
 
         if(downloadTestEnabled)
-            htmlCode += QString(    "            <img src=\"%1\" alt=\"Google Chart - Bandwidth\" />\n").arg(googleChartUrlSpeed(targetList));
+            htmlCode += QString(    "            <img src=\"%1\" alt=\"Google Chart - Bandwidth\" />\n").arg(googleChartUrlSpeed());
 
         htmlCode +=                 "        </p>\n";
     }
@@ -217,7 +217,7 @@ QString TestResults::getVbCode(TargetList *targetList) {
             vbCode += QString(    "[img]%1[/img] ").arg(googleChartUrlPing(targetList));
 
         if(downloadTestEnabled)
-            vbCode += QString(    "[img]%1[/img]").arg(googleChartUrlSpeed(targetList));
+            vbCode += QString(    "[img]%1[/img]").arg(googleChartUrlSpeed());
 
         vbCode +=                 "\n";
     }
@@ -263,7 +263,7 @@ QString TestResults::googleChartUrlPing(TargetList *targetList) {
 }
 
 
-QString TestResults::googleChartUrlSpeed(TargetList *targetList) {
+QString TestResults::googleChartUrlSpeed() {
     QString url = trUtf8("http://chart.apis.google.com/chart?chtt=Exhaustive+bandwidth+test|(Mbps)&chs=300x160&cht=bhs&chxt=x,y&chxr=0,0,25,2&chds=0,25&chm=N++,000000,0,,11&chco=FF0000|00FF00&chxl=1:|International|Domestic&chd=t:");
 
     url += QString::number(speedInKbpsDomestic / 1024, 'f', 2) + ",";
