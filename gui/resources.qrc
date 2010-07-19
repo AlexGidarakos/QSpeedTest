@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/qspeedtest">
+        <file>logo.png</file>
+        <file>icons.ico</file>
+    </qresource>
+</RCC>

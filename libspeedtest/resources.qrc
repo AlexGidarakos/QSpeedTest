@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/libspeedtest">
+        <file>default.hostlist.ini</file>
+        <file>default.preferences.ini</file>
+    </qresource>
+</RCC>
