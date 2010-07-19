@@ -10,10 +10,8 @@
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
-
 QT += network
 QT -= gui
-
 win32 {
     COPYCOMMAND = $$_PRO_FILE_PWD_/../docs/*.txt \
         ../bin
@@ -29,12 +27,10 @@ else {
         $$COPYCOMMAND
     DESTDIR = ../bin
 }
-
 TARGET = speedtest
 TEMPLATE = lib
 DEFINES += LIBSPEEDTEST_LIBRARY
-SOURCES += \
-    pinggroup.cpp \
+SOURCES += pinggroup.cpp \
     hostinfo.cpp \
     downloadgroup.cpp \
     results.cpp \
@@ -44,8 +40,7 @@ SOURCES += \
     preferences.cpp \
     testcontroller.cpp \
     downloadhost.cpp
-HEADERS += \
-    libspeedtest_global.h \
+HEADERS += libspeedtest_global.h \
     pinggroup.h \
     hostinfo.h \
     externs.h \
@@ -56,10 +51,7 @@ HEADERS += \
     hostlist.h \
     preferences.h \
     testcontroller.h
-OTHER_FILES += \
-    default.hostlist.ini \
+OTHER_FILES += default.hostlist.ini \
     default.preferences.ini
-RESOURCES += \
-    resources.qrc
-
+RESOURCES += libspeedtest.qrc
 QMAKE_POST_LINK = $$COPYCOMMAND

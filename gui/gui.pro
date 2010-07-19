@@ -10,21 +10,20 @@
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
-
 QT += network
 TARGET = qspeedtest
 TEMPLATE = app
 DESTDIR = ../bin
 INCLUDEPATH += ../libspeedtest
-LIBS += -L../bin -L../libspeedtest -lspeedtest
-SOURCES += \
-    main.cpp \
+LIBS += -L../bin \
+    -L../libspeedtest \
+    -lspeedtest
+SOURCES += main.cpp \
     qspeedtest.cpp \
     mainwindow.cpp \
     dialogpreferences.cpp \
     dialogabout.cpp
-HEADERS += \
-    qspeedtest.h \
+HEADERS += qspeedtest.h \
     mainwindow.h \
     ../libspeedtest/externs.h \
     dialogpreferences.h \
@@ -32,9 +31,10 @@ HEADERS += \
 FORMS += mainwindow.ui \
     dialogpreferences.ui \
     dialogabout.ui
-OTHER_FILES += \
-    logo.png \
+OTHER_FILES += logo.png \
+    logo.svg \
     icons.rc \
-    icons.ico
-RESOURCES += \
-    resources.qrc
+    icons.ico \
+    default.hostlist.ini \
+    default.preferences.ini
+RESOURCES += resources.qrc

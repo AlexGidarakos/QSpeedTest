@@ -20,7 +20,7 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 
 const QString PROJECTNAME = "QSpeedTest";
-const QString PROJECTVERSION = "r40";
+const QString PROJECTVERSION = "r41";
 QString PROGRAMNAME = "QSpeedTest";
 const QString PROJECTURL = "http://qspeedtest.sourceforge.net/";
 const QString PROJECTDOWNLOADURL = "https://sourceforge.net/projects/qspeedtest/files/";
@@ -37,7 +37,7 @@ const quint8 PINGSPERHOSTDEFAULT = 4;
 quint8 PINGSPERHOST;
 const quint8 PINGTHREADSDEFAULT = 4;
 quint8 PINGTHREADS;
-const quint8 PINGTIMEOUTSECSDEFAULT = 1;
+const quint8 PINGTIMEOUTSECSDEFAULT = 2;
 quint8 PINGTIMEOUTSECS;
 const quint8 DOWNLOADTESTSECSDEFAULT = 10;
 quint8 DOWNLOADTESTSECS;

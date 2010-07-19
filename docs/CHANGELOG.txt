@@ -1,3 +1,15 @@
+revision 41 - 20100719                                          |
+* libspeedtest:                                                 |
+  Fixed a bug causing failed attempts at restoring files from   |
+  the embedded resources when running an executable linked      |
+  against a static version of libspeedtest                      |
+  Proper fix for a compiler warning on non-Windows Oses         |
+  Some fixes in the gui/gui.pro file                            |
+  Updated embedded resources (hostlist version 201007191858 by  |
+  Someonefromhell, increased ping timeout sec from 1 to 2 in    |
+  preferences file)                                             |
+
+
 revision 40 - 20100719                                          |
 * libspeedtest:                                                 |
   Total code rewrite                                            |

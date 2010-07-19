@@ -22,7 +22,7 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QProcess>
 #include <QTime>
 
-PingHost::PingHost(const PingHost &host)
+PingHost::PingHost(const PingHost &host) : QObject(NULL)
 {
     _name = host._name;
     _url = host._url;
