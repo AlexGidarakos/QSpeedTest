@@ -23,7 +23,10 @@ void PingGroup::reset()
 {
     quint16 size = _hosts.size();
 
-    for(int i = 0; i < size; i++) _hosts[i].reset();
+    for(int i = 0; i < size; i++)
+    {
+        _hosts[i].reset();
+    }
 }
 
 quint16 PingGroup::hostsAlive() const
@@ -33,7 +36,10 @@ quint16 PingGroup::hostsAlive() const
 
     for(int i = 0; i < size; i++)
     {
-        if(_hosts[i].isAlive()) sum++;
+        if(_hosts[i].isAlive())
+        {
+            sum++;
+        }
     }
 
     return sum;
@@ -44,7 +50,10 @@ double PingGroup::rttSum() const
     double sum = 0.0;
     quint16 size = _hosts.size();
 
-    for(int i = 0; i < size; i++) sum += _hosts[i].rtt();
+    for(int i = 0; i < size; i++)
+    {
+        sum += _hosts[i].rtt();
+    }
 
     return sum;
 }
@@ -53,8 +62,14 @@ QString PingGroup::rttSumString() const
 {
     QString string;
 
-    if(!hostsAlive()) string = "N/A";
-    else string = QString::number(rttSum(), 'f', 2) + " msec";
+    if(!hostsAlive())
+    {
+        string = "N/A";
+    }
+    else
+    {
+        string = QString::number(rttSum(), 'f', 2) + " msec";
+    }
 
     return string;
 }
@@ -69,7 +84,13 @@ double PingGroup::rttAverage() const
         quint16 size = _hosts.size();
         double sum = 0.0;
 
-        for(int i = 0; i < size; i++) if(_hosts[i].isAlive()) sum += _hosts[i].rtt();
+        for(int i = 0; i < size; i++)
+        {
+            if(_hosts[i].isAlive())
+            {
+                sum += _hosts[i].rtt();
+            }
+        }
 
         average = sum / alive;
     }
@@ -81,8 +102,14 @@ QString PingGroup::rttAverageString() const
 {
     QString string;
 
-    if(!hostsAlive()) string = "N/A";
-    else string = QString::number(rttAverage(), 'f', 2) + " msec";
+    if(!hostsAlive())
+    {
+        string = "N/A";
+    }
+    else
+    {
+        string = QString::number(rttAverage(), 'f', 2) + " msec";
+    }
 
     return string;
 }
@@ -97,7 +124,13 @@ double PingGroup::packetLossAverage() const
         quint16 size = _hosts.size();
         double sum = 0.0;
 
-        for(int i = 0; i < size; i++) if(_hosts[i].isAlive()) sum += _hosts[i].packetLoss();
+        for(int i = 0; i < size; i++)
+        {
+            if(_hosts[i].isAlive())
+            {
+                sum += _hosts[i].packetLoss();
+            }
+        }
 
         average = sum / alive;
     }
@@ -112,14 +145,37 @@ QString PingGroup::packetLossAverageString() const
 
 QString PingGroup::rank() const
 {
-    if(!hostsAlive()) return "N/A";
+    if(!hostsAlive())
+    {
+        return "N/A";
+    }
 
     double average = rttAverage();
 
-    if(average <  30.0) return "A";
-    if(average <  75.0) return "B";
-    if(average < 125.0) return "C";
-    if(average < 200.0) return "D";
-    if(average < 250.0) return "E";
+    if(average <  30.0)
+    {
+        return "A";
+    }
+
+    if(average <  75.0)
+    {
+        return "B";
+    }
+
+    if(average < 125.0)
+    {
+        return "C";
+    }
+
+    if(average < 200.0)
+    {
+        return "D";
+    }
+
+    if(average < 250.0)
+    {
+        return "E";
+    }
+
     return "F";
 }

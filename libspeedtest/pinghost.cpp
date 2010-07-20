@@ -47,25 +47,37 @@ double PingHost::rtt() const
 {
     quint8 replies = _rtt.size();
 
-    if(!replies) return 0.0;
+    if(!replies)
+    {
+        return 0.0;
+    }
 
     double rttSum = 0.0;
 
-    for(int i = 0; i < replies; i++) rttSum += _rtt[i];
+    for(int i = 0; i < replies; i++)
+    {
+        rttSum += _rtt[i];
+    }
 
     return (rttSum / replies);
 }
 
 QString PingHost::rttString() const
 {
-    if(_rtt.size()) return QString::number(rtt(), 'f', 2) + " msec";
+    if(_rtt.size())
+    {
+        return QString::number(rtt(), 'f', 2) + " msec";
+    }
 
     return "N/A";
 }
 
 QString PingHost::packetLossString() const
 {
-    if(_rtt.size()) return QString::number(_packetLoss, 'f', 2) + "%";
+    if(_rtt.size())
+    {
+        return QString::number(_packetLoss, 'f', 2) + "%";
+    }
 
     return "100.00%";
 }
@@ -74,13 +86,19 @@ double PingHost::jitter() const
 {
     quint8 replies = _rtt.size();
 
-    if(replies < 2) return 0.0;
+    if(replies < 2)
+    {
+        return 0.0;
+    }
 
     double sum = 0.0;
 
     for(int i = 0; i < replies; i++)
     {
-        if(i) sum += _rtt[i - 1] - _rtt[i];
+        if(i)
+        {
+            sum += _rtt[i - 1] - _rtt[i];
+        }
     }
 
     return (sum / replies);
@@ -95,15 +113,37 @@ QString PingHost::jitterString() const
 
 QString PingHost::rank() const
 {
-    if(!_rtt.size()) return "N/A";
+    if(!_rtt.size())
+    {
+        return "N/A";
+    }
 
     double value = rtt();
 
-    if(value <  30.0) return "A";
-    if(value <  75.0) return "B";
-    if(value < 125.0) return "C";
-    if(value < 200.0) return "D";
-    if(value < 250.0) return "E";
+    if(value <  30.0)
+    {
+        return "A";
+    }
+
+    if(value <  75.0)
+    {
+        return "B";
+    }
+
+    if(value < 125.0)
+    {
+        return "C";
+    }
+
+    if(value < 200.0)
+    {
+        return "D";
+    }
+
+    if(value < 250.0)
+    {
+        return "E";
+    }
 
     return "F";
 }
@@ -134,14 +174,26 @@ void PingHost::ping()
         pingProc.start(pingCmd, QIODevice::ReadOnly);
         pingProc.waitForFinished(PINGTIMEOUTSECS * 1000);
 
-        for(int j = 0; j < skipLines; j++) contents = pingProc.readLine().trimmed();
+        if(pingProc.state() != QProcess::NotRunning)
+        {
+            pingProc.close();
+            continue;
+        }
+
+        for(int j = 0; j < skipLines; j++)
+        {
+            contents = pingProc.readLine().trimmed();
+        }
 
 #ifdef Q_WS_WIN
         if(!contents.contains(QString("=").toAscii()))
+        {
             contents = pingProc.readLine().trimmed();
+        }
 #endif // Q_WS_WIN
 
-        if(contents.contains(QString("=").toAscii())) {
+        if(contents.contains(QString("=").toAscii()))
+        {
             newRtt = contents;
             list = newRtt.split("=");
 #ifdef Q_WS_WIN

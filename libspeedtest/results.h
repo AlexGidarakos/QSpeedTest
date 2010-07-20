@@ -23,9 +23,9 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "pinggroup.h"
 #include "downloadgroup.h"
 #include "externs.h"
-#include <QtCore/QString>
+#include <QtCore/QStringList>
 
-struct LIBSPEEDTEST_EXPORT Results
+class LIBSPEEDTEST_EXPORT Results
 {
     friend class Hostlist;
     friend class HostInfo;
@@ -68,8 +68,10 @@ private:
     quint8 _cpuCores;
     QString _isp;
     QString _ip;
+    QString _ipCensored;
     QString _ispNetwork;
-    QString _ispNetworkAdvertisers;
+    QString _ispAsn;
+    QStringList _ispNetworkAdvertisers;
     QString _bbras;
     TestMode::Mode _testMode;
     double _testDuration;

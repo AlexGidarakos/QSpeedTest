@@ -156,7 +156,10 @@ void QSpeedTest::_slotSaveReport(ReportFormat::Format format)
 
     filename = QFileDialog::getSaveFileName(&_w, trUtf8("Select path and filename for the report"), filename, filter);
 
-    if(filename.isNull()) return;
+    if(filename.isNull())
+    {
+        return;
+    }
 
     if(!_results.saveReport(format, filename))
     {

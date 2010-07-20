@@ -34,7 +34,9 @@ FORMS += mainwindow.ui \
 OTHER_FILES += logo.png \
     logo.svg \
     icons.rc \
-    icons.ico \
-    default.hostlist.ini \
-    default.preferences.ini
+    icons.ico
 RESOURCES += resources.qrc
+
+!win32 {
+    RESOURCES += ../libspeedtest/libspeedtest.qrc
+}
