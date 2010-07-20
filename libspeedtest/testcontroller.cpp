@@ -41,11 +41,17 @@ void TestController::stopTests()
     _disconnectPingTestSignals();
     _disconnectDownloadTestSignals();
 
-    if(_futureWatcher.isRunning()) _futureWatcher.cancel();
+    if(_futureWatcher.isRunning())
+    {
+        _futureWatcher.cancel();
+    }
 
     quint8 size = _results._downloadGroups.size();
 
-    for(int i = 0; i < size; i++) _results._downloadGroups[i].cancel();
+    for(int i = 0; i < size; i++)
+    {
+        _results._downloadGroups[i].cancel();
+    }
 }
 
 void TestController::_connectPingTestSignals()
@@ -60,7 +66,10 @@ void TestController::_connectPingTestSignals()
     {
         quint16 size2 = _results._pingGroups[i]._hosts.size();
 
-        for(int j = 0; j < size2; j++) connect(&_results._pingGroups[i]._hosts[j], SIGNAL(result(QString)), this, SLOT(_slotResultReceived(QString)));
+        for(int j = 0; j < size2; j++)
+        {
+            connect(&_results._pingGroups[i]._hosts[j], SIGNAL(result(QString)), this, SLOT(_slotResultReceived(QString)));
+        }
     }
 }
 
@@ -76,7 +85,10 @@ void TestController::_disconnectPingTestSignals()
     {
         quint16 size2 = _results._pingGroups[i]._hosts.size();
 
-        for(int j = 0; j < size2; j++) disconnect(&_results._pingGroups[i]._hosts[j], SIGNAL(result(QString)), this, SLOT(_slotResultReceived(QString)));
+        for(int j = 0; j < size2; j++)
+        {
+            disconnect(&_results._pingGroups[i]._hosts[j], SIGNAL(result(QString)), this, SLOT(_slotResultReceived(QString)));
+        }
     }
 }
 
@@ -132,8 +144,14 @@ void TestController::_slotPingTestFinished()
 {
     _disconnectPingTestSignals();
 
-    if(_results._testMode & TestMode::Download) startDownloadTest();
-    else emit finished();
+    if(_results._testMode & TestMode::Download)
+    {
+        startDownloadTest();
+    }
+    else
+    {
+        emit finished();
+    }
 }
 
 void TestController::_slotNextDownloadGroup()
@@ -149,32 +167,3 @@ void TestController::_slotNextDownloadGroup()
     _groupNext++;
     _results._downloadGroups[_groupNext - 1].start();
 }
-
-/*
-void TestController::_slotStartSerialDownloadTest()
-{
-    _nextGroup = 0;
-    _slotNextDownloadGroupSerial();
-}
-
-void TestController::_slotNextDownloadGroupSerial()
-{
-    if(_nextGroup)    // Means it's not the first call of this slot
-    {
-// do things that must be done after a group has just finished
-    }
-
-    if(_nextGroup == _downloadGroupsTotal)    // Means we are done with all the groups, hence with the download tests also
-    {
-        _disconnectDownloadTestSignals();
-        emit sigSerialDownloadTestFinished();
-
-        return;
-    }
-
-// do things that start work on the next group
-    _nextGroup++;
-
-emit sigSerialDownloadTestFinished();
-}
-*/

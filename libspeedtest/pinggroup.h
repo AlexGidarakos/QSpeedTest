@@ -23,7 +23,10 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include "pinghost.h"
 #include <QtCore/QList>
 
-inline bool lessThan(const PingHost &host1, PingHost const &host2) { return host1.rtt() < host2.rtt(); }
+inline bool lessThan(const PingHost &host1, PingHost const &host2)
+{
+    return host1.rtt() < host2.rtt();
+}
 
 class LIBSPEEDTEST_EXPORT PingGroup
 {

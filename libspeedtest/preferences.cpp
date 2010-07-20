@@ -64,32 +64,53 @@ bool Preferences::_loadOk()
 
     sync();
 
-    if(!childGroups().contains("Preferences")) return false;
+    if(!childGroups().contains("Preferences"))
+    {
+        return false;
+    }
 
     beginGroup("Preferences");
     testMode = (TestMode::Mode) value("TestMode", 0).toUInt();
 
-    if(!(testMode == TestMode::Info || testMode == TestMode::Ping || testMode == TestMode::Download || testMode == TestMode::All)) return false;
+    if(!(testMode == TestMode::Info || testMode == TestMode::Ping || testMode == TestMode::Download || testMode == TestMode::All))
+    {
+        return false;
+    }
 
     pingsPerHost = value("PingsPerHost", 0).toUInt();
 
-    if(pingsPerHost < 1 || pingsPerHost > 10) return false;
+    if(pingsPerHost < 1 || pingsPerHost > 10)
+    {
+        return false;
+    }
 
     pingThreads = value("PingThreads", 0).toUInt();
 
-    if(pingThreads < 1 || pingThreads > 8) return false;
+    if(pingThreads < 1 || pingThreads > 8)
+    {
+        return false;
+    }
 
     pingTimeoutSecs = value("PingTimeoutSecs", 0).toUInt();
 
-    if(pingTimeoutSecs < 1 || pingTimeoutSecs > 4) return false;
+    if(pingTimeoutSecs < 1 || pingTimeoutSecs > 4)
+    {
+        return false;
+    }
 
     downloadTestSecs = value("DownloadTestSecs", 0).toUInt();
 
-    if(downloadTestSecs < 5 || downloadTestSecs > 30) return false;
+    if(downloadTestSecs < 5 || downloadTestSecs > 30)
+    {
+        return false;
+    }
 
     hostlistUrl = value("HostlistUrl", QString("")).toString();
 
-    if(hostlistUrl.isEmpty() || !QUrl(hostlistUrl).isValid()) return false;
+    if(hostlistUrl.isEmpty() || !QUrl(hostlistUrl).isValid())
+    {
+        return false;
+    }
 
     // At this point, preferences INI file was valid. Load its preferences
     TESTMODE = testMode;
@@ -108,7 +129,10 @@ bool Preferences::_restoreEmbeddedOk()
     QFile file(fileName());
     QFile embedded(":/libspeedtest/default.preferences.ini");
 
-    if(file.exists()) QFile::rename(fileName(), fileName() + ".wrong");
+    if(file.exists())
+    {
+        QFile::rename(fileName(), fileName() + ".wrong");
+    }
 
     emit message(trUtf8("Extracting default preferences file from embedded resources"));
 

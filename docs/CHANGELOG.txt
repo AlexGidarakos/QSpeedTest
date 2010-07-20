@@ -1,3 +1,13 @@
+revision 42 - 20100720                                          |
+* libspeedtest:                                                 |
+  Fixed a bug that caused a compiler error on Mac OS            |
+  Fixed a bug that did not properly terminate running pings via |
+  QProcess if they exceeded the specified ping timeout since it |
+  would affect some hosts' packet loss results                  |
+  bbCode and HTML report output adjusted for economy in screen  |
+  estate (reduced pixel height)                                 |
+
+
 revision 41 - 20100719                                          |
 * libspeedtest:                                                 |
   Fixed a bug causing failed attempts at restoring files from   |
@@ -13,6 +23,9 @@ revision 41 - 20100719                                          |
 revision 40 - 20100719                                          |
 * libspeedtest:                                                 |
   Total code rewrite                                            |
+  Decreased memory usage during download tests. Incoming data   |
+  are now being redirected to a temporary disk file instead of  |
+  residing in RAM for the duration of the test                  |
   Added serial download testing per download group              |
   Implemented persistent settings system                        |
   Implemented report file saving system                         |

@@ -36,7 +36,10 @@ void DownloadGroup::reset()
 {
     quint16 size = _hosts.size();
 
-    for(int i = 0; i < size; i++) _hosts[i].reset();
+    for(int i = 0; i < size; i++)
+    {
+        _hosts[i].reset();
+    }
 
     _speedBpsParallel = 0;
 }
@@ -48,26 +51,6 @@ void DownloadGroup::start()
     connect(&_progressTimer, SIGNAL(timeout()), this, SLOT(_slotNewProgress()));
     connect(&_stopTimer, SIGNAL(timeout()), this, SLOT(_slotParallelDownloadFinished()));
     _stopTimer.setSingleShot(true);
-/*
-    for(int i = 0; i < _data.size(); i++)    // Normaly, the cleanup work in this and the next for loops should have been taken care of by the cancel or finished slot, but let's play it safe!
-    {
-        if(_data[i])
-        {
-            _data[i]->abort();
-            delete _data[i];
-        }
-    }
-
-    _data.clear();
-
-    if(_file)
-    {
-        _file->close();
-        _file->remove();
-        delete _file;
-        _file = NULL;
-    }
-*/
     _file = new QTemporaryFile();
     _file->open();
 
@@ -145,9 +128,15 @@ double DownloadGroup::speedSerial(SpeedUnit::Unit unit) const
     quint16 size = _hosts.size();
     double sum = 0.0, average = 0.0;
 
-    if(!size) return 0.0;
+    if(!size)
+    {
+        return 0.0;
+    }
 
-    for(int i = 0; i < size; i++) sum += _hosts[i].speed(SpeedUnit::Bps);
+    for(int i = 0; i < size; i++)
+    {
+        sum += _hosts[i].speed(SpeedUnit::Bps);
+    }
 
     average = sum / size;
 
@@ -174,7 +163,10 @@ void DownloadGroup::_slotParallelDownloadFinished()
 {
     for(int i = 0; i < _data.size(); i++)
     {
-        if(_data[i]) disconnect(_data[i], SIGNAL(readyRead()), this, SLOT(_slotWriteData()));
+        if(_data[i])
+        {
+            disconnect(_data[i], SIGNAL(readyRead()), this, SLOT(_slotWriteData()));
+        }
     }
 
     // Two separate loops because we want to stop recording excess bytes as soon as possible!

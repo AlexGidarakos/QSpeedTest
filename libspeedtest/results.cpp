@@ -38,14 +38,14 @@ QString Results::plainText() const
     QString plainText;
 
     plainText += QObject::trUtf8(    "Report created by:      %1 %2\n").arg(_programName).arg(_projectVersion);
+    plainText += QObject::trUtf8(    "Test date and time:     %1\n").arg(_testDateTime);
     plainText += QObject::trUtf8(    "Hostlist used:          %1 %2\n").arg(_hostlistVersion).arg(_hostlistComment);
     plainText += QObject::trUtf8(    "Hostlist contact URL:   %1\n").arg(_hostlistContactUrl);
-    plainText += QObject::trUtf8(    "Test date and time:     %1\n").arg(_testDateTime);
     plainText += QObject::trUtf8(    "Host OS & no. of CPUs:  %1 / %2\n").arg(_hostOS).arg(_cpuCores);
-    plainText += QObject::trUtf8(    "ISP & WAN IP:           %1 - %2\n").arg(_isp).arg(_ip);
     plainText += QObject::trUtf8(    "BBRAS:                  %1\n").arg(_bbras);
-    plainText += QObject::trUtf8(    "ISP network:            %1\n").arg(QObject::trUtf8("[Coming soon!]"));//.arg(_ispNetwork);
-    plainText += QObject::trUtf8(    "Network advertised via: %1\n").arg(QObject::trUtf8("[Coming soon!]"));//.arg(_ispNetworkAdvertisers);
+    plainText += QObject::trUtf8(    "WAN IP:                 %1\n").arg(_ip);
+    plainText += QObject::trUtf8(    "ISP Name & Network:     %1 - %2\n").arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
+    plainText += QObject::trUtf8(    "Network advertised via: %1\n").arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
     plainText += QObject::trUtf8(    "Test mode:              %1\n").arg(_testModeString());
     plainText += QObject::trUtf8(    "Total test duration:    %1 sec\n").arg(_testDuration);
 
@@ -72,30 +72,28 @@ QString Results::bbCode() const
     quint8 pingGroupsSize = _pingGroups.size();
     quint8 downloadGroupsSize = _downloadGroups.size();
 
-    bbCode +=                         "[table=head] | | |\n";
-    bbCode += QObject::trUtf8(        "[right]Report created by[/right] | [left]%1 %2 - [url=%3]Download[/url] - [url=%4]Discuss[/url][/left] | ").arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(_projectDiscussUrl);
-    bbCode += QObject::trUtf8(        "[right]Hostlist used[/right] | [left]%1 [url=%2]%3[/url][/left] |\n").arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment);
-    bbCode += QObject::trUtf8(        "[right]Test date and time[/right] | [left]%1[/left] | ").arg(_testDateTime);
-    bbCode += QObject::trUtf8(        "[right]Host OS & no. of CPUs[/right] | [left]%1 - %2 CPU cores[/left] |\n").arg(_hostOS).arg(_cpuCores);
-    bbCode += QObject::trUtf8(        "[right]ISP & WAN IP[/right] | [left]%1 - %2[/left] | ").arg(_isp).arg(_ip);
-    bbCode += QObject::trUtf8(        "[right]BBRAS[/right] | [left]%1[/left] |\n").arg(_bbras);
-    bbCode += QObject::trUtf8(        "[right]ISP network[/right] | [left]%1[/left] | ").arg(QObject::trUtf8("[Coming soon!]"));//.arg(_ispNetwork);
-    bbCode += QObject::trUtf8(        "[right]Network advertised via[/right] | [left]%1[/left] |\n").arg(QObject::trUtf8("[Coming soon!]"));//.arg(_ispNetworkAdvertisers);
-    bbCode += QObject::trUtf8(        "[right]Test mode[/right] | [left]%1[/left] | ").arg(_testModeString());
-    bbCode += QObject::trUtf8(        "[right]Total test duration[/right] | [left]%1 sec[/left] |\n").arg(_testDuration);
+    bbCode += QObject::trUtf8(        "[table=head] | [center][b]%1 %2 Report - [url=%3]Homepage[/url][/b][/center] | [right]Test timestamp[/right] | [center][b]%4[/b][/center] |\n").arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(_testDateTime);
+    bbCode += QObject::trUtf8(        "[right]Hostlist used[/right] | [center]%1 [url=%2]%3[/url][/center] | ").arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment);
+    bbCode += QObject::trUtf8(        "[right]Host OS & no. of CPUs[/right] | [center]%1 - %2 CPU cores[/center] |\n").arg(_hostOS).arg(_cpuCores);
+    bbCode += QObject::trUtf8(        "[right]BBRAS[/right] | [center]%1[/center] | ").arg(_bbras);
+    bbCode += QObject::trUtf8(        "[right]WAN IP[/right] | [center]%1[/center] |\n").arg(_ipCensored);
+    bbCode += QObject::trUtf8(        "[right]ISP name & network[/right] | [center]%1 - %2[/center] | ").arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
+    bbCode += QObject::trUtf8(        "[right]Network advertised via[/right] | [center]%1[/center] |\n").arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    bbCode += QObject::trUtf8(        "[right]Test mode[/right] | [center]%1[/center] | ").arg(_testModeString());
+    bbCode += QObject::trUtf8(        "[right]Total test duration[/right] | [center]%1 sec[/center] |\n").arg(_testDuration);
 
     if(_testMode & TestMode::Ping)
     {
-        bbCode += QObject::trUtf8(    "[right]Pings per host[/right] | [left]%1[/left] | ").arg(_pingsPerHost);
-        bbCode += QObject::trUtf8(    "[right]Ping threads[/right] | [left]%1[/left] |\n").arg(_pingThreads);
-        bbCode += QObject::trUtf8(    "[right]Hosts alive[/right] | [left]%1 / %2[/left] | \n").arg(_pingHostsAlive()).arg(_pingHostsTotal());
-        bbCode += QObject::trUtf8(    "[right] | | [b][size=3]Avg. latency[/size][/b][/right] | [left][b][size=3]%1[/size][/b][/left] |\n").arg(_pingAverageString());
+        bbCode += QObject::trUtf8(    "[right]Pings per host[/right] | [center]%1[/center] | ").arg(_pingsPerHost);
+        bbCode += QObject::trUtf8(    "[right]Ping threads[/right] | [center]%1[/center] |\n").arg(_pingThreads);
+        bbCode += QObject::trUtf8(    "[right]Hosts alive[/right] | [center]%1 / %2[/center] | ").arg(_pingHostsAlive()).arg(_pingHostsTotal());
+        bbCode += QObject::trUtf8(    "[right][b][size=3]Avg. latency[/size][/b][/right] | [center][b][size=3]%1[/size][/b][/center] |\n").arg(_pingAverageString());
     }
 
     if(_testMode & TestMode::Download)
     {
-        bbCode += QObject::trUtf8(    "[right]Each download ran for[/right] | [left]%1 sec[/left] | ").arg(_downloadTestSecs);
-        bbCode += QObject::trUtf8(    "[right][b][size=3]Max. bandwidth[/size][/b][/right] | [left][b][size=3]%1 or %2[/size][/b][/left] |\n").arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
+        bbCode += QObject::trUtf8(    "[right]Downloads ran for[/right] | [center]%1 sec each[/center] | ").arg(_downloadTestSecs);
+        bbCode += QObject::trUtf8(    "[right][b][size=3]Max. bandwidth[/size][/b][/right] | [center][b][size=3]%1 or %2[/size][/b][/center] |\n").arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
     }
 
     bbCode +=                         "[/table]\n\n";
@@ -163,29 +161,21 @@ QString Results::html() const
     html +=                         "    </head>\n"
                                     "    <body>\n"
                                     "        <table border=\"1\" cellpadding=\"4\">\n";
-    html += QObject::trUtf8(        "            <tr><td>Report created by</td><td align=\"center\">%1 %2 - <a href=\"%3\">Download</a> - <a href=\"%4\">Discuss</a></td></tr>\n").arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(_projectDiscussUrl);
-    html += QObject::trUtf8(        "            <tr><td>Hostlist used</td><td align=\"center\">%1 <a href=\"%2\">%3</a></td></tr>\n").arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment);
-    html += QObject::trUtf8(        "            <tr><td>Test date and time</td><td align=\"center\">%1</td></tr>\n").arg(_testDateTime);
-    html += QObject::trUtf8(        "            <tr><td>Host OS & no. of CPUs</td><td align=\"center\">%1 - %2 CPU cores</td></tr>\n").arg(_hostOS).arg(_cpuCores);
-    html += QObject::trUtf8(        "            <tr><td>ISP & WAN IP</td><td align=\"center\">%1 - %2</td></tr>\n").arg(_isp).arg(_ip);
-    html += QObject::trUtf8(        "            <tr><td>BBRAS</td><td align=\"center\">%1</td></tr>\n").arg(_bbras);
-    html += QObject::trUtf8(        "            <tr><td>ISP network</td><td align=\"center\">%1</td></tr>\n").arg(QObject::trUtf8("[Coming soon!]"));//.arg(_ispNetwork);
-    html += QObject::trUtf8(        "            <tr><td>Network advertised via</td><td align=\"center\">%1</td></tr>\n").arg(QObject::trUtf8("[Coming soon!]"));//.arg(_ispNetworkAdvertisers);
-    html += QObject::trUtf8(        "            <tr><td>Test mode</td><td align=\"center\">%1</td></tr>\n").arg(_testModeString());
-    html += QObject::trUtf8(        "            <tr><td>Total test duration</td><td align=\"center\">%1 sec</td></tr>\n").arg(_testDuration);
+    html += QObject::trUtf8(        "            <tr><td>&nbsp;</td><td align=\"center\" style=\"font-size:130%;\"><b>%1 %2 report - <a href=\"%3\">Homepage</a></b></td><td align=\"right\" style=\"font-size:130%;\"><b>Test timestamp</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%4</b></td></tr>\n").arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(_testDateTime);
+    html += QObject::trUtf8(        "            <tr><td align=\"right\">Hostlist used</td><td align=\"center\">%1 <a href=\"%2\">%3</a></td><td align=\"right\">Host OS & no. of CPUs</td><td align=\"center\">%4 - %5 CPU cores</td></tr>\n").arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment).arg(_hostOS).arg(_cpuCores);
+    html += QObject::trUtf8(        "            <tr><td align=\"right\">BBRAS</td><td align=\"center\">%1</td><td align=\"right\">WAN IP</td><td align=\"center\">%2</td></tr>\n").arg(_bbras).arg(_ipCensored);
+    html += QObject::trUtf8(        "            <tr><td align=\"right\">ISP name & network</td><td align=\"center\">%1 - %2</td><td align=\"right\">Network advertised via</td><td align=\"center\">%3</td></tr>\n").arg(_isp).arg("[coming soon!]").arg("[coming soon!]");
+    html += QObject::trUtf8(        "            <tr><td align=\"right\">Test mode</td><td align=\"center\">%1</td><td align=\"right\">Total test duration</td><td align=\"center\">%2 sec</td></tr>\n").arg(_testModeString()).arg(_testDuration);
 
     if(_testMode & TestMode::Ping)
     {
-        html += QObject::trUtf8(    "            <tr><td>Pings per host</td><td align=\"center\">%1</td></tr>\n").arg(_pingsPerHost);
-        html += QObject::trUtf8(    "            <tr><td>Ping threads</td><td align=\"center\">%1</td></tr>\n").arg(_pingThreads);
-        html += QObject::trUtf8(    "            <tr><td>Ping hosts alive</td><td align=\"center\">%1 / %2</td></tr>\n").arg(_pingHostsAlive()).arg(_pingHostsTotal());
-        html += QObject::trUtf8(    "            <tr><td><b>Avg. latency</b></td><td align=\"center\"><b>%1</b></td></tr>\n").arg(_pingAverageString());
+        html += QObject::trUtf8(    "            <tr><td align=\"right\">Pings per host</td><td align=\"center\">%1</td><td align=\"right\">Ping threads</td><td align=\"center\">%2</td></tr>\n").arg(_pingsPerHost).arg(_pingThreads);
+        html += QObject::trUtf8(    "            <tr><td align=\"right\">Hosts alive</td><td align=\"center\">%1 / %2</td><td align=\"right\" style=\"font-size:130%;\"><b>Avg. latency</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%3</b></td></tr>\n").arg(_pingHostsAlive()).arg(_pingHostsTotal()).arg(_pingAverageString());
     }
 
     if(_testMode & TestMode::Download)
     {
-        html += QObject::trUtf8(    "            <tr><td><b>Max. bandwidth</b></td><td align=\"center\"><b>%1 or %2</b></td></tr>\n").arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
-        html += QObject::trUtf8(    "            <tr><td>Each download ran for></td><td align=\"center\">%1 sec</td></tr>\n").arg(_downloadTestSecs);
+        html += QObject::trUtf8(    "            <tr><td align=\"right\">Downloads ran for</td><td align=\"center\">%1 sec each</td><td align=\"right\" style=\"font-size:130%;\"><b>Max. bandwidth</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%2 or %3</b></td></tr>\n").arg(_downloadTestSecs).arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
     }
 
     html +=                         "        </table>\n";
@@ -305,7 +295,10 @@ bool Results::saveReport(ReportFormat::Format format, const QString &filename) c
         break;
     }
 
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        return false;
+    }
 
     outStream << content;
     file.close();
@@ -375,7 +368,10 @@ QString Results::_pingAverageString() const
 
             for(int j = 0; j < groupSize; j++)
             {
-                if(_pingGroups[i]._hosts[j].isAlive()) sum += _pingGroups[i]._hosts[j].rtt();
+                if(_pingGroups[i]._hosts[j].isAlive())
+                {
+                    sum += _pingGroups[i]._hosts[j].rtt();
+                }
             }
         }
 
@@ -410,7 +406,10 @@ QString Results::_maxBandwidth(SpeedUnit::Unit unit) const
         {
             speed = _downloadGroups[i]._speedBpsParallel;
 
-            if(speed > max) max = speed;
+            if(speed > max)
+            {
+                max = speed;
+            }
         }
     }
 
@@ -465,20 +464,35 @@ QString Results::_googleChartPingGroupsUrl() const
 
     url += QString("&chs=%1x%2&chd=t:").arg(chartWidth).arg(chartHeight);
 
-    if(size) max = _pingGroups[0].rttAverage();
+    if(size)
+    {
+        max = _pingGroups[0].rttAverage();
+    }
 
     for(int i = 0; i < size; i++)
     {
         ping = _pingGroups[i].rttAverage();
         url += QString::number(ping, 'f', 2) + ',';
 
-        if(ping > max) max = ping;
+        if(ping > max)
+        {
+            max = ping;
+        }
     }
 
-    if(size) url.chop(1);
+    if(size)
+    {
+        url.chop(1);
+    }
 
-    if(max < 200) scalingPart = "&chxr=0,0,280&chds=0,280";
-    else scalingPart = QString("&chxr=0,0,%1&chds=0,%1").arg(QString::number(max + 80, 'f', 0));
+    if(max < 200)
+    {
+        scalingPart = "&chxr=0,0,280&chds=0,280";
+    }
+    else
+    {
+        scalingPart = QString("&chxr=0,0,%1&chds=0,%1").arg(QString::number(max + 80, 'f', 0));
+    }
 
     url += scalingPart;
 
@@ -490,7 +504,7 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
     QString chartTitle = QObject::trUtf8("%1|(Mbps)").arg(_downloadGroups[index].name());
     QString url = QString("http://chart.apis.google.com/chart?chof=gif&chtt=%1&cht=bhs&chxt=x,y&chm=N++,000000,0,,11&chco=FF0000|CD8500|808080|00FF00|0000FF&chxl=1:").arg(chartTitle);
     quint16 chartWidth = 280;
-    quint16 chartHeight = 60;
+    quint16 chartHeight = 50;
     quint8 size = _downloadGroups[index]._hosts.size();
     double max = 0.0;
     double speed;
@@ -509,7 +523,10 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
 
     url += QString("&chs=%1x%2&chd=t:").arg(chartWidth).arg(chartHeight);
 
-    if(size) max = _downloadGroups[0].speedParallel(SpeedUnit::Mbps);
+    if(size)
+    {
+        max = _downloadGroups[0].speedParallel(SpeedUnit::Mbps);
+    }
 
     url += QString::number(_downloadGroups[index].speedParallel(SpeedUnit::Mbps), 'f', 2) + ',';
     url += QString::number(_downloadGroups[index].speedSerial(SpeedUnit::Mbps), 'f', 2) + ',';
@@ -519,13 +536,22 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
         speed = _downloadGroups[index]._hosts[i].speed(SpeedUnit::Mbps);
         url += QString::number(speed, 'f', 2) + ',';
 
-        if(speed > max) max = speed;
+        if(speed > max)
+        {
+            max = speed;
+        }
     }
 
     url.chop(1);
 
-    if(max < 21) scalingPart = "&chxr=0,0,25,2&chds=0,25";
-    else scalingPart = QString("&chxr=0,0,%1,2&chds=0,%1").arg(QString::number(max + 4, 'f', 0));
+    if(max < 21)
+    {
+        scalingPart = "&chxr=0,0,25,2&chds=0,25";
+    }
+    else
+    {
+        scalingPart = QString("&chxr=0,0,%1,2&chds=0,%1").arg(QString::number(max + 4, 'f', 0));
+    }
 
     url += scalingPart;
 

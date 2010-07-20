@@ -3,8 +3,4 @@
         <file>logo.png</file>
         <file>icons.ico</file>
     </qresource>
-    <qresource prefix="/libspeedtest">
-        <file>default.hostlist.ini</file>
-        <file>default.preferences.ini</file>
-    </qresource>
 </RCC>

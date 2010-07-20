@@ -81,7 +81,10 @@ void MainWindow::on_actionCopyLog_triggered()
 {
     QString text;
 
-    for(int i = _ui->comboBoxLog->count() - 1; i >= 0; i--) text += _ui->comboBoxLog->itemText(i) + "\n";
+    for(int i = _ui->comboBoxLog->count() - 1; i >= 0; i--)
+    {
+        text += _ui->comboBoxLog->itemText(i) + "\n";
+    }
 
     QApplication::clipboard()->setText(text);
     slotUpdateLog(trUtf8("Log contents copied to system clipboard"));

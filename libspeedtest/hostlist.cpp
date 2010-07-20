@@ -44,6 +44,7 @@ bool Hostlist::_updateIsAvailable()
     {
         download->abort();
         emit message(trUtf8("Hostlist server unreachable"));
+
         return false;
     }
 
@@ -52,10 +53,12 @@ bool Hostlist::_updateIsAvailable()
     if((remoteVersion = download->readLine().trimmed().right(12)) > _version)
     {
         emit message(trUtf8("Update available. Local hostlist version is %1, remote is %2").arg(_version).arg(remoteVersion));
+
         return true;
     }
 
     emit message(trUtf8("No hostlist updates available"));
+
     return false;
 }
 
@@ -76,6 +79,7 @@ bool Hostlist::_downloadOk(const QString &filename)
     if(download->error())
     {
         emit message(trUtf8("Error. Download failed"));
+
         return false;
     }
 
@@ -85,6 +89,7 @@ bool Hostlist::_downloadOk(const QString &filename)
     {
         emit message(trUtf8("Error writing downloaded hostlist to temporary file %1").arg(QDir::toNativeSeparators(filename)));
         emit message(trUtf8("Please check directory permissions."));
+
         return false;
     }
 
@@ -93,6 +98,7 @@ bool Hostlist::_downloadOk(const QString &filename)
     file.close();
     file.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
     emit message(trUtf8("Wrote %1 bytes").arg(file.size()));
+
     return true;
 }
 
@@ -100,52 +106,52 @@ bool Hostlist::_isValid(const QString &filename2)
 {
     QSettings temp(filename2, QSettings::IniFormat);
     QString filename = QDir::toNativeSeparators(filename2);
-    QString string;
+    QString string1, string2, string3;
     int int1, int2;
 
-    if(!temp.childGroups().contains("HostListInfo")) return false;
+    if(!temp.childGroups().contains("HostListInfo"))
+    {
+        return false;
+    }
 
     temp.beginGroup("HostListInfo");
-    string = temp.value("Version", QString("")).toString();
-
-    if(string.isEmpty()) return false;
-
-    string = temp.value("Comment", QString("")).toString();
-
-    if(string.isEmpty()) return false;
-
-    string = temp.value("ContactURL", QString("")).toString();
-
-    if(string.isEmpty()) return false;
-
+    string1 = temp.value("Version", QString("")).toString();
+    string2 = temp.value("Comment", QString("")).toString();
+    string3 = temp.value("ContactURL", QString("")).toString();
     int1 = temp.value("NumberOfPingGroups", 0).toInt();
 
-    if(int1 < 1) return false;
+    if(string1.isEmpty() || string2.isEmpty() || string3.isEmpty() || int1 < 1)
+    {
+        return false;
+    }
 
     temp.endGroup();
 
     for(int i = 1; i <= int1; i++)
     {
-        if(!temp.childGroups().contains(QString("PingGroup%1").arg(i))) return false;
+        if(!temp.childGroups().contains(QString("PingGroup%1").arg(i)))
+        {
+            return false;
+        }
 
         temp.beginGroup(QString("PingGroup%1").arg(i));
-        string = temp.value("Name", QString("")).toString();
-
-        if(string.isEmpty()) return false;
-
+        string1 = temp.value("Name", QString("")).toString();
         int2 = temp.value("NumberOfHosts", 0).toInt();
 
-        if(int2 < 1) return false;
+        if(string1.isEmpty() || int2 < 1)
+        {
+            return false;
+        }
 
         for(int j = 1; j <= int2; j++)
         {
-            string = temp.value(QString("%1/Name").arg(j), QString("")).toString();
+            string1 = temp.value(QString("%1/Name").arg(j), QString("")).toString();
+            string2 = temp.value(QString("%1/URL").arg(j), QString("")).toString();
 
-            if(string.isEmpty()) return false;
-
-            string = temp.value(QString("%1/URL").arg(j), QString("")).toString();
-
-            if(string.isEmpty() || !QUrl(string).isValid()) return false;
+            if(string1.isEmpty() || string2.isEmpty())
+            {
+                return false;
+            }
         }
 
         temp.endGroup();
@@ -153,30 +159,36 @@ bool Hostlist::_isValid(const QString &filename2)
 
     int1 = temp.value("HostListInfo/NumberOfDownloadGroups", 0).toInt();
 
-    if(int1 < 1) return false;
+    if(int1 < 1)
+    {
+        return false;
+    }
 
     for(int i = 1; i <= int1; i++)
     {
-        if(!temp.childGroups().contains(QString("DownloadGroup%1").arg(i))) return false;
+        if(!temp.childGroups().contains(QString("DownloadGroup%1").arg(i)))
+        {
+            return false;
+        }
 
         temp.beginGroup(QString("DownloadGroup%1").arg(i));
-        string = temp.value("Name", QString("")).toString();
-
-        if(string.isEmpty()) return false;
-
+        string1 = temp.value("Name", QString("")).toString();
         int2 = temp.value("NumberOfHosts", 0).toInt();
 
-        if(int2 < 1) return false;
+        if(string1.isEmpty() || int2 < 1)
+        {
+            return false;
+        }
 
         for(int j = 1; j <= int2; j++)
         {
-            string = temp.value(QString("%1/Name").arg(j), QString("")).toString();
+            string1 = temp.value(QString("%1/Name").arg(j), QString("")).toString();
+            string2 = temp.value(QString("%1/URL").arg(j), QString("")).toString();
 
-            if(string.isEmpty()) return false;
-
-            string = temp.value(QString("%1/URL").arg(j), QString("")).toString();
-
-            if(string.isEmpty() || !QUrl(string).isValid()) return false;
+            if(string1.isEmpty() || string2.isEmpty() || !QUrl(string2).isValid())
+            {
+                return false;
+            }
         }
 
         temp.endGroup();
@@ -192,7 +204,10 @@ bool Hostlist::_restoreEmbeddedOk()
     QFile file(fileName());
     QFile embedded(":/libspeedtest/default.hostlist.ini");
 
-    if(file.exists()) QFile::rename(fileName(), fileName() + ".wrong");
+    if(file.exists())
+    {
+        QFile::rename(fileName(), fileName() + ".wrong");
+    }
 
     emit message(trUtf8("Extracting default hostlist from embedded resources"));
 
@@ -314,129 +329,3 @@ bool Hostlist::initOk()
 
     return true;    // An assumption was made here: That, no matter what, restoring from embedded resources will always succeed and give a valid hostlist file. That _may not_ always be the case!
 }
-
-/*
-void Hostlist::startPingTest()
-{
-    int count = pingGroups.size();
-
-    if(!count)
-    {
-        emit sigPingTestFinished();
-        return;
-    }
-
-    pingGroupsQueue.clear();
-
-    for(int i = 0; i < count; i++)
-    {
-        pingGroupsQueue.enqueue(&pingGroups[i]);
-    }
-
-    connect(pingGroupsQueue.first(), SIGNAL(sigFinished()), this, SLOT(slotNextPingGroup()));
-    pingGroupsQueue.first()->startPing();
-
-}
-
-void Hostlist::stopPingTest()
-{
-    for(int i = 0; i < pingGroups.size(); i++)
-    {
-        if(pingGroups[i].isRunning())
-        {
-            pingGroups[i].stopPing();
-            disconnect(&pingGroups[i], SIGNAL(sigFinished()), this, SLOT(slotNextPingGroup()));
-        }
-    }
-}
-
-void Hostlist::startParallelDownloadTest()
-{
-    int count = downloadGroups.size();
-
-    if(!count)
-    {
-        emit sigFinished();
-        return;
-    }
-
-    downloadGroupsQueue.clear();
-
-    for(int i = 0; i < count; i++)
-    {
-        downloadGroupsQueue.enqueue(&downloadGroups[i]);
-    }
-
-    connect(downloadGroupsQueue.first(), SIGNAL(sigFinished()), this, SLOT(slotNextDownloadGroup()));
-    downloadGroupsQueue.first()->startParallelDownload();
-    emit sigShowProgressBar(0, downloadTestSecs * 1000);
-    progress = 0;
-    emit sigProgress(0);
-    progressTimer.start(downloadTestSecs * 25);    // Arbitrary value, chosen because for the default downloadTestSecs (10) gives an interval of 250msec for the progress bar updates
-}
-
-void Hostlist::stopParallelDownloadTest()
-{
-    progressTimer.stop();
-    emit sigHideProgressBar();
-
-    for(int i = 0; i < downloadGroups.size(); i++)
-    {
-        if(downloadGroups[i].isRunning())
-        {
-            downloadGroups[i].stopParallelDownload();
-            disconnect(&downloadGroups[i], SIGNAL(sigFinished()), this, SLOT(slotNextDownloadGroup()));
-        }
-    }
-}
-
-void Hostlist::slotNewProgress()
-{ progress += progressTimer.interval(); emit sigProgress(progress); }
-
-void Hostlist::slotNextPingGroup()
-{
-    disconnect(pingGroupsQueue.first(), SIGNAL(sigFinished()), this, SLOT(slotNextPingGroup()));
-    emit sigResult(trUtf8("Group sum:     %1\n"
-                          "Group average: %2\n").arg(pingGroupsQueue.first()->getPingSumAsString()).arg(pingGroupsQueue.first()->getPingAsString()));
-    pingGroupsQueue.dequeue()->sort();
-
-
-    if(pingGroupsQueue.size())
-    {
-        connect(pingGroupsQueue.first(), SIGNAL(sigFinished()), this, SLOT(slotNextPingGroup()));
-        pingGroupsQueue.first()->startPing();
-
-        return;
-    }
-
-    if(TESTMODE & TestMode::Download)
-    {
-        startParallelDownloadTest();
-
-        return;
-    }
-
-    emit sigFinished();
-}
-
-void Hostlist::slotNextDownloadGroup()
-{
-    disconnect(downloadGroupsQueue.first(), SIGNAL(sigFinished()), this, SLOT(slotNextDownloadGroup()));
-    downloadGroupsQueue.dequeue();
-
-    if(downloadGroupsQueue.size())
-    {
-        connect(downloadGroupsQueue.first(), SIGNAL(sigFinished()), this, SLOT(slotNextDownloadGroup()));
-        downloadGroupsQueue.first()->startParallelDownload();
-        progress = 0;
-        emit sigProgress(0);
-        progressTimer.start(downloadTestSecs * 25);    // Arbitrary value, chosen because for the default downloadTestSecs (10) gives an interval of 250msec for the progress bar updates
-    }
-    else
-    {
-        progressTimer.stop();
-        emit sigHideProgressBar();
-        emit sigFinished();    // The download test is the last test, so we don't need a specific sigDownloadTestFinished signal, the generic one will do
-    }
-}
-*/

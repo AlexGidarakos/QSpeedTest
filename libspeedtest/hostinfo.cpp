@@ -26,8 +26,6 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
     _osDetectProc.setProcessChannelMode(QProcess::MergedChannels);
     _tracerouteProc.setProcessChannelMode(QProcess::MergedChannels);
     connect(&_osDetectProc, SIGNAL(finished(int)), this, SLOT(_slotOsDetectProcFinished()));
-    connect(&_osDetectProc, SIGNAL(finished(int)), &_loop, SLOT(quit()));
-    connect(&_tracerouteProc, SIGNAL(finished(int)), &_loop, SLOT(quit()));
 
 #ifdef Q_WS_WIN
     _winArch = (QProcessEnvironment::systemEnvironment().contains("ProgramFiles(x86)"))? "x64" : "x86";
@@ -63,7 +61,7 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
     _tracerouteCmd = "traceroute -m 2 -q 1 8.8.8.8";
     _bbrasLine = " 2  ";
 #ifdef Q_WS_MAC
-    _macVersionDetectProc.start("sw_vers -productVersion", QIODevice::ReadOnly);
+    _osDetectProc.start("sw_vers -productVersion", QIODevice::ReadOnly);
 #else
 #ifdef Q_OS_LINUX
     _osDetectProc.start("uname -o", QIODevice::ReadOnly);
@@ -76,7 +74,10 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
 
 HostInfo::~HostInfo()
 {
-    if(_osDetectProc.state() != QProcess::NotRunning) _osDetectProc.close();
+    if(_osDetectProc.state() != QProcess::NotRunning)
+    {
+        _osDetectProc.close();
+    }
 
     stopInfoTest();
 }
@@ -109,7 +110,7 @@ void HostInfo::_slotOsDetectProcFinished()
 #else
     _results._hostOS = _osDetectProc.readLine().trimmed();
     _osDetectProc.start("uname -rm", QIODevice::ReadOnly);
-    _loop.exec();
+    _osDetectProc.waitForFinished();
     _results._hostOS += " " + _osDetectProc.readLine().trimmed();
 #endif // Q_WS_MAC
 #endif // Q_WS_WIN
@@ -136,11 +137,14 @@ void HostInfo::_retrieve()
     bool foundFlag = false;
     QStringList list;
 
-    if(_osDetectProc.state() != QProcess::NotRunning) _loop.exec();    // Make sure all pending processes have finished
+    // Make sure all pending processes have finished
+    _osDetectProc.waitForFinished();
+    _tracerouteProc.waitForFinished();
 
-    if(_tracerouteProc.state() != QProcess::NotRunning) _loop.exec();
-
-    if(_download->isRunning()) _loop.exec();
+    if(_download->isRunning())
+    {
+        _loop.exec();
+    }
 
     while(!(contents = _download->readLine()).isEmpty() && !foundFlag)
     {
@@ -149,7 +153,7 @@ void HostInfo::_retrieve()
             contents.chop(7);
             _results._ip = QString(contents.trimmed().mid(16));
             list = _results._ip.split('.');
-            _results._ip = list[0] + "." + list[1] + ".xxx.xxx";
+            _results._ipCensored = list[0] + "." + list[1] + ".xxx.xxx";
             continue;
         }
         else
@@ -175,7 +179,10 @@ void HostInfo::_retrieve()
         {
             foundFlag = true;
 
-            if(contents.contains(QString("*").toAscii())) _results._bbras = trUtf8("N/A (non-responsive BBRAS)");
+            if(contents.contains(QString("*").toAscii()))
+            {
+                _results._bbras = trUtf8("N/A (non-responsive BBRAS)");
+            }
 
 #ifdef Q_WS_WIN
             else _results._bbras = contents.mid(3).trimmed();
@@ -186,11 +193,17 @@ void HostInfo::_retrieve()
         }
     }
 
-    if(!foundFlag) _results._bbras = trUtf8("N/A");
+    if(!foundFlag)
+    {
+        _results._bbras = trUtf8("N/A");
+    }
 
     _tracerouteProc.close();
 
-    if(_download) delete _download;
+    if(_download)
+    {
+        delete _download;
+    }
 
     _download = NULL;
 }
@@ -202,7 +215,10 @@ void HostInfo::startInfoTest()
     _retrieve();
     connect(this, SIGNAL(osDetectionFinished()), &loop, SLOT(quit()));
 
-    if(_results._hostOS.isEmpty()) loop.exec();
+    if(_results._hostOS.isEmpty())
+    {
+        loop.exec();
+    }
 
     disconnect(this, SIGNAL(osDetectionFinished()), &loop, SLOT(quit()));
     emit finished();
