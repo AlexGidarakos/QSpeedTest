@@ -10,7 +10,6 @@
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
-
 QT -= gui
 QT += network
 TARGET = qspeedtestcli
@@ -24,3 +23,6 @@ SOURCES += \
     qspeedtestcli.cpp
 HEADERS += \
     qspeedtestcli.h
+!win32 {
+    RESOURCES += ../libspeedtest/libspeedtest.qrc
+}

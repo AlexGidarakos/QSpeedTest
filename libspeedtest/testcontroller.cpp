@@ -122,8 +122,8 @@ void TestController::_slotNextPingGroup()
 {
     if(_groupNext)    // Means it's not the first call of this slot
     {
-        emit result(trUtf8("Group sum:     %1\n"
-                              "Group average: %2\n").arg(_results._pingGroups[_groupNext - 1].rttSumString()).arg(_results._pingGroups[_groupNext - 1].rttAverageString()));
+        emit result(trUtf8("Group sum:     %1").arg(_results._pingGroups[_groupNext - 1].rttSumString()));
+        emit result(trUtf8("Group average: %1").arg(_results._pingGroups[_groupNext - 1].rttAverageString()) + '\n');
         _results._pingGroups[_groupNext - 1].sort();
     }
 
@@ -134,7 +134,7 @@ void TestController::_slotNextPingGroup()
         return;
     }
 
-    emit result(_results._pingGroups[_groupNext].name().leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
+    emit result(_results._pingGroups[_groupNext].name().leftJustified(27, ' ', true) + "    " + trUtf8("Avg. ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
     emit result("-------------------------------------------------------------------------------");
     _groupNext++;
     _futureWatcher.setFuture(QtConcurrent::map(_results._pingGroups[_groupNext - 1]._hosts, &PingHost::ping));

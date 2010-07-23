@@ -36,8 +36,6 @@ class LIBSPEEDTEST_EXPORT PingGroup
 
 public:
     explicit PingGroup(const QString &name) : _name(name) {}
-    inline QString name() const { return _name; }
-    inline void sort() { qSort(_hosts.begin(), _hosts.end(), lessThan); }
     void reset();
     quint16 hostsAlive() const;
     double rttSum() const;
@@ -45,8 +43,10 @@ public:
     double rttAverage() const;
     QString rttAverageString() const;
     double packetLossAverage() const;
-    QString packetLossAverageString() const;
+    inline QString packetLossAverageString() const { return QString::number(packetLossAverage(), 'f', 2) + '%'; }
     QString rank() const;
+    inline QString name() const { return _name; }
+    inline void sort() { qSort(_hosts.begin(), _hosts.end(), lessThan); }
 
 private:
     QString _name;

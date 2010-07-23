@@ -3,4 +3,7 @@
         <file>logo.png</file>
         <file>icons.ico</file>
     </qresource>
+    <qresource prefix="/qspeedtest/translations">
+        <file>qspeedtest_el.qm</file>
+    </qresource>
 </RCC>

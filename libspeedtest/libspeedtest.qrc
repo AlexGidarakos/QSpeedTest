@@ -3,4 +3,7 @@
         <file>default.hostlist.ini</file>
         <file>default.preferences.ini</file>
     </qresource>
+    <qresource prefix="/libspeedtest/translations">
+        <file>libspeedtest_el.qm</file>
+    </qresource>
 </RCC>

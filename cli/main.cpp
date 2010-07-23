@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QSpeedTestCli cli;
 
-    QMetaObject::invokeMethod(&cli, "start", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(&cli, "_slotStart", Qt::QueuedConnection);
 
     return app.exec();
 }

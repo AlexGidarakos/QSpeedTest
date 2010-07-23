@@ -64,12 +64,18 @@ double PingHost::rtt() const
 
 QString PingHost::rttString() const
 {
-    if(_rtt.size())
+    QString string;
+
+    if(!_rtt.size())
     {
-        return QString::number(rtt(), 'f', 2) + " msec";
+        string = trUtf8("N/A");
+    }
+    else
+    {
+        string = QString::number(rtt(), 'f', 2) + ' ' + trUtf8("msec");
     }
 
-    return "N/A";
+    return string;
 }
 
 QString PingHost::packetLossString() const
@@ -108,7 +114,7 @@ QString PingHost::jitterString() const
 {
     double value = jitter();
 
-    return ((value >= 0.00)? '+' : ' ') + QString::number(value, 'f', 2) + " msec";
+    return ((value >= 0.00)? '+' : ' ') + QString::number(value, 'f', 2) + ' ' + trUtf8("msec");
 }
 
 QString PingHost::rank() const

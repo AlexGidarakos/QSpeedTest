@@ -23,9 +23,10 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 DialogAbout::DialogAbout(QWidget *parent) : QDialog(parent), _ui(new Ui::DialogAbout)
 {
     _ui->setupUi(this);
-    setWindowTitle(trUtf8("About ") + PROGRAMNAME);
+    setWindowTitle(trUtf8("About") + ' ' + PROGRAMNAME);
     _ui->labelProgramNameVersion->setText(QString("<p style=\"color: gray;\">%1 %2</p>").arg(PROGRAMNAME).arg(PROJECTVERSION));
     _ui->labelCopyright->setText(QString("&copy; 2010 <a href=\"%1\">%2</a>").arg(PROJECTCOMPANYURL).arg(PROJECTCOMPANY));
-    _ui->labelHomepage->setText(trUtf8("<a href=\"%1\">Homepage</a>").arg(PROJECTURL));
-    _ui->labelDownloadPage->setText(trUtf8("<a href=\"%1\">Download page</a>").arg(PROJECTDOWNLOADURL));
+    _ui->labelDescription->setText(trUtf8("QSpeedTest is a C++/Qt crossplatform utility for evaluating the performance of your Internet access/ISP, by running automated ping and speed tests. It is also free software, distributed under the GPLv3 license."));
+    _ui->labelHomepage->setText(QString("<a href=\"%1\">%2</a>").arg(PROJECTURL).arg(trUtf8("Homepage")));
+    _ui->labelDownloadPage->setText(QString("<a href=\"%1\">%2</a>").arg(PROJECTDOWNLOADURL).arg(trUtf8("Download page")));
 }

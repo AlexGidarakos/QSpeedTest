@@ -1,3 +1,2 @@
-100. Retrieve from RIPE database and print the ISP network and network advertisers
-200. QSpeedTestCLI release
-300. Thread safe Singleton pattern for the global variables?
+100. Internationalization
+200. Retrieve from RIPE database and print the ISP network and network advertisers

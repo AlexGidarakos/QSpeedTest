@@ -49,13 +49,13 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
     }
 
     emit hostlistOk(true);    // Enable Start button
-    _w.slotUpdateLog(trUtf8("Ready"));
+    _w.slotLog(trUtf8("Ready"));
 }
 
 void QSpeedTest::_connectSignalsSlots()
 {
-    connect(_preferences, SIGNAL(message(QString)), &_w, SLOT(slotUpdateLog(QString)));
-    connect(_hostlist, SIGNAL(message(QString)), &_w, SLOT(slotUpdateLog(QString)));
+    connect(_preferences, SIGNAL(message(QString)), &_w, SLOT(slotLog(QString)));
+    connect(_hostlist, SIGNAL(message(QString)), &_w, SLOT(slotLog(QString)));
     connect(this, SIGNAL(hostlistOk(bool)), &_w, SLOT(_slotEnablePushButtonStartStop(bool)));
     connect(&_w, SIGNAL(pushButtonStartClicked()), this, SLOT(_slotStartTests()));
     connect(&_w, SIGNAL(pushButtonStopClicked()), this, SLOT(_slotStopTests()));
@@ -73,7 +73,7 @@ void QSpeedTest::_checkForProgramUpdates()
     QEventLoop loop;
     int remoteVersion;
 
-    _w.slotUpdateLog(trUtf8("Checking online for an updated version of %1").arg(PROGRAMNAME));
+    _w.slotLog(trUtf8("Checking online for an updated version of %1").arg(PROGRAMNAME));
     QTimer::singleShot(UPDATECHECKTIMEOUTSECS * 1000, &loop, SLOT(quit()));
     download = manager.get(QNetworkRequest(QUrl(PROJECTVERSIONURL)));    // From here on, download pointer does not require manual deletion!
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -82,23 +82,23 @@ void QSpeedTest::_checkForProgramUpdates()
     if(download->isRunning() || download->error())
     {
         download->abort();
-        _w.slotUpdateLog(trUtf8("Update site unreachable"));
+        _w.slotLog(trUtf8("Update site unreachable"));
         return;
     }
 
     if((remoteVersion = download->readLine().mid(1).toInt()) > PROJECTVERSION.mid(1).toInt())
     {
-        _w.slotUpdateLog(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
-        int reply = QMessageBox::question(&_w, trUtf8("Update available"), trUtf8("An updated version of %1 (r%2) is available online.\n\nWould you like to open the download page in your browser?").arg(PROGRAMNAME).arg(remoteVersion), QMessageBox::Yes, QMessageBox::No);
+        _w.slotLog(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
+        int reply = QMessageBox::question(&_w, trUtf8("Update available"), trUtf8("An updated version of %1 (r%2) is available online.") + "\n\n" + trUtf8("Would you like to open the download page in your browser?").arg(PROGRAMNAME).arg(remoteVersion), QMessageBox::Yes, QMessageBox::No);
 
         if(reply == QMessageBox::Yes)
         {
-            _w.slotUpdateLog(trUtf8("Opening download page %1").arg(PROJECTDOWNLOADURL));
+            _w.slotLog(trUtf8("Opening download page %1").arg(PROJECTDOWNLOADURL));
             QDesktopServices::openUrl(QUrl(PROJECTDOWNLOADURL));
         }
     }
     else {
-        _w.slotUpdateLog(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
+        _w.slotLog(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
     }
 }
 
@@ -128,7 +128,7 @@ void QSpeedTest::_slotCopyReport(ReportFormat::Format format)
     }
 
     QApplication::clipboard()->setText(report);
-    _w.slotUpdateLog(reportType + trUtf8(" report copied to system clipboard"));
+    _w.slotLog(trUtf8("A report in %1 format was copied to the clipboard").arg(reportType));
 }
 
 void QSpeedTest::_slotSaveReport(ReportFormat::Format format)
@@ -163,12 +163,12 @@ void QSpeedTest::_slotSaveReport(ReportFormat::Format format)
 
     if(!_results.saveReport(format, filename))
     {
-        _w.slotUpdateLog(trUtf8("Error writing report to ") + QDir::toNativeSeparators(filename));
-        _w.slotUpdateLog(trUtf8("Check directory access permissions"));
+        _w.slotLog(trUtf8("Error writing report to") + ' ' + QDir::toNativeSeparators(filename));
+        _w.slotLog(trUtf8("Check directory access permissions"));
         return;
     }
 
-    _w.slotUpdateLog(trUtf8("Report written to ") + QDir::toNativeSeparators(filename));
+    _w.slotLog(trUtf8("Report written to") + ' ' + QDir::toNativeSeparators(filename));
     QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(filename)));
 }
 
@@ -181,13 +181,12 @@ void QSpeedTest::_slotSavePreferences()
     _preferences->setValue("DownloadTestSecs", DOWNLOADTESTSECS);
     _preferences->setValue("HostlistUrl", HOSTLISTURL);
     _preferences->sync();
-    _w.slotUpdateLog(trUtf8("Preferences saved to ") + QDir::toNativeSeparators(_preferences->fileName()));
+    _w.slotLog(trUtf8("Preferences saved to") + ' ' + QDir::toNativeSeparators(_preferences->fileName()));
 }
 
 void QSpeedTest::_slotStartTests()
 {
     _timer.start();
-    _w.slotUpdateLog(trUtf8("Test started"));
     _results.reset();
      connect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
      connect(_controller, SIGNAL(result(QString)), &_w, SLOT(slotResult(QString)));
@@ -233,6 +232,6 @@ void QSpeedTest::_slotTestsFinished()
     disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
     disconnect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
     _results.setTestDuration((_timer.elapsed() * 1.0) / 1000);
-    _w.slotResult("\n" + _results.plainText());
+    _w.slotResult("\n" + _results.summary());
     _w.slotTestFinished(true);
 }
