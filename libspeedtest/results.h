@@ -37,18 +37,21 @@ public:
     inline QString programName() { return _programName; }
     inline QString testDate() { return _testDate; }
     inline QString testTime() { return _testTime; }
+    inline QString ipCensored() { return _ipCensored; }
+    inline void setTestMode(TestMode::Mode mode) { _testMode = mode; }
     inline void setTestDuration(double duration) { _testDuration = duration; }
     void reset();
+    QString testModeString() const;
+    QString summary() const;
     QString plainText() const;
     QString bbCode() const;
     QString html() const;
     bool saveReport(ReportFormat::Format, const QString &) const;
 
 private:
-    QString _testModeString() const;
     quint16 _pingHostsAlive() const;
     quint16 _pingHostsTotal() const;
-    QString _pingAverageString() const;
+    double _pingAverage() const;
     quint16 _downloadHostsTotal() const;
     QString _maxBandwidth(SpeedUnit::Unit) const;
     QString _googleChartPingGroupsUrl() const;

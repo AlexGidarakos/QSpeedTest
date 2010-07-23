@@ -55,8 +55,8 @@ signals:
     void saveReport(ReportFormat::Format);
 
 public slots:
-    inline void slotUpdateLog(QString message) { _ui->comboBoxLog->insertItem(0, QDateTime::currentDateTime().toString("hh:mm:ss.zzz: ") + message); _ui->comboBoxLog->setCurrentIndex(0); }
-    inline void slotResult(QString result) { _ui->plainTextEditResults->appendPlainText(result); }
+    inline void slotLog(QString message) { _ui->comboBoxLog->insertItem(0, QDateTime::currentDateTime().toString("hh:mm:ss.zzz: ") + message); _ui->comboBoxLog->setCurrentIndex(0); }
+    inline void slotResult(QString result) { _ui->plainTextEditResults->appendPlainText(result); _ui->plainTextEditResults->moveCursor(QTextCursor::NoMove); }
     inline void slotShowProgressBar(int min, int max) { _ui->progressBar->setRange(min, max); _ui->progressBar->reset(); _ui->progressBar->setVisible(true); }
     inline void slotUpdateProgressBar(int value) { _ui->progressBar->setValue(value); }
     inline void slotHideProgressBar() { _ui->progressBar->setVisible(false); }
@@ -71,7 +71,7 @@ private slots:
     inline void on_actionCopyPlainText_triggered() { emit copyReport(ReportFormat::PlainText); }
     inline void on_actionCopyBbCode_triggered() { emit copyReport(ReportFormat::BbCode); }
     inline void on_actionCopyHtml_triggered() { emit copyReport(ReportFormat::Html); }
-    inline void on_actionClearLog_triggered() { _ui->comboBoxLog->clear(); slotUpdateLog(trUtf8("Log cleared")); }
+    inline void on_actionClearLog_triggered() { _ui->comboBoxLog->clear(); slotLog(trUtf8("Log cleared")); }
     inline void on_actionPreferences_triggered() { d1.myShow(); }
     inline void on_actionAboutQSpeedTest_triggered() { d2.show(); }
     inline void on_actionAboutQt_triggered() { qApp->aboutQt(); }

@@ -213,13 +213,13 @@ bool Hostlist::_restoreEmbeddedOk()
 
     if(!embedded.copy(fileName()))
     {
-        emit message(trUtf8("Error: Could not copy to ") + QDir::toNativeSeparators(fileName()));
+        emit message(trUtf8("Error: Could not copy to") + ' ' + QDir::toNativeSeparators(fileName()));
 
         return false;
     }
 
     file.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
-    emit message(trUtf8("Copied to ") + QDir::toNativeSeparators(fileName()));
+    emit message(trUtf8("Copied to") + ' ' + QDir::toNativeSeparators(fileName()));
 
     return true;
 }

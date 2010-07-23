@@ -22,79 +22,62 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QCoreApplication>
 #include <QtNetwork/QNetworkRequest>
 #include <QtCore/QUrl>
-#include <QtCore/QDebug>
-#include <QtCore/QDateTime>
 #include <QtCore/QtConcurrentMap>
-#include <QtCore/QTimer>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 
 QSpeedTestCli::QSpeedTestCli()
 {
     PROGRAMNAME += "CLI";
-    results.programName = PROGRAMNAME ;
-    results.programVersion = PROGRAMVERSION;
-    results.programUrl = PROGRAMURL;
-    results.programDiscussUrl = PROGRAMDISCUSSURL;
-    targetList = NULL;
-    hostInfo = NULL;
-    testMode = TestMode::All;
-    testModeAsString = trUtf8("Ping and speed");
-    pingTestEnabled = results.pingTestEnabled = true;
-    downloadTestEnabled = results.downloadTestEnabled = true;
-    htmlOutputEnabled = true;
-    vbOutputEnabled = true;
+    UPDATECHECKTIMEOUTSECS = UPDATECHECKTIMEOUTSECSDEFAULT;
+    PINGSPERHOST = PINGSPERHOSTDEFAULT;
+    PINGTHREADS = PINGTHREADSDEFAULT;
+    PINGTIMEOUTSECS = PINGTIMEOUTSECSDEFAULT;
+    DOWNLOADTESTSECS = DOWNLOADTESTSECSDEFAULT;
+    HOSTLISTURL = HOSTLISTURLDEFAULT;
+    _hostlist = NULL;
+    _hostInfo = NULL;
+    TESTMODE = TestMode::All;
+    _results.setTestMode(TESTMODE);
+    _htmlEnabled = true;
+    _bbCodeEnabled = true;
 }
 
 QSpeedTestCli::~QSpeedTestCli()
 {
-    if(targetList) delete targetList;
-    if(hostInfo) delete hostInfo;
+    if(_hostlist)
+    {
+        delete _hostlist;
+    }
+
+    if(_hostInfo)
+    {
+        delete _hostInfo;
+    }
 }
 
-void QSpeedTestCli::start()
+void QSpeedTestCli::_slotStart()
 {
-    parseArguments();
-    targetList = new TargetList(PROJECTNAME, PROGRAMNAME);
-    hostInfo = new HostInfo(&results);
-    connect(targetList, SIGNAL(logMessage(QString)), this, SLOT(updateLogMessages(QString)));
-    connect(this, SIGNAL(logMessage(QString)), this, SLOT(updateLogMessages(QString)));
-    connect(this, SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
-    checkForProgramUpdates();
+    _parseArguments();
+    _hostlist = new Hostlist(QSettings::IniFormat, QSettings::UserScope, PROJECTNAME, PROJECTNAME.toLower() + ".hostlist", _results, this);
+    _hostInfo = new HostInfo(_results, this);    // Starts some partial host info extraction in the background
+    _controller = new TestController(_results, this);
+    connect(_hostlist, SIGNAL(message(QString)), this, SLOT(_slotLog(QString)));
+    connect(_controller, SIGNAL(result(QString)), this, SLOT(_slotResult(QString)));
+    _checkForProgramUpdates();
 
-    if(!targetList->init())
+    if(!_hostlist->initOk())
     {
-        updateLogMessages(trUtf8("Unsuccessful initialization of the target list, %1 will now exit").arg(PROGRAMNAME));
-        exit(8);
+        _slotLog(trUtf8("Unsuccessful initialization of the target list, %1 will now exit").arg(PROGRAMNAME));
+
+        exit(10);
     }
 
-    for(int i = 0; i < targetList->pingGroups.size(); i++)
-    {
-        for(int j = 0; j < targetList->pingGroups[i].getSize(); j++)
-        {
-            connect(&targetList->pingGroups[i].targets[j], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
-        }
-    }
-
-    for(int i = 0; i < targetList->downloadGroups.size(); i++)
-    {
-        for(int j = 0; j < targetList->downloadGroups[i].getSize(); j++)
-        {
-            connect(&targetList->downloadGroups[i].targets[j], SIGNAL(newTestResult(QString)), this, SLOT(updateTestResults(QString)));
-        }
-    }
-
-    connect(&results, SIGNAL(message(QString)), this, SLOT(updateTestResults(QString)));
-    results.targetListVersion = targetList->getVersion();
-    results.targetListComment = targetList->getComment();
-    results.targetListContactUrl = targetList->getContactUrl();
-    runBenchmark();
-    saveReports();
-    qApp->processEvents();
-    qApp->quit();
+    _slotResult("\n\n");
+    _startTests();
 }
 
-void QSpeedTestCli::parseArguments()
+void QSpeedTestCli::_parseArguments()
 {
     QStringList args(qApp->arguments());
     int count = args.count();
@@ -105,12 +88,13 @@ void QSpeedTestCli::parseArguments()
 
     if(count == 1)
     {
-        qDebug() << qPrintable(trUtf8("No parameters specified, running with defaults:\n"
-                                      "Mode:             Ping and speed\n"
-                                      "Pings per target: %1\n"
-                                      "Threads:          %2\n"
-                                      "HTML output:      Enabled\n"
-                                      "vBulletin output: Enabled\n").arg(PINGSPERTARGET).arg(PARALLELPINGTHREADS));
+        _slotLog(trUtf8("No parameters specified, running with defaults:"));
+        _slotLog(trUtf8("Test mode:        All tests"));
+        _slotLog(trUtf8("Pings per host:   %1").arg(PINGSPERHOST));
+        _slotLog(trUtf8("Ping threads:     %1").arg(PINGTHREADS));
+        _slotLog(trUtf8("HTML output:      Enabled"));
+        _slotLog(trUtf8("bbCode output:    Enabled"));
+
         return;
     }
 
@@ -118,34 +102,43 @@ void QSpeedTestCli::parseArguments()
     {
         arg = args.at(i).toLower();
 
-        if(i < count - 1) argNext = args.at(i + 1);    // if there is a next argument after the current
-        else argNext.clear();
+        if(i < count - 1)    // if there is a next argument after the current
+        {
+            argNext = args.at(i + 1);
+        }
+        else
+        {
+            argNext.clear();
+        }
 
         if(arg == "--help" || arg == "-h" || arg == "help" || arg == "/?" || arg == "?")
         {
-            message = trUtf8("%1 %2 by %3 - %4").arg(PROGRAMNAME).arg(PROGRAMVERSION).arg(PROGRAMAUTHOR).arg(PROGRAMURL);
-            message = trUtf8("\n    Usage: %1 [PARAMETERS]\n\n"
-                             "    [PARAMETERS] are optional and can be any from the following\n\n"
-                             "--help, -h\n"
-                             "    Prints program usage and exits\n\n"
-                             "--version, -V\n"
-                             "    Prints version info and exits\n\n"
-                             "--mode MODE, -m MODE\n"
-                             "    where MODE can be any one from (without the double quotes)\n"
-                             "    \"info\": will only print some host system and ISP related information\n"
-                             "    \"ping\": will only perform a ping test\n"
-                             "    \"speed\": will only perform a download speed test\n"
-                             "    \"all\": will perform all tests in the above order\n\n"
-                             "--pings NUMBER, -p NUMBER\n"
-                             "    where NUMBER can be any integer between 1 and 100, default is 4\n"
-                             "    During a ping test, each target will be pinged this many times\n\n"
-                             "--threads NUMBER, -t NUMBER\n"
-                             "    where NUMBER can be any integer between 1 and 8, default is 4\n"
-                             "    During a ping test, simultaneous pinging of this many targets\n\n"
-                             "--nohtml, -nh\n"
-                             "    Disables HTML file output in the current directory\n\n"
-                             "--novb, -nv\n"
-                             "    Disables vBulletin code file output in the current directory").arg(args[0]);
+            message =  QString("%1 %2 %3 %4 - %5\n\n").arg(PROGRAMNAME).arg(PROJECTVERSION).arg(trUtf8("by")).arg(PROJECTAUTHOR).arg(PROJECTURL);
+            message += trUtf8("    Usage: %1 [PARAMETERS]").arg(args[0]) + "\n\n";
+            message += trUtf8("    [PARAMETERS] are optional and can be any from the following") + "\n\n";
+            message +=        "--help, -h\n";
+            message += trUtf8("    Prints program usage and exits") + "\n\n";
+            message +=        "--version, -V\n";
+            message += trUtf8("    Prints version info and exits") + "\n\n";
+            message +=        "--mode MODE, -m MODE\n";
+            message += trUtf8("    where MODE can be any one from (without the double quotes)") + '\n';
+            message += trUtf8("    \"info\": will only print some host system and ISP related information") + '\n';
+            message += trUtf8("    \"ping\": will only perform a ping test") + '\n';
+            message += trUtf8("    \"speed\": will only perform a download speed test") + '\n';
+            message += trUtf8("    \"all\": will perform all tests in the above order") + "\n\n";
+            message +=        "--pings NUMBER, -p NUMBER\n";
+            message += trUtf8("    where NUMBER can be any integer between 1 and 100, default is 4") + '\n';
+            message += trUtf8("    During a ping test, each target will be pinged this many times") + "\n\n";
+            message +=        "--threads NUMBER, -t NUMBER\n";
+            message += trUtf8("    where NUMBER can be any integer between 1 and 8, default is 4") + '\n';
+            message += trUtf8("    During a ping test, simultaneous pinging of this many targets") + "\n\n";
+            message +=        "--downloadtime NUMBER, -d NUMBER\n";
+            message += trUtf8("    where NUMBER can be any integer between 5 and 30, default is 10") + '\n';
+            message += trUtf8("    During download test, each download will run for this many seconds") + "\n\n";
+            message +=        "--nohtml, -nh\n";
+            message += trUtf8("    Disables HTML file output in the current directory") + "\n\n";
+            message +=        "--novb, -nv\n";
+            message += trUtf8("    Disables vBulletin code file output in the current directory");
             qDebug() << qPrintable(message);
 
             exit(0);
@@ -153,7 +146,8 @@ void QSpeedTestCli::parseArguments()
 
         if(arg == "--version" || arg == "-v")
         {
-            qDebug() << qPrintable(trUtf8("%1 %2").arg(PROGRAMNAME).arg(PROGRAMVERSION));
+            qDebug() << qPrintable(PROGRAMNAME + ' ' + PROJECTVERSION);
+
             exit(0);
         }
 
@@ -162,45 +156,44 @@ void QSpeedTestCli::parseArguments()
             if(argNext.isEmpty())
             {
                 qDebug() << qPrintable(trUtf8("Error #1: No value specified after --mode (-m) switch"));
+
                 exit(1);
             }
 
             if(argNext == "info")
             {
-                testMode = TestMode::Info;
-                testModeAsString = trUtf8("Info only");
-                pingTestEnabled = results.pingTestEnabled = false;
-                downloadTestEnabled = results.downloadTestEnabled = false;
+                TESTMODE = TestMode::Info;
+                _results.setTestMode(TESTMODE);
                 i++;
                 continue;
             }
 
             if(argNext == "ping")
             {
-                testMode = TestMode::Ping;
-                testModeAsString = trUtf8("Ping only");
-                downloadTestEnabled = results.downloadTestEnabled = false;
+                TESTMODE = TestMode::Ping;
+                _results.setTestMode(TESTMODE);
                 i++;
                 continue;
             }
 
             if(argNext == "speed")
             {
-                testMode = TestMode::Download;
-                testModeAsString = trUtf8("Speed only");
-                pingTestEnabled = results.pingTestEnabled = false;
+                TESTMODE = TestMode::Download;
+                _results.setTestMode(TESTMODE);
                 i++;
                 continue;
             }
 
             if(argNext == "all")
             {
-                testMode = TestMode::All;
+                TESTMODE = TestMode::All;
+                _results.setTestMode(TESTMODE);
                 i++;
                 continue;
             }
 
             qDebug() << qPrintable(trUtf8("Error #2: Value \"%1\" after --mode (-m) switch not a known mode").arg(argNext));
+
             exit(2);
         }
 
@@ -209,16 +202,18 @@ void QSpeedTestCli::parseArguments()
             if(argNext.isEmpty())
             {
                 qDebug() << qPrintable(trUtf8("Error #3: No value specified after --pings (-p) switch"));
+
                 exit(3);
             }
 
             if((!(number = argNext.toInt())) || number < 1 || number > 100)
             {
                 qDebug() << qPrintable(trUtf8("Error #4: Value \"%1\" after --pings (-p) switch not an integer between 1 and 100").arg(argNext));
+
                 exit(4);
             }
 
-            PINGSPERTARGET = number;
+            PINGSPERHOST = number;
             i++;
             continue;
         }
@@ -228,55 +223,79 @@ void QSpeedTestCli::parseArguments()
             if(argNext.isEmpty())
             {
                 qDebug() << qPrintable(trUtf8("Error #5: No value specified after --threads (-t) switch"));
+
                 exit(5);
             }
 
             if((!(number = argNext.toInt())) || number < 1 || number > 8)
             {
                 qDebug() << qPrintable(trUtf8("Error #6: Value \"%1\" after --threads (-t) switch not an integer between 1 and 8").arg(argNext));
+
                 exit(6);
             }
 
-            PARALLELPINGTHREADS = number;
+            PINGTHREADS = number;
+            i++;
+            continue;
+        }
+
+        if(arg == "--downloadtime" || arg == "-d")
+        {
+            if(argNext.isEmpty())
+            {
+                qDebug() << qPrintable(trUtf8("Error #7: No value specified after --downloadtime (-d) switch"));
+
+                exit(7);
+            }
+
+            if((!(number = argNext.toInt())) || number < 5 || number > 30)
+            {
+                qDebug() << qPrintable(trUtf8("Error #8: Value \"%1\" after --downloadtime (-d) switch not an integer between 5 and 30").arg(argNext));
+
+                exit(8);
+            }
+
+            DOWNLOADTESTSECS = number;
             i++;
             continue;
         }
 
         if(arg == "--nohtml" || arg == "-nh")
         {
-            htmlOutputEnabled = false;
+            _htmlEnabled = false;
             continue;
         }
 
         if(arg == "--novb" || arg == "-nv")
         {
-            vbOutputEnabled = false;
+            _bbCodeEnabled = false;
             continue;
         }
 
-        qDebug() << qPrintable(trUtf8("Error #7: Unknown switch or parameter \"%1\"").arg(arg));
-        exit(7);
+        qDebug() << qPrintable(trUtf8("Error #9: Unknown switch or parameter \"%1\"").arg(arg));
+
+        exit(9);
     }
 
     // if execution flow reaches this point, all arguments were valid
-    qDebug() << qPrintable(trUtf8("Custom parameters specified:\n"
-                                  "Mode:             %1\n"
-                                  "Pings per target: %2\n"
-                                  "Threads:          %3\n"
-                                  "HTML output:      %4\n"
-                                  "vBulletin output: %5\n").arg(testModeAsString).arg(PINGSPERTARGET).arg(PARALLELPINGTHREADS).arg((htmlOutputEnabled)? trUtf8("Enabled") : trUtf8("Disabled")).arg((vbOutputEnabled)? trUtf8("Enabled") : trUtf8("Disabled")));
+    _slotLog(trUtf8("Custom parameters specified:"));
+    _slotLog(trUtf8("Test mode:        %1").arg(_results.testModeString()));
+    _slotLog(trUtf8("Pings per host:   %1").arg(PINGSPERHOST));
+    _slotLog(trUtf8("Ping threads:     %1").arg(PINGTHREADS));
+    _slotLog(trUtf8("HTML output:      %1").arg(_htmlEnabled? trUtf8("Yes") : trUtf8("No")));
+    _slotLog(trUtf8("bbCode output     %1").arg(_bbCodeEnabled? trUtf8("Yes") : trUtf8("No")));
 }
 
-void QSpeedTestCli::checkForProgramUpdates()
+void QSpeedTestCli::_checkForProgramUpdates()
 {
     QNetworkAccessManager manager;
     QNetworkReply *download;
     QEventLoop loop;
     int remoteVersion;
 
-    updateLogMessages(trUtf8("Checking online for an updated version of %1").arg(PROGRAMNAME));
-    QTimer::singleShot(UPDATECHECKTIMEOUT *1000, &loop, SLOT(quit()));
-    download = manager.get(QNetworkRequest(QUrl(PROGRAMVERSIONURL)));    // according to Qt documentation, manager will be set as the parent of download, so manual deletion of download should not be necessary
+    _slotLog(trUtf8("Checking online for an updated version of %1").arg(PROGRAMNAME));
+    QTimer::singleShot(UPDATECHECKTIMEOUTSECS *1000, &loop, SLOT(quit()));
+    download = manager.get(QNetworkRequest(QUrl(PROJECTVERSIONURL)));    // according to Qt documentation, manager will be set as the parent of download, so manual deletion of download should not be necessary
     connect(download, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
@@ -284,140 +303,127 @@ void QSpeedTestCli::checkForProgramUpdates()
     {
         download->abort();
         download->deleteLater();
-        updateLogMessages(trUtf8("Update site unreachable"));
+        _slotLog(trUtf8("Update site unreachable"));
         return;
     }
 
-    if((remoteVersion = download->readLine().mid(1).toInt()) > PROGRAMVERSION.mid(1).toInt())
+    if((remoteVersion = download->readLine().mid(1).toInt()) > PROJECTVERSION.mid(1).toInt())
     {
-        updateLogMessages(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
-        updateLogMessages(trUtf8("You can find the new version at %1").arg(PROGRAMURL));
+        _slotLog(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
+        _slotLog(trUtf8("You can find the new version at %1").arg(PROJECTURL));
     }
-    else updateLogMessages(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
-}
-
-void QSpeedTestCli::updateLogMessages(QString value)
-{
-    qDebug() << qPrintable((QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + value));
-}
-
-void QSpeedTestCli::updateTestResults(QString value)
-{
-    qDebug() << qPrintable(value);
-}
-
-void QSpeedTestCli::runBenchmark()
-{
-    QTime timer;
-
-    timer.start();
-    updateLogMessages(trUtf8("Test started\n"));
-    results.testMode = testModeAsString;
-    results.targetsTotal = targetList->getNumberOfPingTargets();
-    results.pingsPerTarget = PINGSPERTARGET;
-    results.parallelPingThreads = PARALLELPINGTHREADS;
-    vbCode.clear();
-    htmlCode.clear();
-    results.reset();
-    QThreadPool::globalInstance()->setMaxThreadCount(PARALLELPINGTHREADS - 1);
-    hostInfo->init();
-
-    for(int i = 0; i < targetList->pingGroups.size() && pingTestEnabled; i++)
+    else
     {
-        targetList->pingGroups[i].reset();
-        updateTestResults(targetList->pingGroups[i].getName().leftJustified(27, ' ', true) + "    " + trUtf8("Avg ping").rightJustified(11, ' ', true) + "    " + trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + trUtf8("Rank").rightJustified(4, ' ', true));
-        updateTestResults("-------------------------------------------------------------------------------");
-
-        if(PARALLELPINGTHREADS > 1) QtConcurrent::blockingMap(targetList->pingGroups[i].targets, &PingTarget::ping);    // multithreaded pinging
-        else    // single-threaded pinging
-        {
-            for(int j = 0; j < targetList->pingGroups[i].getSize(); j++)
-            {
-                targetList->pingGroups[i].targets[j].ping();
-            }
-        }
-
-        qApp->processEvents();
-        targetList->pingGroups[i].sort();
-        results.rttSum += targetList->pingGroups[i].getRttSum();
-        results.targetsAlive += targetList->pingGroups[i].getTargetsAlive();
-        updateTestResults(trUtf8("Group sum:     %1\n"
-                                 "Group average: %2\n").arg(targetList->pingGroups[i].getRttSumAsString()).arg(targetList->pingGroups[i].getRttAvgAsString()));
+        _slotLog(trUtf8("You are using the latest version of %1").arg(PROGRAMNAME));
     }
-
-    for(int i = 0; i < targetList->downloadGroups.size() && downloadTestEnabled; i++)
-    {
-        updateTestResults(trUtf8("\nDownloading the following files, please wait approx. %1 seconds:").arg(DOWNLOADTESTSECS));
-        QThreadPool::globalInstance()->setMaxThreadCount(targetList->downloadGroups[i].targets.size());
-        QtConcurrent::blockingMap(targetList->downloadGroups[i].targets, &DownloadTarget::downloadTest);
-        qApp->processEvents();
-        results.speedInKbps.append(targetList->getBytesDownloaded(targetList->downloadGroups[i].targets) / (DOWNLOADTESTSECS * 128.0));    // ((BYTESDOWNLOADED * 8) / 1024) / (DOWNLOADTESTSECS * 1.0)
-        results.speedInMBps.append(results.speedInKbps.last() / 8192);    // (results.speedInKbpsDomestic / 1024) / 8
-    }
-
-    hostInfo->retrieve();
-    results.testDuration = (timer.elapsed() * 1.0) / 1000;
-    results.print();
-    qDebug() << "\n\n";
-    updateLogMessages(trUtf8("Test complete"));
 }
 
-void QSpeedTestCli::saveReports()
+void QSpeedTestCli::_startTests()
+{
+    _timer.start();
+    _results.reset();
+     connect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+     connect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
+     _hostInfo->startDetection();
+
+    switch(TESTMODE)
+    {
+    case TestMode::Info:
+        _hostInfo->startInfoTest();
+        break;
+
+    case TestMode::Ping:
+
+    case TestMode::All:
+        _controller->startPingTest();
+        break;
+
+    case TestMode::Download:
+        _controller->startDownloadTest();
+
+    default:
+        break;
+    }
+}
+
+void QSpeedTestCli::_slotTestsFinished()
+{
+    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+    disconnect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
+    _results.setTestDuration((_timer.elapsed() * 1.0) / 1000);
+    _slotResult("\n" + _results.summary());
+    _saveReports();
+    qApp->quit();
+}
+
+void QSpeedTestCli::_saveReports()
 {
     QFile file;
     QString fileName;
     QTextStream outStream;
 
-    if(htmlOutputEnabled)
+    if(_htmlEnabled)
     {
-        generateHtmlCode();
-        fileName = QDir::currentPath() + QString("/%1_%2%3_%4.html").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
+        fileName = QDir::currentPath() + QString("/%1_%2%3_%4.html").arg(_results.programName()).arg(_results.testDate()).arg(_results.testTime()).arg(_results.ipCensored());
         fileName = QDir::toNativeSeparators(fileName);
+
+        if(!_results.saveReport(ReportFormat::Html, fileName))
+        {
+            _slotLog(trUtf8("Error writing HTML report %1").arg(fileName));
+
+            return;
+        }
+
+        _slotLog(trUtf8("HTML report saved to %1").arg(fileName));
+
+/*
         file.setFileName(fileName);
         outStream.setDevice(&file);
         outStream.setCodec("UTF-8");
 
         if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            updateLogMessages(trUtf8("Error writing HTML report %1").arg(fileName));
+            _slotLog(trUtf8("Error writing HTML report %1").arg(fileName));
+
             return;
         }
 
-        outStream << htmlCode;
+        outStream << _results.html();
         file.close();
-        updateLogMessages(trUtf8("HTML report saved to %1").arg(fileName));
+        _slotLog(trUtf8("HTML report saved to %1").arg(fileName));
+*/
     }
 
-    if(vbOutputEnabled)
+    if(_bbCodeEnabled)
     {
-        generateVbCode();
-        fileName = QDir::currentPath() + QString("/%1_%2%3_%4.vb.txt").arg(results.programName).arg(results.testDate).arg(results.testTime).arg(results.ip);
+        fileName = QDir::currentPath() + QString("/%1_%2%3_%4.bb.txt").arg(_results.programName()).arg(_results.testDate()).arg(_results.testTime()).arg(_results.ipCensored());
         fileName = QDir::toNativeSeparators(fileName);
+
+        if(!_results.saveReport(ReportFormat::BbCode, fileName))
+        {
+            _slotLog(trUtf8("Error writing bbCode report %1").arg(fileName));
+
+            return;
+        }
+
+        _slotLog(trUtf8("bbCode report saved to %1").arg(fileName));
+
+
+
+/*
         file.setFileName(fileName);
         outStream.setDevice(&file);
         outStream.setCodec("UTF-8");
 
         if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
-            updateLogMessages(trUtf8("Error writing vBulletin report %1").arg(fileName));
+            _slotLog(trUtf8("Error writing bbCode report %1").arg(fileName));
+
             return;
         }
 
-        outStream << vbCode;
+        outStream << _results.bbCode();
         file.close();
-        updateLogMessages(trUtf8("vBulletin report saved to %1").arg(fileName));
+        _slotLog(trUtf8("bbCode report saved to %1").arg(fileName));
+*/
     }
-}
-
-void QSpeedTestCli::generateHtmlCode()
-{
-    if(!htmlCode.isEmpty()) return;
-
-    htmlCode = results.getHtmlCode(targetList);
-}
-
-void QSpeedTestCli::generateVbCode()
-{
-    if(!vbCode.isEmpty()) return;
-
-    vbCode = results.getVbCode(targetList);
 }

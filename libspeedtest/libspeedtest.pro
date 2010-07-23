@@ -52,6 +52,8 @@ HEADERS += libspeedtest_global.h \
     preferences.h \
     testcontroller.h
 OTHER_FILES += default.hostlist.ini \
-    default.preferences.ini
+    default.preferences.ini \
+    libspeedtest_el.qm
 RESOURCES += libspeedtest.qrc
 QMAKE_POST_LINK = $$COPYCOMMAND
+TRANSLATIONS = libspeedtest_el.ts

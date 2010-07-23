@@ -54,7 +54,7 @@ void DownloadGroup::start()
     _file = new QTemporaryFile();
     _file->open();
 
-    emit result(trUtf8("Starting parallel download from group %1, please wait approx. %2sec:").arg(name()).arg(DOWNLOADTESTSECS));
+    emit result(trUtf8("Starting parallel download from group %1, please wait approx. %2 sec:").arg(name()).arg(DOWNLOADTESTSECS));
 
     for(int i = 0; i < size; i++)    // Start downloading
     {
@@ -191,7 +191,7 @@ void DownloadGroup::_slotParallelDownloadFinished()
     _file->remove();
     delete _file;
     _file = NULL;
-    emit result(trUtf8("Parallel speed: %1 Mbps\n").arg(QString::number(speedParallel(SpeedUnit::Mbps), 'f', 2)));
+    emit result(trUtf8("Parallel speed: %1 Mbps").arg(QString::number(speedParallel(SpeedUnit::Mbps), 'f', 2)) + '\n');
 
     // Prepare some things for the serial download test which is about to start
     _hostNext = 0;
@@ -230,7 +230,7 @@ void DownloadGroup::_slotNextHost()
     _file = new QTemporaryFile();
     _file->open();
     _hostNext++;
-    emit result(trUtf8("Downloading from %1, please wait approx. %2sec").arg(_hosts[_hostNext - 1].name()).arg(DOWNLOADTESTSECS));
+    emit result(trUtf8("Downloading from %1, please wait approx. %2 sec").arg(_hosts[_hostNext - 1].name()).arg(DOWNLOADTESTSECS));
     _data[_hostNext - 1] = _manager.get(QNetworkRequest(QUrl(_hosts[_hostNext - 1].url())));
     connect(_data[_hostNext - 1], SIGNAL(readyRead()), this, SLOT(_slotWriteData()));
     _progress = 0;

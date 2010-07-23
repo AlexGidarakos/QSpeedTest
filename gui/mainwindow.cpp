@@ -24,7 +24,7 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow)
 {
     _ui->setupUi(this);
-    setWindowTitle(PROGRAMNAME + " " + PROJECTVERSION);
+    setWindowTitle(PROGRAMNAME + ' ' + PROJECTVERSION);
     _ui->progressBar->setVisible(false);
 
 #ifndef Q_WS_WIN
@@ -73,7 +73,7 @@ void MainWindow::on_pushButtonStartStop_clicked()
     _ui->actionCopyPlainText->setEnabled(false);
     _ui->actionPreferences->setEnabled(false);
     _ui->plainTextEditResults->clear();
-    slotUpdateLog(trUtf8("Test started"));
+    slotLog(trUtf8("Test started"));
     emit pushButtonStartClicked();
 }
 
@@ -87,7 +87,7 @@ void MainWindow::on_actionCopyLog_triggered()
     }
 
     QApplication::clipboard()->setText(text);
-    slotUpdateLog(trUtf8("Log contents copied to system clipboard"));
+    slotLog(trUtf8("Log contents copied to system clipboard"));
 }
 
 void MainWindow::slotTestFinished(bool uninterrupted)
@@ -106,11 +106,11 @@ void MainWindow::slotTestFinished(bool uninterrupted)
         _ui->actionSaveHtml->setEnabled(true);
         _ui->actionSavePlainText->setEnabled(true);
         slotResult(trUtf8("\nTest finished"));
-        slotUpdateLog(trUtf8("Test finished"));
+        slotLog(trUtf8("Test finished"));
 
         return;
     }
 
-    slotUpdateLog(trUtf8("Test aborted"));
+    slotLog(trUtf8("Test aborted"));
     slotResult(trUtf8("\n\nTest aborted"));
 }

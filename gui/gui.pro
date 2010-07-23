@@ -34,9 +34,10 @@ FORMS += mainwindow.ui \
 OTHER_FILES += logo.png \
     logo.svg \
     icons.rc \
-    icons.ico
+    icons.ico \
+    qspeedtest_el.qm
 RESOURCES += resources.qrc
-
 !win32 {
     RESOURCES += ../libspeedtest/libspeedtest.qrc
 }
+TRANSLATIONS = qspeedtest_el.ts

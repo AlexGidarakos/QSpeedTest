@@ -33,34 +33,111 @@ void Results::reset()
     for(int i = 0; i < size; i++) _downloadGroups[i].reset();
 }
 
-QString Results::plainText() const
+QString Results::testModeString() const
 {
-    QString plainText;
+    switch(_testMode)
+    {
+        case TestMode::Info:
+            return QObject::trUtf8("Info");
 
-    plainText += QObject::trUtf8(    "Report created by:      %1 %2\n").arg(_programName).arg(_projectVersion);
-    plainText += QObject::trUtf8(    "Test date and time:     %1\n").arg(_testDateTime);
-    plainText += QObject::trUtf8(    "Hostlist used:          %1 %2\n").arg(_hostlistVersion).arg(_hostlistComment);
-    plainText += QObject::trUtf8(    "Hostlist contact URL:   %1\n").arg(_hostlistContactUrl);
-    plainText += QObject::trUtf8(    "Host OS & no. of CPUs:  %1 / %2\n").arg(_hostOS).arg(_cpuCores);
-    plainText += QObject::trUtf8(    "BBRAS:                  %1\n").arg(_bbras);
-    plainText += QObject::trUtf8(    "WAN IP:                 %1\n").arg(_ip);
-    plainText += QObject::trUtf8(    "ISP Name & Network:     %1 - %2\n").arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
-    plainText += QObject::trUtf8(    "Network advertised via: %1\n").arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
-    plainText += QObject::trUtf8(    "Test mode:              %1\n").arg(_testModeString());
-    plainText += QObject::trUtf8(    "Total test duration:    %1 sec\n").arg(_testDuration);
+        case TestMode::Ping:
+            return QObject::trUtf8("Ping");
+
+        case TestMode::Download:
+            return QObject::trUtf8("Download");
+
+        case TestMode::All:
+            return QObject::trUtf8("All tests");
+
+        default:
+            return QObject::trUtf8("Unknown mode");
+    }
+}
+
+QString Results::summary() const
+{
+    QString summary;
+
+    summary += QString(    "%1 %2 %3\n").arg(QObject::trUtf8("Report created by:").leftJustified(25, ' ', true)).arg(_programName).arg(_projectVersion);
+    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Test date and time:").leftJustified(25, ' ', true)).arg(_testDateTime);
+    summary += QString(    "%1 %2 %3\n").arg(QObject::trUtf8("Hostlist version:").leftJustified(25, ' ', true)).arg(_hostlistVersion).arg(_hostlistComment);
+    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Hostlist contact URL:").leftJustified(25, ' ', true)).arg(_hostlistContactUrl);
+    summary += QString(    "%1 %2 / %3\n").arg(QObject::trUtf8("Host OS & no. of CPUs:").leftJustified(25, ' ', true)).arg(_hostOS).arg(_cpuCores);
+    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("BBRAS:").leftJustified(25, ' ', true)).arg(_bbras);
+    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("WAN IP:").leftJustified(25, ' ', true)).arg(_ip);
+    summary += QString(    "%1 %2 - %3\n").arg(QObject::trUtf8("ISP Name & Network:").leftJustified(25, ' ', true)).arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
+    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Advertised via:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Test mode:").leftJustified(25, ' ', true)).arg(testModeString());
+    summary += QString(    "%1 %2 %3\n").arg(QObject::trUtf8("Total test duration:").leftJustified(25, ' ', true)).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
     if(_testMode & TestMode::Ping)
     {
-        plainText += QObject::trUtf8("Pings per host:         %1\n").arg(_pingsPerHost);
-        plainText += QObject::trUtf8("Ping threads:           %1\n").arg(_pingThreads);
-        plainText += QObject::trUtf8("Ping hosts alive:       %1 / %2\n").arg(_pingHostsAlive()).arg(_pingHostsTotal());
-        plainText += QObject::trUtf8("Avg. latency:           %1\n").arg(_pingAverageString());
+        summary += QString("%1 %2\n").arg(QObject::trUtf8("Pings per host:").leftJustified(25, ' ', true)).arg(_pingsPerHost);
+        summary += QString("%1 %2\n").arg(QObject::trUtf8("Ping threads:").leftJustified(25, ' ', true)).arg(_pingThreads);
+        summary += QString("%1 %2 / %3\n").arg(QObject::trUtf8("Hosts alive:").leftJustified(25, ' ', true)).arg(_pingHostsAlive()).arg(_pingHostsTotal());
+        summary += QString("%1 %2 %3\n").arg(QObject::trUtf8("Avg. latency:").leftJustified(25, ' ', true)).arg(_pingAverage()).arg(QObject::trUtf8("msec"));
     }
 
     if(_testMode & TestMode::Download)
     {
-        plainText += QObject::trUtf8("Max. bandwidth:         %1 or %2\n").arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
-        plainText += QObject::trUtf8("Each download ran for:  %1 sec\n").arg(_downloadTestSecs);
+        summary += QString("%1 %2 %3 %4\n").arg(QObject::trUtf8("Max. speed:").leftJustified(25, ' ', true)).arg(_maxBandwidth(SpeedUnit::Mbps)).arg(QObject::trUtf8("or")).arg(_maxBandwidth(SpeedUnit::MBps));
+        summary += QString("%1 %2 %3\n").arg(QObject::trUtf8("Downloads ran for:").leftJustified(25, ' ', true)).arg(_downloadTestSecs).arg(QObject::trUtf8("sec each"));
+    }
+
+    return summary;
+}
+
+QString Results::plainText() const
+{
+    quint8 pingGroupsSize = _pingGroups.size();
+    QString plainText;
+
+    plainText += QString("%1 %2 %3\n").arg(QObject::trUtf8("Report created by:").leftJustified(25, ' ', true)).arg(_programName).arg(_projectVersion);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("Test date and time:").leftJustified(25, ' ', true)).arg(_testDateTime);
+    plainText += QString("%1 %2 %3\n").arg(QObject::trUtf8("Hostlist version:").leftJustified(25, ' ', true)).arg(_hostlistVersion).arg(_hostlistComment);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("Hostlist contact URL:").leftJustified(25, ' ', true)).arg(_hostlistContactUrl);
+    plainText += QString("%1 %2 / %3\n").arg(QObject::trUtf8("Host OS & no. of CPUs:").leftJustified(25, ' ', true)).arg(_hostOS).arg(_cpuCores);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("BBRAS:").leftJustified(25, ' ', true)).arg(_bbras);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("WAN IP:").leftJustified(25, ' ', true)).arg(_ipCensored);
+    plainText += QString("%1 %2 - %3\n").arg(QObject::trUtf8("ISP Name & Network:").leftJustified(25, ' ', true)).arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("Advertised via:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("Test mode:").leftJustified(25, ' ', true)).arg(testModeString());
+    plainText += QString("%1 %2 %3\n").arg(QObject::trUtf8("Total test duration:").leftJustified(25, ' ', true)).arg(_testDuration).arg(QObject::trUtf8("sec"));
+
+    if(_testMode & TestMode::Ping)
+    {
+        plainText += QString("%1 %2\n").arg(QObject::trUtf8("Pings per host:").leftJustified(25, ' ', true)).arg(_pingsPerHost);
+        plainText += QString("%1 %2\n").arg(QObject::trUtf8("Ping threads:").leftJustified(25, ' ', true)).arg(_pingThreads);
+        plainText += QString("%1 %2 / %3\n").arg(QObject::trUtf8("Hosts alive:").leftJustified(25, ' ', true)).arg(_pingHostsAlive()).arg(_pingHostsTotal());
+        plainText += QString("%1 %2 %3\n").arg(QObject::trUtf8("Avg. latency:").leftJustified(25, ' ', true)).arg(_pingAverage()).arg(QObject::trUtf8("msec"));
+    }
+
+    if(_testMode & TestMode::Download)
+    {
+        plainText += QString("%1 %2 %3 %4\n").arg(QObject::trUtf8("Max. speed:").leftJustified(25, ' ', true)).arg(_maxBandwidth(SpeedUnit::Mbps)).arg(QObject::trUtf8("or")).arg(_maxBandwidth(SpeedUnit::MBps));
+        plainText += QString("%1 %2 %3\n").arg(QObject::trUtf8("Downloads ran for:").leftJustified(25, ' ', true)).arg(_downloadTestSecs).arg(QObject::trUtf8("sec each"));
+    }
+
+    if(_testMode & TestMode::Ping)
+    {
+        plainText += "\n\n";
+        plainText += QObject::trUtf8("Detailed ping results") + '\n';
+
+        for(int i = 0; i < pingGroupsSize; i++)
+        {
+            plainText += _pingGroups[i].name().leftJustified(27, ' ', true) + "    " + QObject::trUtf8("Avg. ping").rightJustified(11, ' ', true) + "    " + QObject::trUtf8("Pckt loss").rightJustified(9, ' ', true) + "    " + QString("Jitter").rightJustified(12, ' ', true) + "    " + QObject::trUtf8("Rank").rightJustified(4, ' ', true) + '\n';
+            plainText += "-------------------------------------------------------------------------------\n";
+            quint16 size = _pingGroups[i]._hosts.size();
+
+            for(int j = 0; j < size; j++)
+            {
+                plainText +=  _pingGroups[i]._hosts[j].name().leftJustified(27, ' ', true) + "    " + _pingGroups[i]._hosts[j].rttString().rightJustified(11, ' ', true) + "    " + _pingGroups[i]._hosts[j].packetLossString().rightJustified(9, ' ', true) + "    " + _pingGroups[i]._hosts[j].jitterString().rightJustified(12, ' ', true) + "    " + _pingGroups[i]._hosts[j].rank().rightJustified(3, ' ', true) + '\n';
+            }
+
+            plainText += QObject::trUtf8("Group sum:").leftJustified(14, ' ', true) + ' ' + _pingGroups[i].rttSumString() + '\n';
+            plainText += QObject::trUtf8("Group average:").leftJustified(14, ' ', true) + ' ' + _pingGroups[i].rttAverageString() + '\n';
+            plainText += '\n';
+        }
     }
 
     return plainText;
@@ -72,76 +149,76 @@ QString Results::bbCode() const
     quint8 pingGroupsSize = _pingGroups.size();
     quint8 downloadGroupsSize = _downloadGroups.size();
 
-    bbCode += QObject::trUtf8(        "[table=head] | [center][b]%1 %2 Report - [url=%3]Homepage[/url][/b][/center] | [right]Test timestamp[/right] | [center][b]%4[/b][/center] |\n").arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(_testDateTime);
-    bbCode += QObject::trUtf8(        "[right]Hostlist used[/right] | [center]%1 [url=%2]%3[/url][/center] | ").arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment);
-    bbCode += QObject::trUtf8(        "[right]Host OS & no. of CPUs[/right] | [center]%1 - %2 CPU cores[/center] |\n").arg(_hostOS).arg(_cpuCores);
-    bbCode += QObject::trUtf8(        "[right]BBRAS[/right] | [center]%1[/center] | ").arg(_bbras);
-    bbCode += QObject::trUtf8(        "[right]WAN IP[/right] | [center]%1[/center] |\n").arg(_ipCensored);
-    bbCode += QObject::trUtf8(        "[right]ISP name & network[/right] | [center]%1 - %2[/center] | ").arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
-    bbCode += QObject::trUtf8(        "[right]Network advertised via[/right] | [center]%1[/center] |\n").arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
-    bbCode += QObject::trUtf8(        "[right]Test mode[/right] | [center]%1[/center] | ").arg(_testModeString());
-    bbCode += QObject::trUtf8(        "[right]Total test duration[/right] | [center]%1 sec[/center] |\n").arg(_testDuration);
+    bbCode += QString(            "[table=head] | [center][b]%1 %2 %3 - [url=%4]%5[/url][/b][/center] | [right]%6[/right] | [b]%7[/b]\n").arg(QObject::trUtf8("Report by")).arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(QObject::trUtf8("Homepage")).arg(QObject::trUtf8("Test timestamp")).arg(_testDateTime);
+    bbCode += QString(            "[right]%1[/right] | [center]%2 [url=%3]%4[/url][/center] | ").arg(QObject::trUtf8("Hostlist version")).arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment);
+    bbCode += QString(            "[right]%1[/right] | [center]%2 - %3 %4[/center] |\n").arg(QObject::trUtf8("Host OS & no. of CPUs")).arg(_hostOS).arg(_cpuCores).arg(QObject::trUtf8("CPU cores"));
+    bbCode += QString(            "[right]%1[/right] | [center]%2[/center] | ").arg(QObject::trUtf8("BBRAS")).arg(_bbras);
+    bbCode += QString(            "[right]%1[/right] | [center]%2[/center] |\n").arg(QObject::trUtf8("WAN IP")).arg(_ipCensored);
+    bbCode += QString(            "[right]%1[/right] | [center]%2 - %3[/center] | ").arg(QObject::trUtf8("ISP name & network")).arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
+    bbCode += QString(            "[right]%1[/right] | [center]%2[/center] |\n").arg(QObject::trUtf8("Advertised via")).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    bbCode += QString(            "[right]%1[/right] | [center]%2[/center] | ").arg(QObject::trUtf8("Test mode")).arg(testModeString());
+    bbCode += QString(            "[right]%1[/right] | [center]%2 %3[/center] |\n").arg(QObject::trUtf8("Total test duration")).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
     if(_testMode & TestMode::Ping)
     {
-        bbCode += QObject::trUtf8(    "[right]Pings per host[/right] | [center]%1[/center] | ").arg(_pingsPerHost);
-        bbCode += QObject::trUtf8(    "[right]Ping threads[/right] | [center]%1[/center] |\n").arg(_pingThreads);
-        bbCode += QObject::trUtf8(    "[right]Hosts alive[/right] | [center]%1 / %2[/center] | ").arg(_pingHostsAlive()).arg(_pingHostsTotal());
-        bbCode += QObject::trUtf8(    "[right][b][size=3]Avg. latency[/size][/b][/right] | [center][b][size=3]%1[/size][/b][/center] |\n").arg(_pingAverageString());
+        bbCode += QString(        "[right]%1[/right] | [center]%2[/center] | ").arg(QObject::trUtf8("Pings per host")).arg(_pingsPerHost);
+        bbCode += QString(        "[right]%1[/right] | [center]%2[/center] |\n").arg(QObject::trUtf8("Ping threads")).arg(_pingThreads);
+        bbCode += QString(        "[right]%1[/right] | [center]%2 / %3[/center] | ").arg(QObject::trUtf8("Hosts alive")).arg(_pingHostsAlive()).arg(_pingHostsTotal());
+        bbCode += QString(        "[right][b][size=3]%1[/size][/b][/right] | [center][b][size=3]%2 %3[/size][/b][/center] |\n").arg(QObject::trUtf8("Avg. latency")).arg(_pingAverage()).arg(QObject::trUtf8("msec"));
     }
 
     if(_testMode & TestMode::Download)
     {
-        bbCode += QObject::trUtf8(    "[right]Downloads ran for[/right] | [center]%1 sec each[/center] | ").arg(_downloadTestSecs);
-        bbCode += QObject::trUtf8(    "[right][b][size=3]Max. bandwidth[/size][/b][/right] | [center][b][size=3]%1 or %2[/size][/b][/center] |\n").arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
+        bbCode += QString(        "[right]%1[/right] | [center]%2 %3[/center] | ").arg(QObject::trUtf8("Downloads ran for")).arg(_downloadTestSecs).arg(QObject::trUtf8("sec each"));
+        bbCode += QString(        "[right][b][size=3]%1[/size][/b][/right] | [center][b][size=3]%2 %3 %4[/size][/b][/center] |\n").arg(QObject::trUtf8("Max. speed")).arg(_maxBandwidth(SpeedUnit::Mbps)).arg(QObject::trUtf8("or")).arg(_maxBandwidth(SpeedUnit::MBps));
     }
 
-    bbCode +=                         "[/table]\n\n";
+    bbCode +=                     "[/table]\n\n";
 
     if(_testMode & TestMode::Ping)
     {
-        bbCode += QString(            "[img]%1[/img] ").arg(_googleChartPingGroupsUrl());
+        bbCode += QString(        "[img]%1[/img] ").arg(_googleChartPingGroupsUrl());
     }
 
     if(_testMode & TestMode::Download)
     {
         for(int i = 0; i < downloadGroupsSize; i++)
         {
-            bbCode += QString(        "[img]%1[/img] ").arg(_googleChartDownloadGroupUrl(i));
+            bbCode += QString(    "[img]%1[/img] ").arg(_googleChartDownloadGroupUrl(i));
         }
     }
 
     if((_testMode & TestMode::Ping) || (_testMode & TestMode::Download))
     {
-        bbCode +=                     "\n";
+        bbCode +=                 '\n';
     }
 
     if(_testMode & TestMode::Ping)
     {
-        bbCode +=                     "\n";
-        bbCode += QObject::trUtf8(    "[b]Detailed ping results[/b]\n");
-        bbCode +=                     "[spoiler]\n";
+        bbCode +=                 '\n';
+        bbCode += QString(        "[b]%1[/b]\n").arg(QObject::trUtf8("Detailed ping results"));
+        bbCode +=                 "[spoiler]\n";
 
         for(int i = 0; i < pingGroupsSize; i++)
         {
-            bbCode += QString(        "[b]%1[/b]\n").arg(_pingGroups[i].name());
-            bbCode +=                 "[spoiler]\n";
-            bbCode += QObject::trUtf8("[table=head][center]Host[/center] | [center]Ping average[/center] | Packet loss | Jitter | Rank\n");
+            bbCode += QString(    "[b]%1[/b]\n").arg(_pingGroups[i].name());
+            bbCode +=             "[spoiler]\n";
+            bbCode += QString(    "[table=head][center]%1[/center] | [center]%2[/center] | [center]%3[/center] | [center]%4[/center] | %5\n").arg(QObject::trUtf8("Host")).arg(QObject::trUtf8("Ping average")).arg(QObject::trUtf8("Packet loss")).arg(QObject::trUtf8("Jitter")).arg(QObject::trUtf8("Rank"));
 
             quint16 size = _pingGroups[i]._hosts.size();
 
             for(int j = 0; j < size; j++)
             {
-                bbCode += QString(    "%1 | [right]%2[/right] | [right]%3[/right] | [right]%4[/right] | [center]%5[/center] |\n").arg(_pingGroups[i]._hosts[j].name()).arg(_pingGroups[i]._hosts[j].rttString()).arg(_pingGroups[i]._hosts[j].packetLossString()).arg(_pingGroups[i]._hosts[j].jitterString()).arg(_pingGroups[i]._hosts[j].rank());
+                bbCode += QString("%1 | [right]%2[/right] | [right]%3[/right] | [right]%4[/right] | [center]%5[/center] |\n").arg(_pingGroups[i]._hosts[j].name()).arg(_pingGroups[i]._hosts[j].rttString()).arg(_pingGroups[i]._hosts[j].packetLossString()).arg(_pingGroups[i]._hosts[j].jitterString()).arg(_pingGroups[i]._hosts[j].rank());
             }
 
-            bbCode += QObject::trUtf8("[b]Group sum[/b] | [right][b]%1[/b][/right] |\n").arg(_pingGroups[i].rttSumString());
-            bbCode += QObject::trUtf8("[b]Group average[/b] | [right][b]%1[/b][/right] | [right][b]%2[/b][/right] | | [center][b]%3[/b][/center]\n").arg(_pingGroups[i].rttAverageString()).arg(_pingGroups[i].packetLossAverageString()).arg(_pingGroups[i].rank());
-            bbCode +=                 "[/table]\n"
-                                      "[/spoiler]\n";
+            bbCode += QString(    "[b]%1[/b] | [right][b]%2[/b][/right] |\n").arg(QObject::trUtf8("Group sum")).arg(_pingGroups[i].rttSumString());
+            bbCode += QString(    "[b]%1[/b] | [right][b]%2[/b][/right] | [right][b]%3[/b][/right] | | [center][b]%4[/b][/center]\n").arg(QObject::trUtf8("Group average")).arg(_pingGroups[i].rttAverageString()).arg(_pingGroups[i].packetLossAverageString()).arg(_pingGroups[i].rank());
+            bbCode +=             "[/table]\n"
+                                  "[/spoiler]\n";
         }
 
-        bbCode +=                     "[/spoiler]\n";
+        bbCode +=                 "[/spoiler]\n";
     }
 
     return bbCode;
@@ -153,119 +230,120 @@ QString Results::html() const
     quint8 pingGroupsSize = _pingGroups.size();
     quint8 downloadGroupsSize = _downloadGroups.size();
 
-    html +=                         "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-                                    "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"el\">\n"
-                                    "    <head>\n"
-                                    "        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
-    html += QObject::trUtf8(        "        <title>%1 %2 report - %3</title>\n").arg(_programName).arg(_projectVersion).arg(_testDateTime);
-    html +=                         "    </head>\n"
-                                    "    <body>\n"
-                                    "        <table border=\"1\" cellpadding=\"4\">\n";
-    html += QObject::trUtf8(        "            <tr><td>&nbsp;</td><td align=\"center\" style=\"font-size:130%;\"><b>%1 %2 report - <a href=\"%3\">Homepage</a></b></td><td align=\"right\" style=\"font-size:130%;\"><b>Test timestamp</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%4</b></td></tr>\n").arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(_testDateTime);
-    html += QObject::trUtf8(        "            <tr><td align=\"right\">Hostlist used</td><td align=\"center\">%1 <a href=\"%2\">%3</a></td><td align=\"right\">Host OS & no. of CPUs</td><td align=\"center\">%4 - %5 CPU cores</td></tr>\n").arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment).arg(_hostOS).arg(_cpuCores);
-    html += QObject::trUtf8(        "            <tr><td align=\"right\">BBRAS</td><td align=\"center\">%1</td><td align=\"right\">WAN IP</td><td align=\"center\">%2</td></tr>\n").arg(_bbras).arg(_ipCensored);
-    html += QObject::trUtf8(        "            <tr><td align=\"right\">ISP name & network</td><td align=\"center\">%1 - %2</td><td align=\"right\">Network advertised via</td><td align=\"center\">%3</td></tr>\n").arg(_isp).arg("[coming soon!]").arg("[coming soon!]");
-    html += QObject::trUtf8(        "            <tr><td align=\"right\">Test mode</td><td align=\"center\">%1</td><td align=\"right\">Total test duration</td><td align=\"center\">%2 sec</td></tr>\n").arg(_testModeString()).arg(_testDuration);
+    html +=                     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+                                "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"el\">\n"
+                                "    <head>\n"
+                                "        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
+    html += QString(            "        <title>%1 %2 %3 - %4 - %5</title>\n").arg(QObject::trUtf8("Report by")).arg(_programName).arg(_projectVersion).arg(_testDateTime).arg(_ipCensored);
+    html +=                     "    </head>\n"
+                                "    <body>\n"
+                                "        <table border=\"1\" cellpadding=\"4\">\n";
+    html += QString(            "            <tr><td>&nbsp;</td><td align=\"center\" style=\"font-size:130%;\"><b>%1 %2 %3 - <a href=\"%4\">%5</a></b></td><td align=\"right\" style=\"font-size:130%;\"><b>%6</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%7</b></td></tr>\n").arg(QObject::trUtf8("Report by")).arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(QObject::trUtf8("Homepage")).arg(QObject::trUtf8("Test timestamp")).arg(_testDateTime);
+    html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2 <a href=\"%3\">%4</a></td><td align=\"right\">%5</td><td align=\"center\">%6 - %7 %8</td></tr>\n").arg(QObject::trUtf8("Hostlist version")).arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment).arg(QObject::trUtf8("Host OS & no. of CPUs")).arg(_hostOS).arg(_cpuCores).arg(QObject::trUtf8("CPU cores"));
+    html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2</td><td align=\"right\">%3</td><td align=\"center\">%4</td></tr>\n").arg(QObject::trUtf8("BBRAS")).arg(_bbras).arg(QObject::trUtf8("WAN IP")).arg(_ipCensored);
+    html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2 - %3</td><td align=\"right\">%4</td><td align=\"center\">%5</td></tr>\n").arg(QObject::trUtf8("ISP name & network")).arg(_isp).arg("[coming soon!]").arg(QObject::trUtf8("Advertised via")).arg("[coming soon!]");
+    html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2</td><td align=\"right\">%3</td><td align=\"center\">%4 %5</td></tr>\n").arg(QObject::trUtf8("Test mode")).arg(testModeString()).arg(QObject::trUtf8("Total test duration")).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
     if(_testMode & TestMode::Ping)
     {
-        html += QObject::trUtf8(    "            <tr><td align=\"right\">Pings per host</td><td align=\"center\">%1</td><td align=\"right\">Ping threads</td><td align=\"center\">%2</td></tr>\n").arg(_pingsPerHost).arg(_pingThreads);
-        html += QObject::trUtf8(    "            <tr><td align=\"right\">Hosts alive</td><td align=\"center\">%1 / %2</td><td align=\"right\" style=\"font-size:130%;\"><b>Avg. latency</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%3</b></td></tr>\n").arg(_pingHostsAlive()).arg(_pingHostsTotal()).arg(_pingAverageString());
+        html += QString(        "            <tr><td align=\"right\">%1</td><td align=\"center\">%2</td><td align=\"right\">%3</td><td align=\"center\">%4</td></tr>\n").arg(QObject::trUtf8("Pings per host")).arg(_pingsPerHost).arg(QObject::trUtf8("Ping threads")).arg(_pingThreads);
+        html += QString(        "            <tr><td align=\"right\">%1</td><td align=\"center\">%2 / %3</td><td align=\"right\" style=\"font-size:130%;\"><b>%4</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%5 %6</b></td></tr>\n").arg(QObject::trUtf8("Hosts alive")).arg(_pingHostsAlive()).arg(_pingHostsTotal()).arg(QObject::trUtf8("Avg. latency")).arg(_pingAverage()).arg(QObject::trUtf8("msec"));
     }
 
     if(_testMode & TestMode::Download)
     {
-        html += QObject::trUtf8(    "            <tr><td align=\"right\">Downloads ran for</td><td align=\"center\">%1 sec each</td><td align=\"right\" style=\"font-size:130%;\"><b>Max. bandwidth</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%2 or %3</b></td></tr>\n").arg(_downloadTestSecs).arg(_maxBandwidth(SpeedUnit::Mbps)).arg(_maxBandwidth(SpeedUnit::MBps));
+        html += QString(        "            <tr><td align=\"right\">%1</td><td align=\"center\">%2 %3</td><td align=\"right\" style=\"font-size:130%;\"><b>%4</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%5 %6 %7</b></td></tr>\n").arg(QObject::trUtf8("Downloads ran for")).arg(_downloadTestSecs).arg(QObject::trUtf8("sec each")).arg(QObject::trUtf8("Max. speed")).arg(_maxBandwidth(SpeedUnit::Mbps)).arg(QObject::trUtf8("or")).arg(_maxBandwidth(SpeedUnit::MBps));
     }
 
-    html +=                         "        </table>\n";
+    html +=                     "        </table>\n";
 
     if((_testMode & TestMode::Ping) || (_testMode & TestMode::Download))
     {
-        html +=                     "        <p>\n";
+        html +=                 "        <p>\n";
 
         if(_testMode & TestMode::Ping)
         {
-            html += QString(        "            <img src=\"%1\" alt=\"Google Chart - Pings\" />\n").arg(_googleChartPingGroupsUrl());
+            html += QString(    "            <img src=\"%1\" alt=\"Google Chart - Pings\" />\n").arg(_googleChartPingGroupsUrl());
         }
 
         if(_testMode & TestMode::Download)
         {
             for(int i = 0; i < downloadGroupsSize; i++)
             {
-                html += QString(    "<img src=\"%1\" alt=\"Google Chart - Download speeds - Group %2\" />\n").arg(_googleChartDownloadGroupUrl(i)).arg(_downloadGroups[i].name());
+                html += QString("<img src=\"%1\" alt=\"Google Chart - Download speeds - Group %2\" />\n").arg(_googleChartDownloadGroupUrl(i)).arg(_downloadGroups[i].name());
             }
         }
 
-        html +=                     "        </p>\n";
+        html +=                 "        </p>\n";
     }
 
     if(_testMode & TestMode::Ping)
     {
-        html +=                     "        <p style=\"margin-bottom: 2px;\"><b>Detailed ping results</b></p>\n"
-                                    "        <div>\n"
-                                    "            <input type=\"button\" id=\"GroupsSpoilerButton\" value=\"Show\" style=\"width: 80px; height: 25px; font-size: 9pt;\" onclick=\""
-                                    "                if(document.getElementById('GroupsDiv').style.display != '')\n"
-                                    "                {\n"
-                                    "                    document.getElementById('GroupsDiv').style.display = '';\n"
-                                    "                    this.innerText = '';\n"
-                                    "                    this.value = 'Hide';\n"
-                                    "                }\n"
-                                    "                else\n"
-                                    "                {\n"
-                                    "                    document.getElementById('GroupsDiv').style.display = 'none';\n"
-                                    "                    this.innerText = '';\n"
-                                    "                    this.value = 'Show';\n"
-                                    "                }\"/>\n"
-                                    "        </div>\n"
-                                    "        <div id=\"GroupsDiv\" style=\"display: none; border: 1px solid black; padding: 5px; margin: 2px;\">\n";
+        html +=                 "        <p style=\"margin-bottom: 2px;\"><b>Detailed ping results</b></p>\n"
+                                "        <div>\n"
+                                "            <input type=\"button\" id=\"GroupsSpoilerButton\" value=\"Show\" style=\"width: 80px; height: 25px; font-size: 9pt;\" onclick=\""
+                                "                if(document.getElementById('GroupsDiv').style.display != '')\n"
+                                "                {\n"
+                                "                    document.getElementById('GroupsDiv').style.display = '';\n"
+                                "                    this.innerText = '';\n"
+                                "                    this.value = 'Hide';\n"
+                                "                }\n"
+                                "                else\n"
+                                "                {\n"
+                                "                    document.getElementById('GroupsDiv').style.display = 'none';\n"
+                                "                    this.innerText = '';\n"
+                                "                    this.value = 'Show';\n"
+                                "                }\"/>\n"
+                                "        </div>\n"
+                                "        <div id=\"GroupsDiv\" style=\"display: none; border: 1px solid black; padding: 5px; margin: 2px;\">\n";
 
         for(int i = 0; i < pingGroupsSize; i++)
         {
-            html += QString(        "            <p style=\"margin-top: 2px; margin-bottom: 2px;\"><b>%1</b></p>\n").arg(_pingGroups[i].name());
-            html +=                 "            <div>\n";
-            html += QString(        "                <input type=\"button\" id=\"Group%2SpoilerButton\" value=\"Show\" style=\"width: 80px; height: 25px; font-size: 9pt;\" onclick=\"\n").arg(i);
-            html += QString(        "                    if(document.getElementById('Group%2Div').style.display != '')\n").arg(i);
-            html +=                 "                    {\n";
-            html += QString(        "                        document.getElementById('Group%2Div').style.display = '';\n").arg(i);
-            html +=                 "                        this.innerText = '';\n"
-                                    "                        this.value = 'Hide';\n"
-                                    "                    }\n"
-                                    "                    else\n"
-                                    "                    {\n";
-            html += QString(        "                        document.getElementById('Group%2Div').style.display = 'none';\n").arg(i);
-            html +=                 "                        this.innerText = '';\n"
-                                    "                        this.value = 'Show';\n"
-                                    "                    }\"/>\n"
-                                    "            </div>\n";
-            html += QString(        "            <div id=\"Group%2Div\" style=\"display: none; border: 1px solid black; padding: 5px; margin: 2px;\">\n").arg(i);
-            html +=                 "                <table border=\"1\" cellpadding=\"4\">\n";
-            html += QObject::trUtf8("                    <tr><td>Host</td><td>Average ping time</td><td>Packet loss</td><td align=\"center\">Jitter</td><td>Rank</td></tr>\n");
+            html += QString(    "            <p style=\"margin-top: 2px; margin-bottom: 2px;\"><b>%1</b></p>\n").arg(_pingGroups[i].name());
+            html +=             "            <div>\n";
+            html += QString(    "                <input type=\"button\" id=\"Group%2SpoilerButton\" value=\"Show\" style=\"width: 80px; height: 25px; font-size: 9pt;\" onclick=\"\n").arg(i);
+            html += QString(    "                    if(document.getElementById('Group%2Div').style.display != '')\n").arg(i);
+            html +=             "                    {\n";
+            html += QString(    "                        document.getElementById('Group%2Div').style.display = '';\n").arg(i);
+            html +=             "                        this.innerText = '';\n"
+                                "                        this.value = 'Hide';\n"
+                                "                    }\n"
+                                "                    else\n"
+                                "                    {\n";
+            html += QString(    "                        document.getElementById('Group%2Div').style.display = 'none';\n").arg(i);
+            html +=             "                        this.innerText = '';\n"
+                                "                        this.value = 'Show';\n"
+                                "                    }\"/>\n"
+                                "            </div>\n";
+            html += QString(    "            <div id=\"Group%2Div\" style=\"display: none; border: 1px solid black; padding: 5px; margin: 2px;\">\n").arg(i);
+            html +=             "                <table border=\"1\" cellpadding=\"4\">\n";
+            html += QString(    "                    <tr><td>%1</td><td>%2</td><td>%3</td><td align=\"center\">%4</td><td>%5</td></tr>\n").arg(QObject::trUtf8("Host")).arg(QObject::trUtf8("Avg. ping time")).arg(QObject::trUtf8("Packet loss")).arg(QObject::trUtf8("Jitter")).arg(QObject::trUtf8("Rank"));
 
             quint16 size = _pingGroups[i]._hosts.size();
 
             for(int j = 0; j < size; j++)
             {
-                html += QString(    "                    <tr><td><a href=\"http://%1\">%2</a></td><td align=\"right\">%3</td><td align=\"right\">%4</td><td align=\"right\">%5</td><td align=\"center\">%6</td></tr>\n").arg(_pingGroups[i]._hosts[j].url()).arg(_pingGroups[i]._hosts[j].name()).arg(_pingGroups[i]._hosts[j].rttString()).arg(_pingGroups[i]._hosts[j].packetLossString()).arg(_pingGroups[i]._hosts[j].jitterString()).arg(_pingGroups[i]._hosts[j].rank());
+                html += QString("                    <tr><td><a href=\"http://%1\">%2</a></td><td align=\"right\">%3</td><td align=\"right\">%4</td><td align=\"right\">%5</td><td align=\"center\">%6</td></tr>\n").arg(_pingGroups[i]._hosts[j].url()).arg(_pingGroups[i]._hosts[j].name()).arg(_pingGroups[i]._hosts[j].rttString()).arg(_pingGroups[i]._hosts[j].packetLossString()).arg(_pingGroups[i]._hosts[j].jitterString()).arg(_pingGroups[i]._hosts[j].rank());
             }
 
-            html += QObject::trUtf8("                    <tr><td><b>Group sum</b></td><td align=\"right\"><b>%1</b></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n").arg(_pingGroups[i].rttSumString());
-            html += QObject::trUtf8("                    <tr><td><b>Group average</b></td><td align=\"right\"><b>%1</b></td><td align=\"right\"><b>%2</b></td><td>&nbsp;</td><td align=\"center\"><b>%3</b></td></tr>\n").arg(_pingGroups[i].rttAverageString()).arg(_pingGroups[i].packetLossAverageString()).arg(_pingGroups[i].rank());
-            html +=                 "                </table>\n"
-                                    "            </div>\n"
-                                    "            <br/>\n";
+            html += QString(    "                    <tr><td><b>%1</b></td><td align=\"right\"><b>%2</b></td></tr>\n").arg(QObject::trUtf8("Group sum")).arg(_pingGroups[i].rttSumString());
+            html += QString(    "                    <tr><td><b>%1</b></td><td align=\"right\"><b>%2</b></td><td align=\"right\"><b>%3</b></td><td>&nbsp;</td><td align=\"center\"><b>%4</b></td></tr>\n").arg(QObject::trUtf8("Group avg.")).arg(_pingGroups[i].rttAverageString()).arg(_pingGroups[i].packetLossAverageString()).arg(_pingGroups[i].rank());
+            html +=             "                </table>\n"
+                                "            </div>\n"
+                                "            <br/>\n";
         }
 
-        html +=                     "        </div>\n";
+        html +=                 "        </div>\n";
     }
 
-    html +=                         "        <p>\n"
-                                    "            <a href=\"http://validator.w3.org\">\n"
-                                    "                <img src=\"http://www.w3.org/Icons/valid-xhtml11\" alt=\"Valid XHTML 1.1\" height=\"31\" width=\"88\" />\n"
-                                    "            </a>\n"
-                                    "        </p>\n"
-                                    "    </body>\n"
-                                    "</html>\n";
+    html +=                     "        <p>\n"
+                                "            <a href=\"http://validator.w3.org\">\n"
+                                "                <img src=\"http://www.w3.org/Icons/valid-xhtml11\" alt=\"Valid XHTML 1.1\" height=\"31\" width=\"88\" />\n"
+                                "            </a>\n"
+                                "        </p>\n"
+                                "    </body>\n"
+                                "</html>\n";
+
     html.replace('&', "&amp;");
     html.replace("&amp;nbsp", "&nbsp");
 
@@ -306,27 +384,6 @@ bool Results::saveReport(ReportFormat::Format format, const QString &filename) c
     return true;
 }
 
-QString Results::_testModeString() const
-{
-    switch(_testMode)
-    {
-        case TestMode::Info:
-            return QObject::trUtf8("Info");
-
-        case TestMode::Ping:
-            return QObject::trUtf8("Ping");
-
-        case TestMode::Download:
-            return QObject::trUtf8("Download");
-
-        case TestMode::All:
-            return QObject::trUtf8("All tests");
-
-        default:
-            return QObject::trUtf8("Unknown mode");
-    }
-}
-
 quint16 Results::_pingHostsAlive() const
 {
     quint16 size = _pingGroups.size();
@@ -353,7 +410,7 @@ quint16 Results::_pingHostsTotal() const
     return sum;
 }
 
-QString Results::_pingAverageString() const
+double Results::_pingAverage() const
 {
     double sum = 0.0;
     double average = 0.0;
@@ -378,7 +435,7 @@ QString Results::_pingAverageString() const
         average = sum /alive;
     }
 
-    return QString::number(average, 'f', 2) + " msec";
+    return average;
 }
 
 quint16 Results::_downloadHostsTotal() const
@@ -399,6 +456,7 @@ QString Results::_maxBandwidth(SpeedUnit::Unit unit) const
     double max = 0.0, speed = 0.0;
     QString string = "0.00";
     quint8 size = _downloadGroups.size();
+    quint16 size2 = 0;
 
     if(size)
     {
@@ -409,6 +467,18 @@ QString Results::_maxBandwidth(SpeedUnit::Unit unit) const
             if(speed > max)
             {
                 max = speed;
+            }
+
+            size2 = _downloadGroups[i]._hosts.size();
+
+            for(int j = 0; j < size2; j++)    // There is a slight possibility that one of the single downloads gave a bigger speed result than the parallel download result. The inner loop deals with this possibility
+            {
+                speed = _downloadGroups[i]._hosts[j].speed(SpeedUnit::Bps);
+
+                if(speed > max)
+                {
+                    max = speed;
+                }
             }
         }
     }
@@ -464,11 +534,6 @@ QString Results::_googleChartPingGroupsUrl() const
 
     url += QString("&chs=%1x%2&chd=t:").arg(chartWidth).arg(chartHeight);
 
-    if(size)
-    {
-        max = _pingGroups[0].rttAverage();
-    }
-
     for(int i = 0; i < size; i++)
     {
         ping = _pingGroups[i].rttAverage();
@@ -506,8 +571,7 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
     quint16 chartWidth = 280;
     quint16 chartHeight = 50;
     quint8 size = _downloadGroups[index]._hosts.size();
-    double max = 0.0;
-    double speed;
+    double max = 0.0, speed = 0.0;
     QString scalingPart;
 
     for(int i = size - 1; i >= 0; i--)    // When building a horizontal bars Google Charts URL, if you want the label names with a top-to-bottom order, you must insert them in the reverse order of their respective data!
@@ -522,13 +586,9 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
     chartHeight += 30;
 
     url += QString("&chs=%1x%2&chd=t:").arg(chartWidth).arg(chartHeight);
-
-    if(size)
-    {
-        max = _downloadGroups[0].speedParallel(SpeedUnit::Mbps);
-    }
-
-    url += QString::number(_downloadGroups[index].speedParallel(SpeedUnit::Mbps), 'f', 2) + ',';
+    speed = _downloadGroups[index].speedParallel(SpeedUnit::Mbps);
+    url += QString::number(speed, 'f', 2) + ',';
+    max = speed;
     url += QString::number(_downloadGroups[index].speedSerial(SpeedUnit::Mbps), 'f', 2) + ',';
 
     for(int i = 0; i < size; i++)
@@ -550,7 +610,7 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
     }
     else
     {
-        scalingPart = QString("&chxr=0,0,%1,2&chds=0,%1").arg(QString::number(max + 4, 'f', 0));
+        scalingPart = QString("&chxr=0,0,%1&chds=0,%1").arg(QString::number(max + 4, 'f', 0));
     }
 
     url += scalingPart;

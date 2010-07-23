@@ -68,7 +68,7 @@ QString PingGroup::rttSumString() const
     }
     else
     {
-        string = QString::number(rttSum(), 'f', 2) + " msec";
+        string = QString::number(rttSum(), 'f', 2) + ' ' + QObject::trUtf8("msec");
     }
 
     return string;
@@ -108,7 +108,7 @@ QString PingGroup::rttAverageString() const
     }
     else
     {
-        string = QString::number(rttAverage(), 'f', 2) + " msec";
+        string = QString::number(rttAverage(), 'f', 2) + ' ' + QObject::trUtf8("msec");
     }
 
     return string;
@@ -136,11 +136,6 @@ double PingGroup::packetLossAverage() const
     }
 
     return average;
-}
-
-QString PingGroup::packetLossAverageString() const
-{
-    return QString::number(packetLossAverage(), 'f', 2) + "%";
 }
 
 QString PingGroup::rank() const

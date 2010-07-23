@@ -19,10 +19,13 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QSPEEDTESTCLI_H
 #define QSPEEDTESTCLI_H
-
-#include "targetlist.h"
-#include "testresults.h"
+#include "results.h"
+#include "hostlist.h"
 #include "hostinfo.h"
+#include "testcontroller.h"
+#include <QtCore/QDebug>
+#include <QtCore/QDateTime>
+#include <QtCore/QTime>
 
 class QSpeedTestCli : public QObject
 {
@@ -33,33 +36,32 @@ public:
     ~QSpeedTestCli();
 
 private:
-    TargetList *targetList;
-    TestResults results;
-    HostInfo *hostInfo;
-    int testMode;
-    QString testModeAsString;
-    bool pingTestEnabled;
-    bool downloadTestEnabled;
-    bool htmlOutputEnabled;
-    bool vbOutputEnabled;
-    QString htmlCode;
-    QString vbCode;
+    void _parseArguments();
+    void _checkForProgramUpdates();
+    void _startTests();
+    void _saveReports();
 
-    void parseArguments();
-    void checkForProgramUpdates();
-    void runBenchmark();
-    void saveReports();
-    void generateHtmlCode();
-    void generateVbCode();
+    Results _results;
+    Hostlist *_hostlist;
+    HostInfo *_hostInfo;
+    TestController *_controller;
+//    QString testModeAsString;
+//    bool pingTestEnabled;
+//    bool downloadTestEnabled;
+    bool _htmlEnabled;
+    bool _bbCodeEnabled;
+    QTime _timer;
+//    QString _html;
+//    QString _bbCode;
 
 signals:
-    void logMessage(QString);
-    void newTestResult(QString);
+    void message(QString);
+    void result(QString);
 
 private slots:
-    void start();
-    void updateLogMessages(QString);
-    void updateTestResults(QString);
+    void _slotStart();
+    void _slotTestsFinished();
+    inline void _slotLog(QString message) { qDebug() << qPrintable((QDateTime::currentDateTime().toString("hh:mm:ss.zzz ") + message)); }
+    inline void _slotResult(QString result) { qDebug() << qPrintable(result); }
 };
-
 #endif // QSPEEDTESTCLI_H

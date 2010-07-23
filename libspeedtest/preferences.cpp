@@ -36,7 +36,7 @@ void Preferences::init()
 
     if(!dir.exists())    // If necessary, create subdir for the program's INI files
     {
-        emit message(trUtf8("Creating program preferences directory ") + QDir::toNativeSeparators(dir.path()));
+        emit message(trUtf8("Creating program preferences directory") + ' ' + QDir::toNativeSeparators(dir.path()));
         dir.mkpath(dir.path());
     }
 
@@ -119,7 +119,7 @@ bool Preferences::_loadOk()
     PINGTIMEOUTSECS = pingTimeoutSecs;
     DOWNLOADTESTSECS = downloadTestSecs;
     HOSTLISTURL = hostlistUrl;
-    emit message(trUtf8("Loaded preferences from ") + QDir::toNativeSeparators(fileName()));
+    emit message(trUtf8("Loaded preferences from") + ' ' + QDir::toNativeSeparators(fileName()));
 
     return true;
 }
@@ -138,14 +138,14 @@ bool Preferences::_restoreEmbeddedOk()
 
     if(!embedded.copy(fileName()))
     {
-        emit message(trUtf8("Error copying to ") + QDir::toNativeSeparators(fileName()));
+        emit message(trUtf8("Error copying to") + ' ' + QDir::toNativeSeparators(fileName()));
         emit message(trUtf8("Check directory access permissions"));
 
         return false;
     }
 
     file.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
-    emit message(trUtf8("Copied to ") + QDir::toNativeSeparators(fileName()));
+    emit message(trUtf8("Copied to") + ' ' + QDir::toNativeSeparators(fileName()));
     sync();
 
     return true;
