@@ -1,3 +1,8 @@
+revision 45 - 20100725                                      |
+libspeedtest:                                               |
+  * Minor changes in report layout                          |
+
+
 revision 44 - 20100724                                      |
 libspeedtest:                                               |
   * Improved max scaling algorithm for the download charts  |
