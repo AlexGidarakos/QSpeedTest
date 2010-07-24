@@ -53,7 +53,7 @@ signals:
     void finished();
 
 public slots:
-    void startInfoTest();
+    void slotStartInfoTest();
 
 private slots:
     void _slotOsDetectProcFinished();

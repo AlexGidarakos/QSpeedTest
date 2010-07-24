@@ -610,7 +610,7 @@ QString Results::_googleChartDownloadGroupUrl(quint8 index) const
     }
     else
     {
-        scalingPart = QString("&chxr=0,0,%1&chds=0,%1").arg(QString::number(max + 4, 'f', 0));
+        scalingPart = QString("&chxr=0,0,%1&chds=0,%1").arg(QString::number(max * 1.18, 'f', 0));    // The 1.18 factor seems to give enough space available for the arithmetic values right next to the bars, so they do not overlap with the bar itself
     }
 
     url += scalingPart;

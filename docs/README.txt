@@ -13,7 +13,8 @@ CONTENTS
 1. Source code availability
 2. Requirements for Windows users
 3. Build instructions
-4. Support and contact info
+4. Acknowledgements
+5. Support and contact info
 
 
 1. Source code availability
@@ -37,7 +38,12 @@ If you feel more comfortable working with an IDE (Integrated Development Environ
 In Qt Creator, you only need to load QSpeedTest's main project file (qspeedtest.pro) and use the command under "Build" menu
 
 
-4. Support and contact info
+4. Acknowledgements
+Material from the Open Clipart Library was used for the creation of QSpeedTest's artwork
+    http://www.openclipart.org
+
+
+5. Support and contact info
 For more information about QSpeedTest, visit its homepage:
     http://qspeedtest.sourceforge.net
 and the official phpBB forum:

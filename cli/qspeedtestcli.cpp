@@ -322,14 +322,14 @@ void QSpeedTestCli::_startTests()
 {
     _timer.start();
     _results.reset();
-     connect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+     connect(_controller, SIGNAL(finished()), _hostInfo, SLOT(slotStartInfoTest()));
      connect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
      _hostInfo->startDetection();
 
     switch(TESTMODE)
     {
     case TestMode::Info:
-        _hostInfo->startInfoTest();
+        _hostInfo->slotStartInfoTest();
         break;
 
     case TestMode::Ping:
