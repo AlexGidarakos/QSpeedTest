@@ -1,3 +1,14 @@
+revision 44 - 20100724                                      |
+libspeedtest:                                               |
+  * Improved max scaling algorithm for the download charts  |
+  * Updated embedded resources' hostlist to 201007220909    |
+                                                            |
+QSpeedTest:                                                 |
+  * Prevent exiting the application via Window Manager's    |
+    "X" button or the File > Exit menuitem when a test is   |
+    still in progress                                       |
+
+
 revision 43 - 20100723                                      |
 QSpeedTestCLI:                                              |
   * IT'S BACK!                                              |

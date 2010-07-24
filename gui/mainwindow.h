@@ -47,12 +47,14 @@ public:
 private:
     Ui::MainWindow *_ui;
     void _centerOnDesktop();
+    void closeEvent(QCloseEvent *);
 
 signals:
     void pushButtonStartClicked();
     void pushButtonStopClicked();
     void copyReport(ReportFormat::Format);
     void saveReport(ReportFormat::Format);
+    void exitWhileStillTesting();
 
 public slots:
     inline void slotLog(QString message) { _ui->comboBoxLog->insertItem(0, QDateTime::currentDateTime().toString("hh:mm:ss.zzz: ") + message); _ui->comboBoxLog->setCurrentIndex(0); }

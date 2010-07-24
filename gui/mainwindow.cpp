@@ -19,6 +19,7 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include <QtGui/QDesktopWidget>
+#include <QtGui/QMessageBox>
 #include <QtGui/QClipboard>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow)
@@ -54,6 +55,21 @@ void MainWindow::_centerOnDesktop()
     move(x, y);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if(_ui->pushButtonExit->isEnabled())
+    {
+        event->accept();
+
+        return;
+    }
+    else
+    {
+        event->ignore();
+        QMessageBox::information(this, trUtf8("Test still running"), trUtf8("Please first stop all running tests before exiting the program."));
+    }
+}
+
 void MainWindow::on_pushButtonStartStop_clicked()
 {
     if(!_ui->pushButtonStartStop->text().compare(trUtf8("Stop")))
@@ -65,6 +81,7 @@ void MainWindow::on_pushButtonStartStop_clicked()
 
     _ui->pushButtonStartStop->setText(trUtf8("Stop"));
     _ui->pushButtonExit->setEnabled(false);
+    _ui->actionExit->setEnabled(false);
     _ui->actionSaveBbCode->setEnabled(false);
     _ui->actionSaveHtml->setEnabled(false);
     _ui->actionSavePlainText->setEnabled(false);
@@ -95,6 +112,7 @@ void MainWindow::slotTestFinished(bool uninterrupted)
     _ui->pushButtonStartStop->setText(trUtf8("Start"));
     _ui->pushButtonStartStop->setEnabled(true);
     _ui->pushButtonExit->setEnabled(true);
+    _ui->actionExit->setEnabled(true);
     _ui->actionPreferences->setEnabled(true);
 
     if(uninterrupted)

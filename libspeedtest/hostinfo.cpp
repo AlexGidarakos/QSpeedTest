@@ -208,7 +208,7 @@ void HostInfo::_retrieve()
     _download = NULL;
 }
 
-void HostInfo::startInfoTest()
+void HostInfo::slotStartInfoTest()
 {
     QEventLoop loop;
 

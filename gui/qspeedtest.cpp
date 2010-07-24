@@ -188,7 +188,7 @@ void QSpeedTest::_slotStartTests()
 {
     _timer.start();
     _results.reset();
-     connect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+     connect(_controller, SIGNAL(finished()), _hostInfo, SLOT(slotStartInfoTest()));
      connect(_controller, SIGNAL(result(QString)), &_w, SLOT(slotResult(QString)));
      connect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
      _hostInfo->startDetection();
@@ -196,7 +196,7 @@ void QSpeedTest::_slotStartTests()
     switch(TESTMODE)
     {
     case TestMode::Info:
-        _hostInfo->startInfoTest();
+        _hostInfo->slotStartInfoTest();
         break;
 
     case TestMode::Ping:
@@ -219,7 +219,7 @@ void QSpeedTest::_slotStopTests()
 {
     _w.hideProgressBar();
     disconnect(_controller, SIGNAL(result(QString)), &_w, SLOT(slotResult(QString)));
-    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(slotStartInfoTest()));
     disconnect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
     _controller->stopTests();
     _w.slotTestFinished(false);
@@ -229,7 +229,7 @@ void QSpeedTest::_slotTestsFinished()
 {
     _w.hideProgressBar();
     disconnect(_controller, SIGNAL(result(QString)), &_w, SLOT(slotResult(QString)));
-    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(slotStartInfoTest()));
     disconnect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
     _results.setTestDuration((_timer.elapsed() * 1.0) / 1000);
     _w.slotResult("\n" + _results.summary());
