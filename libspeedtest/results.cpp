@@ -58,17 +58,18 @@ QString Results::summary() const
 {
     QString summary;
 
-    summary += QString(    "%1 %2 %3\n").arg(QObject::trUtf8("Report created by:").leftJustified(25, ' ', true)).arg(_programName).arg(_projectVersion);
-    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Test date and time:").leftJustified(25, ' ', true)).arg(_testDateTime);
-    summary += QString(    "%1 %2 %3\n").arg(QObject::trUtf8("Hostlist version:").leftJustified(25, ' ', true)).arg(_hostlistVersion).arg(_hostlistComment);
-    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Hostlist contact URL:").leftJustified(25, ' ', true)).arg(_hostlistContactUrl);
-    summary += QString(    "%1 %2 / %3\n").arg(QObject::trUtf8("Host OS & no. of CPUs:").leftJustified(25, ' ', true)).arg(_hostOS).arg(_cpuCores);
-    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("BBRAS:").leftJustified(25, ' ', true)).arg(_bbras);
-    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("WAN IP:").leftJustified(25, ' ', true)).arg(_ip);
-    summary += QString(    "%1 %2 - %3\n").arg(QObject::trUtf8("ISP Name & Network:").leftJustified(25, ' ', true)).arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
-    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Advertised via:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
-    summary += QString(    "%1 %2\n").arg(QObject::trUtf8("Test mode:").leftJustified(25, ' ', true)).arg(testModeString());
-    summary += QString(    "%1 %2 %3\n").arg(QObject::trUtf8("Total test duration:").leftJustified(25, ' ', true)).arg(_testDuration).arg(QObject::trUtf8("sec"));
+    summary += QString("%1 %2 %3\n").arg(QObject::trUtf8("Report created by:").leftJustified(25, ' ', true)).arg(_programName).arg(_projectVersion);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("Test date and time:").leftJustified(25, ' ', true)).arg(_testDateTime);
+    summary += QString("%1 %2 %3\n").arg(QObject::trUtf8("Hostlist version:").leftJustified(25, ' ', true)).arg(_hostlistVersion).arg(_hostlistComment);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("Hostlist contact URL:").leftJustified(25, ' ', true)).arg(_hostlistContactUrl);
+    summary += QString("%1 %2 / %3\n").arg(QObject::trUtf8("Host OS & no. of CPUs:").leftJustified(25, ' ', true)).arg(_hostOS).arg(_cpuCores);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("BBRAS:").leftJustified(25, ' ', true)).arg(_bbras);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("WAN IP:").leftJustified(25, ' ', true)).arg(_ip);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("ISP name:").leftJustified(25, ' ', true)).arg(_isp);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("ISP network:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetwork);
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("ISP network advertisers:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    summary += QString("%1 %2\n").arg(QObject::trUtf8("Test mode:").leftJustified(25, ' ', true)).arg(testModeString());
+    summary += QString("%1 %2 %3\n").arg(QObject::trUtf8("Total test duration:").leftJustified(25, ' ', true)).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
     if(_testMode & TestMode::Ping)
     {
@@ -99,8 +100,9 @@ QString Results::plainText() const
     plainText += QString("%1 %2 / %3\n").arg(QObject::trUtf8("Host OS & no. of CPUs:").leftJustified(25, ' ', true)).arg(_hostOS).arg(_cpuCores);
     plainText += QString("%1 %2\n").arg(QObject::trUtf8("BBRAS:").leftJustified(25, ' ', true)).arg(_bbras);
     plainText += QString("%1 %2\n").arg(QObject::trUtf8("WAN IP:").leftJustified(25, ' ', true)).arg(_ipCensored);
-    plainText += QString("%1 %2 - %3\n").arg(QObject::trUtf8("ISP Name & Network:").leftJustified(25, ' ', true)).arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
-    plainText += QString("%1 %2\n").arg(QObject::trUtf8("Advertised via:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("ISP name:").leftJustified(25, ' ', true)).arg(_isp);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("ISP network:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetwork);
+    plainText += QString("%1 %2\n").arg(QObject::trUtf8("ISP network advertisers:").leftJustified(25, ' ', true)).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
     plainText += QString("%1 %2\n").arg(QObject::trUtf8("Test mode:").leftJustified(25, ' ', true)).arg(testModeString());
     plainText += QString("%1 %2 %3\n").arg(QObject::trUtf8("Total test duration:").leftJustified(25, ' ', true)).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
@@ -154,8 +156,8 @@ QString Results::bbCode() const
     bbCode += QString(            "[right]%1[/right] | [center]%2 - %3 %4[/center] |\n").arg(QObject::trUtf8("Host OS & no. of CPUs")).arg(_hostOS).arg(_cpuCores).arg(QObject::trUtf8("CPU cores"));
     bbCode += QString(            "[right]%1[/right] | [center]%2[/center] | ").arg(QObject::trUtf8("BBRAS")).arg(_bbras);
     bbCode += QString(            "[right]%1[/right] | [center]%2[/center] |\n").arg(QObject::trUtf8("WAN IP")).arg(_ipCensored);
-    bbCode += QString(            "[right]%1[/right] | [center]%2 - %3[/center] | ").arg(QObject::trUtf8("ISP name & network")).arg(_isp).arg("[coming soon!]");//.arg(_ispNetwork);
-    bbCode += QString(            "[right]%1[/right] | [center]%2[/center] |\n").arg(QObject::trUtf8("Advertised via")).arg("[coming soon!]");//.arg(_ispNetworkAdvertisers.join(", "));
+    bbCode += QString(            "[right]%1[/right] | [center]%2[/center] | ").arg(QObject::trUtf8("ISP name")).arg(_isp);
+    bbCode += QString(            "[right]%1[/right] | [center]%2 - %3[/center] |\n").arg(QObject::trUtf8("ISP network & advertisers")).arg("[coming soon!]").arg("[coming soon!]");//.arg(_ispNetwork).arg(_ispNetworkAdvertisers.join(", "));
     bbCode += QString(            "[right]%1[/right] | [center]%2[/center] | ").arg(QObject::trUtf8("Test mode")).arg(testModeString());
     bbCode += QString(            "[right]%1[/right] | [center]%2 %3[/center] |\n").arg(QObject::trUtf8("Total test duration")).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
@@ -241,7 +243,7 @@ QString Results::html() const
     html += QString(            "            <tr><td>&nbsp;</td><td align=\"center\" style=\"font-size:130%;\"><b>%1 %2 %3 - <a href=\"%4\">%5</a></b></td><td align=\"right\" style=\"font-size:130%;\"><b>%6</b></td><td align=\"center\" style=\"font-size:130%;\"><b>%7</b></td></tr>\n").arg(QObject::trUtf8("Report by")).arg(_programName).arg(_projectVersion).arg(_projectUrl).arg(QObject::trUtf8("Homepage")).arg(QObject::trUtf8("Test timestamp")).arg(_testDateTime);
     html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2 <a href=\"%3\">%4</a></td><td align=\"right\">%5</td><td align=\"center\">%6 - %7 %8</td></tr>\n").arg(QObject::trUtf8("Hostlist version")).arg(_hostlistVersion).arg(_hostlistContactUrl).arg(_hostlistComment).arg(QObject::trUtf8("Host OS & no. of CPUs")).arg(_hostOS).arg(_cpuCores).arg(QObject::trUtf8("CPU cores"));
     html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2</td><td align=\"right\">%3</td><td align=\"center\">%4</td></tr>\n").arg(QObject::trUtf8("BBRAS")).arg(_bbras).arg(QObject::trUtf8("WAN IP")).arg(_ipCensored);
-    html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2 - %3</td><td align=\"right\">%4</td><td align=\"center\">%5</td></tr>\n").arg(QObject::trUtf8("ISP name & network")).arg(_isp).arg("[coming soon!]").arg(QObject::trUtf8("Advertised via")).arg("[coming soon!]");
+    html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2</td><td align=\"right\">%3</td><td align=\"center\">%4 - %5</td></tr>\n").arg(QObject::trUtf8("ISP name")).arg(_isp).arg(QObject::trUtf8("ISP network & advertisers")).arg("[coming soon!]").arg("[coming soon]");
     html += QString(            "            <tr><td align=\"right\">%1</td><td align=\"center\">%2</td><td align=\"right\">%3</td><td align=\"center\">%4 %5</td></tr>\n").arg(QObject::trUtf8("Test mode")).arg(testModeString()).arg(QObject::trUtf8("Total test duration")).arg(_testDuration).arg(QObject::trUtf8("sec"));
 
     if(_testMode & TestMode::Ping)
