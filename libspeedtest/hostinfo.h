@@ -33,23 +33,30 @@ class LIBSPEEDTEST_EXPORT HostInfo : public QObject
 
 public:
     explicit HostInfo(Results &, QObject *parent = 0);
-    ~HostInfo();
+    ~HostInfo() { stopInfoTest(); }
     void startDetection();
     void stopInfoTest();
 
 private:
     void _retrieve();
     Results &_results;
-    QProcess _osDetectProc, _tracerouteProc;
+    QProcess _osDetectProc;
+    QProcess _bbrasDetectProc;
     QEventLoop _loop;
-    QString _tracerouteCmd;
+    QString _bbrasDetectProcCmd;
     QString _bbrasLine;
-    QString _winArch;
+    QString _winArchitecture;
     QNetworkAccessManager _manager;
-    QNetworkReply *_download;
+    QNetworkReply *_ipDetectDownload;
+    QNetworkReply *_ispNetworkDetectDownload;
+    QNetworkReply *_ispNameDetectDownload;
 
 signals:
     void osDetectionFinished();
+    void ipDetectionFinished();
+    void bbrasDetectionFinished();
+    void ispNetworkDetectionFinished();
+    void ispNameDetectionFinished();
     void finished();
 
 public slots:
@@ -57,5 +64,9 @@ public slots:
 
 private slots:
     void _slotOsDetectProcFinished();
+    void _slotIpDetectDownloadFinished();
+    void _slotBbrasDetectProcFinished();
+    void _slotIspNetworkDetectDownloadFinished();
+    void _slotIspNameDetectDownloadFinished();
 };
 #endif // HOSTINFO_H

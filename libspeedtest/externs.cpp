@@ -20,7 +20,7 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 
 const QString PROJECTNAME = "QSpeedTest";
-const QString PROJECTVERSION = "r45";
+const QString PROJECTVERSION = "r46";
 QString PROGRAMNAME = "QSpeedTest";
 const QString PROJECTURL = "http://qspeedtest.sourceforge.net/";
 const QString PROJECTDOWNLOADURL = "https://sourceforge.net/projects/qspeedtest/files/";
@@ -43,3 +43,4 @@ const quint8 DOWNLOADTESTSECSDEFAULT = 10;
 quint8 DOWNLOADTESTSECS;
 const QString HOSTLISTURLDEFAULT = "http://hostlist.narfhosting.net/qspeedtest.hostlist.ini";
 QString HOSTLISTURL;
+const QString IPDETECTIONSERVICEURL = "http://www.whatismyip.com/automation/n09230945.asp";

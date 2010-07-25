@@ -92,6 +92,7 @@ void QSpeedTestCli::_parseArguments()
         _slotLog(trUtf8("Test mode:        All tests"));
         _slotLog(trUtf8("Pings per host:   %1").arg(PINGSPERHOST));
         _slotLog(trUtf8("Ping threads:     %1").arg(PINGTHREADS));
+        _slotLog(trUtf8("Each download:    %1 %2").arg(DOWNLOADTESTSECS).arg(trUtf8("sec")));
         _slotLog(trUtf8("HTML output:      Enabled"));
         _slotLog(trUtf8("bbCode output:    Enabled"));
 
@@ -282,6 +283,7 @@ void QSpeedTestCli::_parseArguments()
     _slotLog(trUtf8("Test mode:        %1").arg(_results.testModeString()));
     _slotLog(trUtf8("Pings per host:   %1").arg(PINGSPERHOST));
     _slotLog(trUtf8("Ping threads:     %1").arg(PINGTHREADS));
+    _slotLog(trUtf8("Each download:    %1 %2").arg(DOWNLOADTESTSECS).arg(trUtf8("sec")));
     _slotLog(trUtf8("HTML output:      %1").arg(_htmlEnabled? trUtf8("Yes") : trUtf8("No")));
     _slotLog(trUtf8("bbCode output     %1").arg(_bbCodeEnabled? trUtf8("Yes") : trUtf8("No")));
 }
@@ -348,7 +350,7 @@ void QSpeedTestCli::_startTests()
 
 void QSpeedTestCli::_slotTestsFinished()
 {
-    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(startInfoTest()));
+    disconnect(_controller, SIGNAL(finished()), _hostInfo, SLOT(slotStartInfoTest()));
     disconnect(_hostInfo, SIGNAL(finished()), this, SLOT(_slotTestsFinished()));
     _results.setTestDuration((_timer.elapsed() * 1.0) / 1000);
     _slotResult("\n" + _results.summary());
