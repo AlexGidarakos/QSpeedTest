@@ -1,3 +1,10 @@
+revision 49 - 20100725                                      |
+libspeedtest:                                               |
+  * Fixed a serious bug introduced in previous commits that |
+    caused segmentation fault when exiting without having   |
+    first run a test                                        |
+
+
 revision 48 - 20100725                                      |
 libspeedtest:                                               |
   * Fixed a minor bug introduced in previous commit that    |

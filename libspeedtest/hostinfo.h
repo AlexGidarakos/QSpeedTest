@@ -33,7 +33,7 @@ class LIBSPEEDTEST_EXPORT HostInfo : public QObject
 
 public:
     explicit HostInfo(Results &, QObject *parent = 0);
-    ~HostInfo() { stopInfoTest(); }
+    ~HostInfo();
     void startDetection();
     void stopInfoTest();
 
