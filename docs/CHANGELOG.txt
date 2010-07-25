@@ -1,3 +1,9 @@
+revision 48 - 20100725                                      |
+libspeedtest:                                               |
+  * Fixed a minor bug introduced in previous commit that    |
+    caused a QProcess-related message in stderr             |
+
+
 revision 47 - 20100725                                      |
 libspeedtest:                                               |
   * Some fixes in HostInfo and PingHost code for IBM OS/2   |
