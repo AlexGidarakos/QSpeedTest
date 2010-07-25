@@ -214,7 +214,7 @@ void PingHost::ping()
             newRtt = list[2];
             newRtt.chop(6);
 #else
-#ifdef Q_OS_O2
+#ifdef Q_OS_OS2
             newRtt = list[2];
             list = newRtt.split(".");
             newRtt = list[0];
