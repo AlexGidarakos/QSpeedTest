@@ -61,6 +61,8 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
 #else
     _bbrasDetectProcCmd = "traceroute -m 2 -q 1 8.8.8.8";
     _bbrasLine = "2  ";
+#endif // Q_WS_WIN
+
 #ifdef Q_WS_MAC
     _osDetectProc.start("sw_vers -productVersion", QIODevice::ReadOnly);
 #else
@@ -70,7 +72,10 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
     _osDetectProc.start("uname -s", QIODevice::ReadOnly);
 #endif // Q_OS_LINUX
 #endif // Q_WS_MAC
-#endif // Q_WS_WIN
+
+#ifdef Q_OS_OS2
+    _results._hostOS = "IBM OS/2";
+#endif // W_OS_OS2
 }
 
 void HostInfo::startDetection()

@@ -156,21 +156,29 @@ QString PingHost::rank() const
 
 void PingHost::ping()
 {
-#ifdef Q_WS_WIN
-    QString pingCmd = QString("ping -n 1 -w %1 %2").arg(PINGTIMEOUTSECS * 1000).arg(_url);
-    quint8 skipLines = 3;
-#else
-    quint8 skipLines = 6;
-#ifdef Q_OS_LINUX
-    QString pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUTSECS).arg(_url);
-#else
-    QString pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUTSECS * 1000).arg(_url);
-#endif // Q_OS_LINUX
-#endif // Q_WS_WIN
+    QString pingCmd;
+    quint8 skipLines = 0;
     QByteArray contents;
     QString newRtt;
     QStringList list;
     QProcess pingProc;
+
+#ifdef Q_WS_WIN
+    pingCmd = QString("ping -n 1 -w %1 %2").arg(PINGTIMEOUTSECS * 1000).arg(_url);
+    skipLines = 3;
+#else
+    skipLines = 6;
+#ifdef Q_OS_LINUX
+    pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUTSECS).arg(_url);
+#else
+    pingCmd = QString("ping -c 1 -W %1 %2").arg(PINGTIMEOUTSECS * 1000).arg(_url);
+#endif // Q_OS_LINUX
+#endif // Q_WS_WIN
+
+#ifdef Q_OS_OS2
+    pingCmd = QString("ping %1 32 1").arg(_url);
+    skipLines = 2;
+#endif // Q_OS_OS2
 
     reset();
     pingProc.setProcessChannelMode(QProcess::MergedChannels);
@@ -206,8 +214,14 @@ void PingHost::ping()
             newRtt = list[2];
             newRtt.chop(6);
 #else
+#ifdef Q_OS_O2
+            newRtt = list[2];
+            list = newRtt.split(".");
+            newRtt = list[0];
+#else
             list = QString(list[1]).split('/');
             newRtt = list[0];
+#endif // Q_OS_OS2
 #endif // Q_WS_WIN
             _addRtt(newRtt.toDouble());
         }
