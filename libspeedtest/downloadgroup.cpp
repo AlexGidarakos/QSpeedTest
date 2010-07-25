@@ -54,7 +54,7 @@ void DownloadGroup::start()
     _file = new QTemporaryFile();
     _file->open();
 
-    emit result(trUtf8("Starting parallel download from group %1, please wait approx. %2 sec:").arg(name()).arg(DOWNLOADTESTSECS));
+    emit result(trUtf8("Starting parallel download of group %1, please wait approx. %2 sec:").arg(name()).arg(DOWNLOADTESTSECS));
 
     for(int i = 0; i < size; i++)    // Start downloading
     {
