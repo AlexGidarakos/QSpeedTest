@@ -89,7 +89,7 @@ void QSpeedTest::_checkForProgramUpdates()
     if((remoteVersion = download->readLine().mid(1).toInt()) > PROJECTVERSION.mid(1).toInt())
     {
         _w.slotLog(trUtf8("%1 update available, remote version: r%2").arg(PROGRAMNAME).arg(remoteVersion));
-        int reply = QMessageBox::question(&_w, trUtf8("Update available"), trUtf8("An updated version of %1 (r%2) is available online.") + "\n\n" + trUtf8("Would you like to open the download page in your browser?").arg(PROGRAMNAME).arg(remoteVersion), QMessageBox::Yes, QMessageBox::No);
+        int reply = QMessageBox::question(&_w, trUtf8("Update available"), trUtf8("An updated version of %1 (r%2) is available online.").arg(PROGRAMNAME).arg(remoteVersion) + "\n\n" + trUtf8("Would you like to open the download page in your browser?"), QMessageBox::Yes, QMessageBox::No);
 
         if(reply == QMessageBox::Yes)
         {

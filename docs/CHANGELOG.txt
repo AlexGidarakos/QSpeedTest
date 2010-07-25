@@ -1,3 +1,11 @@
+revision 47 - 20100725                                      |
+libspeedtest:                                               |
+  * Some fixes in HostInfo and PingHost code for IBM OS/2   |
+                                                            |
+QSpeedTest:                                                 |
+  * Fixed minor bug in program update availability message  |
+
+
 revision 46 - 20100725                                      |
 libspeedtest:                                               |
   * Detect and print ISP network in the reports             |
