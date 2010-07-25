@@ -23,6 +23,9 @@ along with QSpeedTest.  If not, see <http://www.gnu.org/licenses/>.
 
 HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _results(results)
 {
+    _ipDetectDownload = NULL;
+    _ispNetworkDetectDownload = NULL;
+    _ispNameDetectDownload = NULL;
     connect(&_osDetectProc, SIGNAL(finished(int)), this, SLOT(_slotOsDetectProcFinished()));
     _osDetectProc.setProcessChannelMode(QProcess::MergedChannels);
     _results._hostOS.clear();
@@ -75,6 +78,17 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
 #endif // Q_OS_LINUX
 #endif // Q_WS_MAC
 #endif // Q_WS_WIN
+}
+
+HostInfo::~HostInfo()
+{
+    stopInfoTest();
+
+    if(_osDetectProc.state() != QProcess::NotRunning)
+    {
+        disconnect(&_osDetectProc, SIGNAL(finished(int)), this, SLOT(_slotOsDetectProcFinished()));
+        _osDetectProc.close();
+    }
 }
 
 void HostInfo::startDetection()
