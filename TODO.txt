@@ -1,2 +1,3 @@
+050. Fix segfault when exiting under Linux
 100. Internationalization
 200. Retrieve from RIPE database and print the ISP network and network advertisers

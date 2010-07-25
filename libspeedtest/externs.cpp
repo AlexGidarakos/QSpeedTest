@@ -20,7 +20,7 @@ along with QSpeedTest. If not, see <http://www.gnu.org/licenses/>.
 #include "externs.h"
 
 const QString PROJECTNAME = "QSpeedTest";
-const QString PROJECTVERSION = "r47";
+const QString PROJECTVERSION = "r48";
 QString PROGRAMNAME = "QSpeedTest";
 const QString PROJECTURL = "http://qspeedtest.sourceforge.net/";
 const QString PROJECTDOWNLOADURL = "https://sourceforge.net/projects/qspeedtest/files/";
