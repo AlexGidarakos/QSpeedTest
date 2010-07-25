@@ -74,7 +74,7 @@ HostInfo::HostInfo(Results &results, QObject *parent) : QObject(parent), _result
     _results._hostOS = "IBM OS/2";
 #else
     _osDetectProc.start("uname -s", QIODevice::ReadOnly);
-#endif // W_OS_OS2
+#endif // Q_OS_OS2
 #endif // Q_OS_LINUX
 #endif // Q_WS_MAC
 #endif // Q_WS_WIN

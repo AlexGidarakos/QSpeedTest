@@ -1,3 +1,9 @@
+revision 50 - 20100726                                      |
+libspeedtest:                                               |
+  * Fixes in PingHost class code for IBM OS/2 portability.  |
+    BBRAS detection still not implemented, though           |
+
+
 revision 49 - 20100725                                      |
 libspeedtest:                                               |
   * Fixed a serious bug introduced in previous commits that |
