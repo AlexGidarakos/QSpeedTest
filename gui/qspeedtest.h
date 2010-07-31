@@ -52,6 +52,7 @@ signals:
     void hostlistOk(bool);    // Connect to appropriate MainWindow's slot to enable or disable Start button
 
 private slots:
+    inline void _slotLoadHostlist() { emit hostlistOk(_hostlist->initOk()); }
     void _slotCopyReport(ReportFormat::Format);
     void _slotSaveReport(ReportFormat::Format);
     void _slotSavePreferences();
