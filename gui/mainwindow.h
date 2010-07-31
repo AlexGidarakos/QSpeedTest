@@ -77,7 +77,7 @@ private slots:
     inline void on_actionPreferences_triggered() { d1.myShow(); }
     inline void on_actionAboutQSpeedTest_triggered() { d2.show(); }
     inline void on_actionAboutQt_triggered() { qApp->aboutQt(); }
-    inline void _slotEnablePushButtonStartStop(bool value) { _ui->pushButtonStartStop->setEnabled(value); if(value) slotLog(trUtf8("Ready")); }
+    inline void _slotEnablePushButtonStartStop(bool value) { _ui->pushButtonStartStop->setEnabled(value); }
     inline void _slotSetProgressBarRange(int min, int max) { _ui->progressBar->setRange(min, max); }
     inline void _slotUpdateProgressBar(int value) { _ui->progressBar->setValue(value); }
     void on_actionCopyLog_triggered();

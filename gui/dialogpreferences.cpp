@@ -56,6 +56,7 @@ void DialogPreferences::myShow()
 void DialogPreferences::on_pushButtonOk_clicked()
 {
     bool changed = false;
+    bool urlChanged = false;
     quint8 number;
     QString string;
 
@@ -129,13 +130,18 @@ void DialogPreferences::on_pushButtonOk_clicked()
     if(string != HOSTLISTURL)
     {
         changed = true;
+        urlChanged = true;
         HOSTLISTURL = string;
-        emit hostlistUrlChanged();
     }
 
     if(changed)
     {
         emit savePreferences();
+    }
+
+    if(urlChanged)
+    {
+        emit hostlistUrlChanged();
     }
 
     close();
