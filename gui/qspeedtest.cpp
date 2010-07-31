@@ -41,15 +41,7 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
     _w.show();
     _preferences->init();
     _checkForProgramUpdates();
-
-    if(!_hostlist->initOk())
-    {
-        emit hostlistOk(false);    // Disable Start button (although it is by default enabled, this should not be forgotten when loading hostlist from an external file!
-        return;
-    }
-
-    emit hostlistOk(true);    // Enable Start button
-    _w.slotLog(trUtf8("Ready"));
+    _slotLoadHostlist();
 }
 
 void QSpeedTest::_connectSignalsSlots()
@@ -62,6 +54,7 @@ void QSpeedTest::_connectSignalsSlots()
     connect(&_w, SIGNAL(copyReport(ReportFormat::Format)), this, SLOT(_slotCopyReport(ReportFormat::Format)));
     connect(&_w, SIGNAL(saveReport(ReportFormat::Format)), this, SLOT(_slotSaveReport(ReportFormat::Format)));
     connect(&_w.d1, SIGNAL(savePreferences()), this, SLOT(_slotSavePreferences()));
+    connect(&_w.d1, SIGNAL(hostlistUrlChanged()), this, SLOT(_slotLoadHostlist()));
     connect(_controller, SIGNAL(progressRangeChanged(int,int)), &_w, SLOT(_slotSetProgressBarRange(int,int)));
     connect(_controller, SIGNAL(progressValueChanged(int)), &_w, SLOT(_slotUpdateProgressBar(int)));
 }

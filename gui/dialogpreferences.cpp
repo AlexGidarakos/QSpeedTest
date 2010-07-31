@@ -133,7 +133,10 @@ void DialogPreferences::on_pushButtonOk_clicked()
         emit hostlistUrlChanged();
     }
 
-    if(changed) emit savePreferences();
+    if(changed)
+    {
+        emit savePreferences();
+    }
 
     close();
 }

@@ -1,3 +1,11 @@
+revision 51 - 20100801                                      |
+libspeedtest:                                               |
+  * Fixed bug (finally!) causing failed hostlist updates    |
+QSpeedTest:                                                 |
+  * Entering a new hostlist URL in Preferences and clicking |
+    the OK button will, if warranted, trigger an immediate  |
+    update of the hostlist                                  |
+
 revision 50 - 20100726                                      |
 libspeedtest:                                               |
   * Fixes in PingHost class code for IBM OS/2 portability.  |
@@ -20,7 +28,6 @@ libspeedtest:                                               |
 revision 47 - 20100725                                      |
 libspeedtest:                                               |
   * Some fixes in HostInfo and PingHost code for IBM OS/2   |
-                                                            |
 QSpeedTest:                                                 |
   * Fixed minor bug in program update availability message  |
 
@@ -39,7 +46,6 @@ revision 44 - 20100724                                      |
 libspeedtest:                                               |
   * Improved max scaling algorithm for the download charts  |
   * Updated embedded resources' hostlist to 201007220909    |
-                                                            |
 QSpeedTest:                                                 |
   * Prevent exiting the application via Window Manager's    |
     "X" button or the File > Exit menuitem when a test is   |
@@ -49,7 +55,6 @@ QSpeedTest:                                                 |
 revision 43 - 20100723                                      |
 QSpeedTestCLI:                                              |
   * IT'S BACK!                                              |
-                                                            |
 libspeedtest:                                               |
   * Fixed a bug that caused ugly X-axis result in Google    |
     Charts for download groups with speeds exceeding the    |
@@ -58,7 +63,6 @@ libspeedtest:                                               |
     in Google Charts for download groups                    |
   * Fixed a bug that caused an extraneous empty column in   |
     the bbCode output, when posted                          |
-                                                            |
 QSpeedTest:                                                 |
   * Enabled horizontal scroll bar in the QPlainTextEdit     |
     widget of the results + a work-around to deal with the  |
@@ -116,7 +120,7 @@ revision 40 - 20100719                                          |
   In non-Windows OSes, a static version of libspeedtest is      |
   created and linked inside the other executables, to avoid     |
   problems with LD_LIBRARY_PATH environment variable and such   |
-
+                                                                |
 * QSpeedTest: Major interface changes!                          |
   Implemented menu system                                       |
   Moved some push buttons to menuitems                          |

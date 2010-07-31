@@ -235,6 +235,7 @@ void Hostlist::_load()
     DownloadGroup *newDownloadGroup;
 
     _clear();
+    _results.clear();
     emit message(trUtf8("Loading hosts from %1").arg(filename));
     _version = value("HostListInfo/Version").toString();
     _results._hostlistVersion = _version;
@@ -289,12 +290,8 @@ void Hostlist::_load()
 
 bool Hostlist::initOk()
 {
-    QTemporaryFile tempFile;
-    QString filename;
-
-    tempFile.open();
-    tempFile.close();
-    filename = tempFile.fileName();
+    QString update = fileName() + ".new";
+    QString backup = fileName() + ".bak";
 
     if(!_exists())
     {
@@ -314,13 +311,15 @@ bool Hostlist::initOk()
     sync();
     _version = value("HostListInfo/Version").toString();
 
-    if(_updateIsAvailable() && _downloadOk(filename) && _isValid(filename))
+    if(_updateIsAvailable() && _downloadOk(update) && _isValid(update))
     {
-        QFile::rename(fileName(), fileName() + ".bak");    // create a backup copy of the previous valid hostlist
-        sync();
+        QFile::remove(backup);
+        QFile::copy(fileName(), backup);    // create a backup copy of the previous valid hostlist
         emit message(trUtf8("Copying temporary downloaded hostlist to program settings directory"));
-        tempFile.copy(fileName());
+        QFile::remove(fileName());
+        QFile::copy(update, fileName());
         QFile::setPermissions(fileName(), QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
+        QFile::remove(update);
         sync();
     }
 
