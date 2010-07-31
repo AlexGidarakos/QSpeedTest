@@ -41,7 +41,16 @@ QSpeedTest::QSpeedTest(int argc, char **argv) : QApplication(argc, argv)
     _w.show();
     _preferences->init();
     _checkForProgramUpdates();
-    _slotLoadHostlist();
+
+    if(!_hostlist->initOk())
+    {
+        emit hostlistOk(false);    // Disable Start button (although it is by default enabled, this should not be forgotten when loading hostlist from an external file!
+
+        return;
+    }
+
+    emit hostlistOk(true);    // Enable Start button
+    _w.slotLog(trUtf8("Ready"));
 }
 
 void QSpeedTest::_connectSignalsSlots()
@@ -175,6 +184,19 @@ void QSpeedTest::_slotSavePreferences()
     _preferences->setValue("HostlistUrl", HOSTLISTURL);
     _preferences->sync();
     _w.slotLog(trUtf8("Preferences saved to") + ' ' + QDir::toNativeSeparators(_preferences->fileName()));
+}
+
+void QSpeedTest::_slotLoadHostlist()
+{
+    if(!_hostlist->initOk())
+    {
+        emit hostlistOk(false);    // Disable Start button (although it is by default enabled, this should not be forgotten when loading hostlist from an external file!
+
+        return;
+    }
+
+    emit hostlistOk(true);    // Enable Start button
+    _w.slotLog(trUtf8("Ready"));
 }
 
 void QSpeedTest::_slotStartTests()
