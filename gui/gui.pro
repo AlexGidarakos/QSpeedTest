@@ -40,4 +40,7 @@ RESOURCES += resources.qrc
 !win32 {
     RESOURCES += ../libspeedtest/libspeedtest.qrc
 }
+win32 {
+    RC_FILE = icons.rc
+}
 TRANSLATIONS = qspeedtest_el.ts
